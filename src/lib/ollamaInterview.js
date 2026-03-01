@@ -121,31 +121,18 @@ function parseResponse(content) {
 const VALID_TYPES = new Set(['single_choice', 'multi_choice']);
 
 /**
- * Validate parsed LLM response against the schema required by the UI.
- * @param {object} parsed - Parsed JSON from LLM
- * @returns {{ valid: boolean, errors: string[] }}
+ * Validate nextQuestion object. idOptional: when true, id is not required (assigned in code).
  */
-function validateAssessmentResponse(parsed) {
+function validateNextQuestionObject(q, idOptional = false) {
   const errors = [];
-  if (parsed == null || typeof parsed !== 'object') {
-    return { valid: false, errors: ['Response is not a JSON object.'] };
-  }
-  if (typeof parsed.completed !== 'boolean') {
-    errors.push('"completed" must be a boolean (true or false).');
-  }
-  if (parsed.completed === true) {
-    if (parsed.nextQuestion != null) {
-      errors.push('When "completed" is true, "nextQuestion" must be null.');
-    }
-    return { valid: errors.length === 0, errors };
-  }
-  // completed === false: nextQuestion is required and must be valid
-  const q = parsed.nextQuestion;
   if (q == null || typeof q !== 'object') {
-    errors.push('When "completed" is false, "nextQuestion" must be a non-null object.');
-    return { valid: false, errors };
+    return { valid: false, errors: ['nextQuestion must be a non-null object.'] };
   }
-  if (typeof q.id !== 'string' || !/^[a-zA-Z0-9_]+$/.test(q.id)) {
+  if (idOptional) {
+    if (q.id != null && (typeof q.id !== 'string' || !/^[a-zA-Z0-9_]+$/.test(q.id))) {
+      errors.push('"nextQuestion.id" if present must be a string with only letters, numbers, underscores.');
+    }
+  } else if (typeof q.id !== 'string' || !/^[a-zA-Z0-9_]+$/.test(q.id)) {
     errors.push('"nextQuestion.id" must be a string with only letters, numbers, underscores (e.g. q_1).');
   }
   if (typeof q.title !== 'string' || q.title.trim() === '') {
@@ -185,6 +172,30 @@ function validateAssessmentResponse(parsed) {
   return { valid: errors.length === 0, errors };
 }
 
+/**
+ * Validate parsed LLM response against the schema required by the UI.
+ * @param {object} parsed - Parsed JSON from LLM
+ * @returns {{ valid: boolean, errors: string[] }}
+ */
+function validateAssessmentResponse(parsed) {
+  const errors = [];
+  if (parsed == null || typeof parsed !== 'object') {
+    return { valid: false, errors: ['Response is not a JSON object.'] };
+  }
+  if (typeof parsed.completed !== 'boolean') {
+    errors.push('"completed" must be a boolean (true or false).');
+  }
+  if (parsed.completed === true) {
+    if (parsed.nextQuestion != null) {
+      errors.push('When "completed" is true, "nextQuestion" must be null.');
+    }
+    return { valid: errors.length === 0, errors };
+  }
+  const qResult = validateNextQuestionObject(parsed.nextQuestion, false);
+  if (!qResult.valid) errors.push(...qResult.errors);
+  return { valid: errors.length === 0, errors };
+}
+
 function buildCorrectionUserMessage(rawContent, validationErrors) {
   const lines = [
     'Your previous response was invalid. Fix the following and reply with ONLY a valid JSON object (no markdown, no explanation):',
@@ -198,6 +209,81 @@ function buildCorrectionUserMessage(rawContent, validationErrors) {
     'Reply now with a single valid JSON object in the exact format specified in the system prompt.',
   ];
   return lines.join('\n');
+}
+
+const SCENARIO_SYSTEM_PROMPT = `You are the Built for Tomorrow interview assistant. Your task is to generate exactly ONE scenario-based interview question.
+
+You will be given a set of dimensions (aptitudes, traits, values, or skills) to probe. Create a single question that feels like a real situation (e.g. "Imagine you're leading a project and the requirements keep changing...") so we can infer something about those dimensions from the answer. Do NOT ask separate questions per dimension; weave them into one scenario.
+
+Response format — reply with exactly one JSON object. No markdown, no code fences.
+- "completed": false (we are not ending the interview).
+- "nextQuestion": object with "title" (string), optional "description", "type" ("single_choice" or "multi_choice"), "options" (array of {"text": string, "value": string}). Do NOT include "id" — we assign it server-side.
+- "assessmentSummary": optional 1–2 sentence summary of what the answer might suggest.
+
+Do not repeat or rephrase questions you are told were already asked.`;
+
+function buildScenarioUserPrompt(dimensionSet, askedTitles, answers) {
+  const lines = ['Generate one scenario-based interview question that naturally probes the following dimensions:'];
+  dimensionSet.forEach((d) => {
+    lines.push(`- ${d.dimensionType} "${d.name}": ${d.how_measured_or_observed || 'Use question_hints below.'}`);
+    if (Array.isArray(d.question_hints) && d.question_hints.length > 0) {
+      d.question_hints.forEach((h) => lines.push(`  Hint: ${h}`));
+    }
+  });
+  if (askedTitles.length > 0) {
+    lines.push('');
+    lines.push('Do not repeat or rephrase these already-asked questions:');
+    askedTitles.forEach((t) => lines.push(`- ${t}`));
+  }
+  lines.push('');
+  lines.push('Answers so far (for context). Each line is: question asked → option value the user chose:');
+  (answers || []).forEach((a, i) => {
+    const title = (askedTitles && askedTitles[i]) ? askedTitles[i] : (a.questionId || a.questionTitle || `Q${i + 1}`);
+    const v = a.value ?? a.selected ?? a.answer ?? a.text ?? JSON.stringify(a);
+    lines.push(`- "${title}" → ${v}`);
+  });
+  lines.push('');
+  lines.push('Reply with one JSON object: { "completed": false, "nextQuestion": { "title", "description"?, "type", "options" }, "assessmentSummary"?: "..." }. No "id" in nextQuestion.');
+  return lines.join('\n');
+}
+
+/**
+ * Generate one scenario-based question that probes the given dimension set.
+ * Question id is NOT returned; the caller assigns it.
+ * @param {Array<object>} dimensionSet - [{ dimensionType, dimensionId, name, question_hints, how_measured_or_observed }]
+ * @param {string[]} askedQuestionTitles - Titles of questions already asked (for deduplication)
+ * @param {Array<object>} answers - Previous answers
+ * @param {object} [preSurveyProfile] - Pre-survey profile for tailoring
+ * @returns {Promise<{ assessmentSummary?: string, nextQuestion: object | null }>}
+ */
+async function generateScenarioQuestion(dimensionSet, askedQuestionTitles, answers, preSurveyProfile = null) {
+  const tailoring = buildTailoringBlock(preSurveyProfile);
+  const systemContent = SCENARIO_SYSTEM_PROMPT + tailoring;
+  const userContent = buildScenarioUserPrompt(dimensionSet, askedQuestionTitles || [], answers);
+
+  const messages = [
+    { role: 'system', content: systemContent },
+    { role: 'user', content: userContent },
+  ];
+
+  const content = (await ollamaClient.chat(messages)).content;
+  const parsed = parseResponse(content);
+  if (!parsed || typeof parsed !== 'object') {
+    return { assessmentSummary: null, nextQuestion: null };
+  }
+
+  const q = parsed.nextQuestion;
+  const qValidation = q ? validateNextQuestionObject(q, true) : { valid: false, errors: ['Missing nextQuestion.'] };
+  if (!qValidation.valid) {
+    console.warn('[LLM] Scenario question validation failed:', qValidation.errors);
+    return { assessmentSummary: parsed.assessmentSummary || null, nextQuestion: null };
+  }
+
+  const { id, ...rest } = q;
+  return {
+    assessmentSummary: parsed.assessmentSummary || null,
+    nextQuestion: rest,
+  };
 }
 
 /**
@@ -272,6 +358,8 @@ async function assessAndGetNextQuestion(answers, lastAnswerText = null, preSurve
 
 module.exports = {
   assessAndGetNextQuestion,
+  generateScenarioQuestion,
   buildUserPrompt,
+  buildScenarioUserPrompt,
   buildTailoringBlock,
 };

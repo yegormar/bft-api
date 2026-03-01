@@ -1,0 +1,81 @@
+{
+  "version": "1.0",
+  "sources": [
+    "Citrini Research (2028 GIC thought exercise)",
+    "Microsoft New Future of Work Report 2025",
+    "Built for Tomorrow project context (career/study guidance)"
+  ],
+  "description": "Values: non-negotiables and what you're working toward (destination). The fuel that keeps you going when work gets hard. Used with aptitudes and traits to match users to career clusters and study directions where their values are satisfied.",
+  "values": [
+    {
+      "id": "helping_others_impact",
+      "name": "Helping others / impact on people",
+      "description": "Wanting work to improve other people's lives, serve a community, or contribute to something larger than oneself. Non-negotiable for many in care, education, health, social impact, or mission-driven roles.",
+      "how_measured_or_observed": "Self-report on what makes work meaningful; choices between 'high pay but little impact' vs 'lower pay but clear benefit to others'; examples of activities or roles they've found satisfying because of who they helped.",
+      "question_hints": ["What would have to be true about your work for you to feel it was meaningful?", "Would you rather earn more in a job that didn't help anyone directly, or less in one where you could see the difference you make?"]
+    },
+    {
+      "id": "mastery_growth",
+      "name": "Mastery and growth",
+      "description": "Wanting to get better at something over time, build expertise, and feel a sense of progress. Non-negotiable for people who need to feel they're learning and improving, not just maintaining.",
+      "how_measured_or_observed": "Whether they describe satisfaction in terms of 'getting better' or 'learning new things'; discomfort with roles that feel repetitive with no growth; preference for stretch over comfort.",
+      "question_hints": ["How important is it to you that your work keeps challenging you to improve?", "Do you get restless when you feel you've stopped learning in a role?"]
+    },
+    {
+      "id": "autonomy_independence",
+      "name": "Autonomy and independence",
+      "description": "Wanting to decide how, when, or where you work; to be trusted with ownership and minimal micromanagement. Non-negotiable for people who feel stifled by heavy structure or supervision.",
+      "how_measured_or_observed": "Reaction to 'how do you feel when someone else sets your schedule or process?'; preference for self-directed projects vs clearly defined tasks; examples of when they've sought or resisted more freedom.",
+      "question_hints": ["How much do you need to feel you're in charge of your own work and schedule?", "Would you rather have clear instructions and support, or more freedom to figure it out yourself?"]
+    },
+    {
+      "id": "security_stability",
+      "name": "Security and stability",
+      "description": "Wanting predictable income, job security, or a clear path so that the future feels safe. Non-negotiable for people who prioritize reducing financial or career risk over upside.",
+      "how_measured_or_observed": "Reaction to uncertainty (e.g. gig work, startups, frequent change); importance of benefits, steady paycheck, or 'safe' industries; trade-offs they'd make for stability.",
+      "question_hints": ["How important is it that your job and income feel predictable and secure?", "Would you take a higher-risk opportunity if it meant less stability?"]
+    },
+    {
+      "id": "recognition_visibility",
+      "name": "Recognition and visibility",
+      "description": "Wanting to be known, respected, or seen for one's work; to have a reputation or influence. Non-negotiable for people who are motivated by status, awards, or being the go-to person.",
+      "how_measured_or_observed": "Whether they describe satisfaction in terms of 'being known' or 'getting credit'; preference for visible vs behind-the-scenes roles; reaction to anonymous or supporting roles.",
+      "question_hints": ["How much does it matter to you that others recognize your contribution or know your name?", "Would you be okay in a role where you did great work but rarely got direct credit?"]
+    },
+    {
+      "id": "creativity_self_expression",
+      "name": "Creativity and self-expression",
+      "description": "Wanting work that lets you create something new, express yourself, or leave a personal mark. Non-negotiable for people who feel empty in purely execution or maintenance roles.",
+      "how_measured_or_observed": "Importance of 'making something that's mine' or 'doing it my way'; discomfort with purely prescribed output; examples of when they've sought or sacrificed creative outlet.",
+      "question_hints": ["How important is it that your work lets you create something or express your own ideas?", "Could you be happy in a job where the output was mostly defined by someone else?"]
+    },
+    {
+      "id": "financial_success",
+      "name": "Financial success and earning",
+      "description": "Wanting to earn well, build wealth, or use income as a clear measure of success. Non-negotiable for people who prioritize pay and financial upside when choosing paths.",
+      "how_measured_or_observed": "How they rank pay vs other factors; reaction to 'would you take a pay cut for meaning or growth?'; importance of salary in past or hypothetical choices.",
+      "question_hints": ["How important is earning a high income when you think about your future career?", "Would you trade some pay for more meaning, flexibility, or learning?"]
+    },
+    {
+      "id": "work_life_balance_wellbeing",
+      "name": "Work-life balance and wellbeing",
+      "description": "Wanting time and energy for life outside work—family, health, hobbies, rest. Non-negotiable for people who are unwilling to sacrifice wellbeing or relationships for career intensity.",
+      "how_measured_or_observed": "Importance of hours, flexibility, or boundaries; reaction to 'high-intensity career with little free time'; examples of when they've protected or sacrificed balance.",
+      "question_hints": ["How important is it that your job leaves you time and energy for the rest of your life?", "Would you accept a role that required long hours and little flexibility if it advanced your career?"]
+    },
+    {
+      "id": "challenge_achievement",
+      "name": "Challenge and achievement",
+      "description": "Wanting to tackle hard problems, hit ambitious goals, or prove oneself. Non-negotiable for people who are motivated by difficulty and the feeling of having overcome something.",
+      "how_measured_or_observed": "Whether they seek or avoid 'stretch' goals; satisfaction from overcoming obstacles vs avoiding them; preference for easy wins vs hard victories.",
+      "question_hints": ["Do you get more satisfaction from achieving something difficult or from doing something well that came easily?", "How do you feel when a goal is so hard you're not sure you'll make it?"]
+    },
+    {
+      "id": "belonging_community",
+      "name": "Belonging and community",
+      "description": "Wanting to be part of a team, culture, or community where you fit. Non-negotiable for people who need to feel they belong and that their workplace or field shares their values.",
+      "how_measured_or_observed": "Importance of 'fitting in' or 'people like me'; reaction to remote/solo vs in-person/team; examples of when culture or community made or broke a role for them.",
+      "question_hints": ["How important is it that you feel part of a team or community at work?", "Could you be happy in a role where you worked mostly alone or with people you didn't click with?"]
+    }
+  ]
+}

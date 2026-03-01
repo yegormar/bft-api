@@ -97,6 +97,36 @@ if (handoffSystemPromptFile) {
   }
 }
 
+const reportProfileSystemPromptFile = (process.env.LLM_REPORT_PROFILE_SYSTEM_PROMPT_FILE || '').trim();
+if (reportProfileSystemPromptFile) {
+  const reportProfilePath = path.isAbsolute(reportProfileSystemPromptFile)
+    ? reportProfileSystemPromptFile
+    : path.join(PROJECT_ROOT, reportProfileSystemPromptFile);
+  if (!fs.existsSync(reportProfilePath)) {
+    exit(`LLM_REPORT_PROFILE_SYSTEM_PROMPT_FILE does not exist: ${reportProfilePath}`);
+  }
+}
+
+const reportHybridSystemPromptFile = (process.env.LLM_REPORT_HYBRID_SYSTEM_PROMPT_FILE || '').trim();
+if (reportHybridSystemPromptFile) {
+  const reportHybridPath = path.isAbsolute(reportHybridSystemPromptFile)
+    ? reportHybridSystemPromptFile
+    : path.join(PROJECT_ROOT, reportHybridSystemPromptFile);
+  if (!fs.existsSync(reportHybridPath)) {
+    exit(`LLM_REPORT_HYBRID_SYSTEM_PROMPT_FILE does not exist: ${reportHybridPath}`);
+  }
+}
+
+const reportRecommendationsSystemPromptFile = (process.env.LLM_REPORT_RECOMMENDATIONS_SYSTEM_PROMPT_FILE || '').trim();
+if (reportRecommendationsSystemPromptFile) {
+  const reportRecPath = path.isAbsolute(reportRecommendationsSystemPromptFile)
+    ? reportRecommendationsSystemPromptFile
+    : path.join(PROJECT_ROOT, reportRecommendationsSystemPromptFile);
+  if (!fs.existsSync(reportRecPath)) {
+    exit(`LLM_REPORT_RECOMMENDATIONS_SYSTEM_PROMPT_FILE does not exist: ${reportRecPath}`);
+  }
+}
+
 function resolveProjectPath(relativePath) {
   if (!relativePath) return null;
   const normalized = path.isAbsolute(relativePath) ? relativePath : path.join(PROJECT_ROOT, relativePath);
@@ -137,6 +167,18 @@ const llm = {
 
   getHandoffSystemPrompt() {
     return this.handoffSystemPromptFile ? loadPromptFile(this.handoffSystemPromptFile) : null;
+  },
+
+  getReportProfileSystemPrompt() {
+    return reportProfileSystemPromptFile ? loadPromptFile(reportProfileSystemPromptFile) : null;
+  },
+
+  getReportHybridSystemPrompt() {
+    return reportHybridSystemPromptFile ? loadPromptFile(reportHybridSystemPromptFile) : null;
+  },
+
+  getReportRecommendationsSystemPrompt() {
+    return reportRecommendationsSystemPromptFile ? loadPromptFile(reportRecommendationsSystemPromptFile) : null;
   },
 
   resolveProjectPath,

@@ -1,0 +1,52 @@
+{
+  "version": "1.1",
+  "sources": [
+    "Citrini Research (2028 GIC thought exercise)",
+    "Microsoft New Future of Work Report 2025"
+  ],
+  "description": "Aptitudes: natural affinity and raw potential (capacity). Largely stable; dictate ceiling and speed of learning in a field. Distinct from traits (how you behave) and skills (what you've learned).",
+  "aptitudes": [
+    {
+      "id": "logical_analytical_reasoning",
+      "name": "Logical and analytical reasoning",
+      "description": "Capacity to follow and construct logical arguments, identify cause and effect, and reason systematically from premises to conclusions. Determines how quickly someone can learn formal systems, rules, and structured domains (e.g. law, logic, systems design).",
+      "how_measured_or_observed": "Ability to spot flaws in arguments or processes; comfort with 'if-then' and rule-based reasoning; performance on tasks that require following or designing a clear logical structure. Probe with scenarios that have a right answer derivable from rules.",
+      "question_hints": ["When someone gives a reason for something, do you often find yourself checking whether the logic holds?", "Do you find it easy or hard to break a complex rule or process into clear steps?"]
+    },
+    {
+      "id": "quantitative_numerical",
+      "name": "Quantitative and numerical facility",
+      "description": "Capacity to work comfortably with numbers, quantities, proportions, and data. Determines ceiling and learning speed in math-heavy fields, data analysis, finance, and technical domains that rely on numerical reasoning.",
+      "how_measured_or_observed": "Comfort with numbers in everyday decisions (budgets, estimates, comparisons); ability to interpret charts or simple statistics; self-report and scenario questions about handling numerical or data-heavy tasks.",
+      "question_hints": ["When you see numbers or data, do you feel at ease making sense of them or do you prefer to avoid them?", "How do you approach a problem that involves comparing options using quantities or metrics?"]
+    },
+    {
+      "id": "verbal_linguistic",
+      "name": "Verbal and linguistic facility",
+      "description": "Capacity to understand and use language with precision and nuance: reading, writing, and grasping subtle meaning. Determines ceiling in communication-heavy roles, persuasion, editing, and domains where wording and interpretation matter.",
+      "how_measured_or_observed": "Ease with reading dense text or legal/technical language; ability to rephrase and clarify; sensitivity to tone and ambiguity in wording. Probe with scenarios about interpreting or drafting text.",
+      "question_hints": ["Do you find it easy to notice when two people mean different things by the same words?", "When you have to explain something in writing, do you enjoy getting the wording right or find it tedious?"]
+    },
+    {
+      "id": "pattern_recognition",
+      "name": "Pattern recognition and abstraction",
+      "description": "Capacity to spot similarities, analogies, and recurring structures across different contexts. Supports learning by transfer and cross-domain thinking; determines how quickly someone can see 'this is like that' and apply prior knowledge in new settings.",
+      "how_measured_or_observed": "Tendency to draw analogies; ability to identify what two different problems have in common; performance on tasks that require seeing a general rule or pattern behind varied examples.",
+      "question_hints": ["When you learn something new, do you often connect it to something you already knew from a different area?", "If two problems look different on the surface, how easily can you tell whether they're really the same type of problem?"]
+    },
+    {
+      "id": "technical_hands_on",
+      "name": "Technical / hands-on orientation",
+      "description": "Affinity for building, coding, debugging, or working with systems and tools. Includes both routine implementation (automation-prone) and design/architecture (complementary to AI). Capacity to learn and retain how systems work.",
+      "how_measured_or_observed": "Interest in building, coding, or technical projects; preference for practical step-by-step problem solving; self-reported technical hobbies or coursework.",
+      "question_hints": ["Do you enjoy building, coding, or technical projects?", "Do you prefer hands-on, logical tasks or more open-ended creative ones?"]
+    },
+    {
+      "id": "creative_open_ended",
+      "name": "Creative and open-ended thinking",
+      "description": "Capacity for imagination, divergent thinking, and generating options when there is no single right answer. Valued where human taste, novelty, and judgment matter. Supports learning in arts, design, and strategy.",
+      "how_measured_or_observed": "Interest in arts, design, storytelling; preference for 'freedom to explore and experiment'; responses to open-ended scenarios; ability to generate multiple plausible approaches to a vague brief.",
+      "question_hints": ["Do you prefer clear instructions or freedom to explore?", "Do you enjoy imaginative or storytelling-style tasks?"]
+    }
+  ]
+}

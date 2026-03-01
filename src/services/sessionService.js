@@ -1,10 +1,18 @@
+const { ulid } = require('ulid');
+
 const sessions = new Map();
-let nextId = 1;
 
 const STATUSES = ['draft', 'in_progress', 'completed'];
 
-function create(preSurveyProfile = null) {
-  const id = String(nextId++);
+/** ULID format: 26 chars, Crockford base32 (0-9, A-Z excluding I,L,O,U). */
+const ULID_REGEX = /^[0-9A-HJKMNP-TV-Z]{26}$/;
+
+function isValidUlid(value) {
+  return typeof value === 'string' && ULID_REGEX.test(value);
+}
+
+function create(preSurveyProfile = null, clientId = null) {
+  const id = clientId && isValidUlid(clientId) ? clientId : ulid();
   const session = {
     id,
     status: 'draft',

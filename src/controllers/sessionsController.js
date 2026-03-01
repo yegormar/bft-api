@@ -3,7 +3,8 @@ const sessionService = require('../services/sessionService');
 function create(req, res, next) {
   try {
     const preSurveyProfile = req.body?.preSurveyProfile ?? null;
-    const session = sessionService.create(preSurveyProfile);
+    const clientId = req.body?.id ?? null;
+    const session = sessionService.create(preSurveyProfile, clientId);
     res.status(201).json(session);
   } catch (err) {
     next(err);

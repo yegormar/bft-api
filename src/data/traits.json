@@ -1,0 +1,52 @@
+{
+  "version": "1.0",
+  "sources": [
+    "Citrini Research (2028 GIC thought exercise)",
+    "Microsoft New Future of Work Report 2025"
+  ],
+  "description": "Traits: personality and behavioral tendencies. How you behave; stable 'handling' that shapes fit for environments.",
+  "traits": [
+    {
+      "id": "experimentation_risk_tolerance",
+      "name": "Experimentation and risk tolerance",
+      "description": "Comfort with starting something new and uncertain before all information is in; willingness to try and iterate despite ambiguity. About the act of beginning and tolerating uncertainty, not the process of learning over time (see adaptability_learning).",
+      "how_measured_or_observed": "Willingness to start without full information; preference for novelty and challenge over predictability; response to 'would you rather start a project with unclear scope or one with very clear steps?'. Do not use 'learning something new' alone—that blurs with adaptability.",
+      "question_hints": ["Do you prefer to start something even when the outcome is uncertain, or wait until you have a clearer picture?", "When given a new challenge, do you feel energized by the risk or more comfortable once the path is predictable?"]
+    },
+    {
+      "id": "adaptability_learning",
+      "name": "Adaptability and learning capacity",
+      "description": "Willingness and ability to learn new tools, domains, and ways of working as the environment changes—the process of learning and changing over time. Distinct from experimentation_risk_tolerance (which is about starting something uncertain); this is about how they respond when things shift and they must acquire new skills.",
+      "how_measured_or_observed": "How they describe the process of picking up new skills (not just willingness to start); history of switching domains or tools; speed and comfort adopting new methods. Ask about a time they had to learn something new and how they went about it.",
+      "question_hints": ["When your job or tools changed, how quickly did you adapt and feel effective again?", "Do you seek out new challenges to learn from, or prefer to deepen existing skills before branching out?"]
+    },
+    {
+      "id": "social_collaboration",
+      "name": "Human-human collaboration and influence",
+      "description": "Genuine coordination with other people: relationship trust, emotional attunement, influence, and teamwork. Distinct from intermediation (friction with a friendly face) and from human-AI coordination (see human_ai_coordination). Remains deeply human and hard to automate.",
+      "how_measured_or_observed": "Preference for team vs solo work; tendency to build trust and read others; whether they describe collaboration in terms of relationship and influence vs efficiency and task-handoff.",
+      "question_hints": ["Do you prefer working with others to solve problems or working independently?", "When you work in a team, do you focus more on the relationship and trust or on dividing tasks efficiently?"]
+    },
+    {
+      "id": "comfort_ambiguous_ownership",
+      "name": "Comfort with ambiguous ownership",
+      "description": "In agentic workflows, it is often unclear who 'did' the work. Comfort directing, editing, and taking responsibility for output one didn't personally generate; those who need to feel personal authorship may resist adoption or struggle.",
+      "how_measured_or_observed": "Reaction to 'how do you feel about putting your name on work that involved significant help from others or tools?'; comfort with editing and signing off on others' drafts; need for personal credit vs team outcome.",
+      "question_hints": ["When a project succeeds because of a team (or tools), how do you feel about claiming credit or responsibility?", "Would you be comfortable submitting work that you heavily edited but didn't write from scratch?"]
+    },
+    {
+      "id": "ambiguity_resilience",
+      "name": "Resilience to ambiguity and change",
+      "description": "Capacity to remain composed, motivated, and effective amid constant change, unclear futures, and evolving job demands. Psychological foundation for continuous learning and adaptation; mental models that treat flux as the default. Distinct from adaptability_learning (which is the behavior of learning); this is the internal state that enables it.",
+      "how_measured_or_observed": "Reaction to scenarios of disruption ('how would you feel if your core job task was automated next month?'); ability to describe past change without excessive negativity; comfort with 'not knowing' what's next.",
+      "question_hints": ["How do you stay motivated when priorities or tools seem to change constantly?", "Tell me about a time you had to work toward a goal when the path was very unclear."]
+    },
+    {
+      "id": "motivation_drivers",
+      "name": "Motivation drivers",
+      "description": "What energizes the person: goals, mastery, recognition, helping others, novelty, stability, etc. Informs fit for roles that remain human-centric vs those that are being automated.",
+      "how_measured_or_observed": "Self-report on what makes work satisfying; choice of activities in free time; alignment with gaming/competition, social, creative, strategic, or neutral clusters.",
+      "question_hints": ["What kind of work or activities make you feel most engaged?", "Do you prefer competition and goals or collaboration and helping others?"]
+    }
+  ]
+}

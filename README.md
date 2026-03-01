@@ -36,12 +36,27 @@ The API uses a **unified LLM config** (aligned with the Python project): provide
 
 When the LLM is enabled (Ollama or Ollama Cloud), `GET .../assessment/next` uses it to generate the next question; on failure or if disabled, the API falls back to static questions.
 
+## Assessment model (interview + recommendations)
+
+The interview is designed to (a) identify **aptitudes** and **traits** (intrinsic, hard to change), (b) identify **values** and **interests** (driving force), (c) advise on **skills** to develop or already present, and (d) recommend profession or study direction using all of the above.
+
+Assessment data lives in **`src/data/`** (not in `conf/`):
+
+- **aptitudes.json** – Natural affinity and raw potential (e.g. logical_analytical_reasoning, verbal_linguistic, technical_hands_on, creative_open_ended). Used to infer ceiling and learning speed.
+- **traits.json** – Personality and behavioral tendencies (e.g. experimentation_risk_tolerance, social_collaboration, ambiguity_resilience). How the user behaves.
+- **values.json** – Non-negotiables and destination (e.g. helping_others_impact, mastery_growth, autonomy_independence). Used for career cluster and mission fit.
+- **skills.json** – Trainable capabilities (e.g. problem_formulation, instruction_clarity, delegation_oversight). Used to advise what to develop and to assess current level.
+- **ai_relevance_ranking.json** – Per-item relevance in the AI era (trend, score, rationale). Used for recommendations (career clusters, skill stacks, resilient paths). `trait_id` refers to an id in one of the four files above.
+
+Each data file has version, sources, description, and items with id, name, description, how_measured_or_observed, question_hints. Sources: Citrini 2028 GIC, Microsoft New Future of Work Report 2025. See **`conf/README.md`** for LLM prompts and config.
+
 ## Structure
 
 - `server.js` – entry point
 - `app.js` – Express app, middleware, routes
 - `config/` – env-based config (`index.js`, `llm.js`, `ollama.js` for backward compat)
-- `conf/` – prompt files (e.g. `assessment_system_prompt.txt`)
+- `conf/` – LLM prompt files (e.g. `assessment_system_prompt.txt`), `personality_clusters.json`. See `conf/README.md`. Assessment model data is in `src/data/`.
+- `src/data/` – assessment model JSON (aptitudes, traits, values, skills, ai_relevance_ranking)
 - `src/routes` – route definitions
 - `src/controllers` – request/response handling
 - `src/services` – business logic (in-memory; Ollama for interview flow)
