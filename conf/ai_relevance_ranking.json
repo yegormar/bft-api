@@ -1,0 +1,122 @@
+{
+  "version": "1.0",
+  "sources": [
+    "Citrini Research (2028 GIC thought exercise)",
+    "Microsoft New Future of Work Report 2025"
+  ],
+  "description": "Ranking of traits/skills by relevance in the AI era. Used by the API for recommendations: matching users to career clusters, skill stacks, and resilient paths. trait_id must match traits_skills_model.json.",
+  "rankings": [
+    {
+      "trait_id": "structured_problem_solving",
+      "trend": "stable",
+      "relevance_score": 0.6,
+      "rationale": "Planning and structure remain useful for human-led work and for directing AI; routine execution of plans is increasingly automated. Value is in high-level design and oversight, not in doing every step oneself.",
+      "recommendation_note": "Emphasize use of structure for coordination and delegation, not only for personal execution."
+    },
+    {
+      "trait_id": "experimentation_risk_tolerance",
+      "trend": "increasing",
+      "relevance_score": 0.9,
+      "rationale": "Adaptation and willingness to try new tools and roles are critical as tasks and jobs shift. Citrini: displaced workers who adapt fare better; Microsoft: new ways of working require experimentation.",
+      "recommendation_note": "Strong differentiator for AI-resilient paths; prioritize in recommendations."
+    },
+    {
+      "trait_id": "social_collaboration",
+      "trend": "increasing",
+      "relevance_score": 0.85,
+      "rationale": "Genuine coordination, teamwork, and influence are human-centric. Citrini: 'a lot of what people called relationships was simply friction with a friendly face'—differentiate genuine collaboration from intermediation. Microsoft: collective productivity and human-AI collaboration depend on people working together.",
+      "recommendation_note": "Favor roles and clusters where human collaboration is core, not replaceable by agents."
+    },
+    {
+      "trait_id": "research_analysis",
+      "trend": "decreasing",
+      "relevance_score": 0.35,
+      "rationale": "Routine research and analysis are highly automatable. Citrini: AI handles 'many-weeks-long research and development tasks'; value shifts to synthesis, judgment, and taste rather than gathering and crunching.",
+      "recommendation_note": "If strong here, steer toward high-level synthesis and decision-making roles; avoid roles that are mostly routine analysis."
+    },
+    {
+      "trait_id": "technical_hands_on",
+      "trend": "mixed",
+      "relevance_score": 0.55,
+      "rationale": "Routine coding and implementation are heavily automated (Citrini: 'They write essentially all code'); design, architecture, and 'agent boss' technical oversight remain valuable. Microsoft: building and managing agents is a key competency.",
+      "recommendation_note": "Recommend pairing with delegation/oversight and instruction clarity; position as designer of systems and manager of agents, not only executor."
+    },
+    {
+      "trait_id": "creative_open_ended",
+      "trend": "increasing",
+      "relevance_score": 0.8,
+      "rationale": "Judgment, novelty, and open-ended creation are harder to automate. Citrini: humans 'directing for taste' remain in the loop; Microsoft: higher-value tasks and new competencies favor creativity.",
+      "recommendation_note": "Align with roles that emphasize ideation, design, and human taste over routine production."
+    },
+    {
+      "trait_id": "strategic_planning",
+      "trend": "increasing",
+      "relevance_score": 0.85,
+      "rationale": "Strategy and prioritization at the human level remain central. Citrini: 'coordination at the highest level'; Microsoft: calibrating human-agent ratios and setting direction are agent-boss skills.",
+      "recommendation_note": "Strong fit for roles that involve directing work (human or agent) and setting goals."
+    },
+    {
+      "trait_id": "instruction_clarity",
+      "trend": "increasing",
+      "relevance_score": 0.9,
+      "rationale": "Microsoft: agents take instructions literally; writing clear, literal instructions is core to being an 'agent boss'. Critical for human-AI collaboration and delegation.",
+      "recommendation_note": "Core skill for AI-augmented roles; recommend development and highlight in recommendations."
+    },
+    {
+      "trait_id": "delegation_oversight",
+      "trend": "increasing",
+      "relevance_score": 0.95,
+      "rationale": "Microsoft: 'every employee becomes an agent boss'—building, delegating to, and managing AI agents. Citrini: value shifts to directing and coordinating rather than doing all work oneself.",
+      "recommendation_note": "Top-priority trait for AI-resilient careers; match to roles centered on oversight and coordination."
+    },
+    {
+      "trait_id": "feedback_refinement",
+      "trend": "increasing",
+      "relevance_score": 0.8,
+      "rationale": "Microsoft: managing agents includes refining instructions, setting expectations, and providing feedback. Improving output through iteration is a human-AI collaboration skill.",
+      "recommendation_note": "Valuable for roles that involve managing people or agents and improving quality over time."
+    },
+    {
+      "trait_id": "adaptability_learning",
+      "trend": "increasing",
+      "relevance_score": 0.95,
+      "rationale": "Citrini: displaced workers must adapt; no 'natural brake' to labor displacement. Microsoft: new ways of working and collective productivity require learning new tools and norms. Central to resilience.",
+      "recommendation_note": "Key for Plan B and scenario planning; prioritize in skill roadmap and backup path strategy."
+    },
+    {
+      "trait_id": "judgment_taste",
+      "trend": "increasing",
+      "relevance_score": 0.9,
+      "rationale": "Citrini: humans 'directing for taste' and making high-level decisions remain; machine intelligence substitutes for routine intelligence, not nuanced judgment. Microsoft: human judgment and shared goals are essential.",
+      "recommendation_note": "Favor roles where judgment, ethics, or aesthetic taste drive decisions; reduce weight for purely rule-based roles."
+    },
+    {
+      "trait_id": "motivation_drivers",
+      "trend": "stable",
+      "relevance_score": 0.7,
+      "rationale": "Motivation informs fit and durability in any role; AI does not change the importance of matching people to work that energizes them. Helps with retention and resilience under change.",
+      "recommendation_note": "Use for career cluster alignment and personalization; not directly redundant or boosted by AI."
+    },
+    {
+      "trait_id": "routine_execution",
+      "trend": "decreasing",
+      "relevance_score": 0.2,
+      "rationale": "Citrini: routine white-collar work is most exposed; 'AI agents that don't sleep' handle repetitive tasks. Microsoft: AI removes routine work so employees can focus on higher-value tasks.",
+      "recommendation_note": "Avoid recommending roles that are predominantly routine execution; suggest reskilling toward oversight, creativity, or human-centric tasks."
+    },
+    {
+      "trait_id": "intermediation_friction",
+      "trend": "decreasing",
+      "relevance_score": 0.15,
+      "rationale": "Citrini: 'trillions of dollars of enterprise value depended on' friction; agents remove friction, so intermediation based on 'navigating complexity that you find tedious' is disrupted. Value of 'human relationships' that were mainly friction with a friendly face proved fragile.",
+      "recommendation_note": "Steer users away from roles whose value is primarily reducing others' friction (e.g. routine brokerage, pure process navigation); favor roles with genuine relationship or judgment components."
+    }
+  ],
+  "trend_legend": {
+    "increasing": "More important in the AI era; prioritize in recommendations and skill development",
+    "stable": "Relevant but not uniquely boosted or reduced by AI",
+    "decreasing": "Increasingly redundant or automated; de-emphasize or pair with complementary traits",
+    "mixed": "Depends on how the trait is applied (e.g. routine vs high-level)"
+  },
+  "relevance_score_note": "0–1 scale; higher = more important to emphasize for AI-resilient recommendations. Use with career clusters and skill roadmap logic."
+}

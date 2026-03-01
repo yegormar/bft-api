@@ -1,0 +1,129 @@
+{
+  "version": "1.0",
+  "sources": [
+    "Citrini Research (2028 GIC thought exercise)",
+    "Microsoft New Future of Work Report 2025"
+  ],
+  "traits_and_skills": [
+    {
+      "id": "structured_problem_solving",
+      "name": "Structured problem solving",
+      "category": "cognitive",
+      "description": "Ability to break down complex problems into steps, plan methodically, and execute in an ordered way. Valued in roles that require clear processes and predictable outcomes.",
+      "how_measured_or_observed": "Choices under ambiguity (plan-first vs try-first); preference for clear goals and deadlines; self-report and scenario-based questions about how they approach new problems.",
+      "question_hints": ["When facing a new problem, do you prefer to plan step-by-step or try things quickly?", "Do you prefer clear goals and deadlines or more open-ended tasks?"]
+    },
+    {
+      "id": "experimentation_risk_tolerance",
+      "name": "Experimentation and risk tolerance",
+      "category": "behavioral",
+      "description": "Comfort with trying things quickly, iterating, and tolerating uncertainty. Associated with learning new domains and adapting when routines are disrupted.",
+      "how_measured_or_observed": "Willingness to try without full information; preference for novelty vs predictability; response to 'how do you feel about learning something completely new?'.",
+      "question_hints": ["Do you prefer to try something quickly and see what happens, or plan first?", "Do you enjoy new risks and challenges or prefer predictable tasks?"]
+    },
+    {
+      "id": "social_collaboration",
+      "name": "Social collaboration and influence",
+      "category": "behavioral",
+      "description": "Tendency to work with others, coordinate people, and influence outcomes through relationships and communication. Distinct from superficial intermediation; reflects genuine coordination and teamwork.",
+      "how_measured_or_observed": "Preference for team vs solo work; tendency to 'talk it through with others'; choices about work environment (team-based, collaborative).",
+      "question_hints": ["Do you prefer working with others to solve problems or working independently?", "When stuck, do you seek input from others or research alone?"]
+    },
+    {
+      "id": "research_analysis",
+      "name": "Research and analytical depth",
+      "category": "cognitive",
+      "description": "Tendency to gather information, look for similar examples, and analyze before acting. Can be routine (easily automated) or high-level (synthesis, judgment, taste).",
+      "how_measured_or_observed": "Whether they 'research or look for similar examples' first; preference for data-driven decisions; depth of explanation when solving problems.",
+      "question_hints": ["Do you look for similar examples or research before acting?", "How much do you rely on data vs intuition?"]
+    },
+    {
+      "id": "technical_hands_on",
+      "name": "Technical / hands-on orientation",
+      "category": "aptitude",
+      "description": "Affinity for building, coding, debugging, or working with systems and tools. Includes both routine implementation (automation-prone) and design/architecture (complementary to AI).",
+      "how_measured_or_observed": "Interest in building, coding, or technical projects; preference for practical step-by-step problem solving; self-reported technical hobbies or coursework.",
+      "question_hints": ["Do you enjoy building, coding, or technical projects?", "Do you prefer hands-on, logical tasks or more open-ended creative ones?"]
+    },
+    {
+      "id": "creative_open_ended",
+      "name": "Creative and open-ended thinking",
+      "category": "aptitude",
+      "description": "Comfort with ambiguity, imagination, storytelling, and tasks that lack a single right answer. Valued where human taste, novelty, and judgment matter.",
+      "how_measured_or_observed": "Interest in arts, design, storytelling; preference for 'freedom to explore and experiment'; responses to open-ended scenarios.",
+      "question_hints": ["Do you prefer clear instructions or freedom to explore?", "Do you enjoy imaginative or storytelling-style tasks?"]
+    },
+    {
+      "id": "strategic_planning",
+      "name": "Strategic planning and logic",
+      "category": "cognitive",
+      "description": "Ability to think ahead, weigh options, and align actions with longer-term goals. Distinct from routine execution; involves judgment and prioritization.",
+      "how_measured_or_observed": "Preference for puzzles, strategy, research; how they describe decision-making under constraints; interest in planning and logic.",
+      "question_hints": ["Do you enjoy puzzles, strategy, or logical thinking?", "How do you balance short-term tasks with long-term goals?"]
+    },
+    {
+      "id": "instruction_clarity",
+      "name": "Instruction clarity and literal communication",
+      "category": "skill",
+      "description": "Ability to write and give clear, literal instructions that others (or AI agents) can follow without ambiguity. Critical for human-AI collaboration and delegation.",
+      "how_measured_or_observed": "Ability to explain a process step-by-step; preference for clear vs vague wording; self-awareness of how others interpret their requests.",
+      "question_hints": ["When you explain a task to someone, do you tend to be very specific or leave room for interpretation?", "Have you ever had to give instructions to a tool or system? How did you approach it?"]
+    },
+    {
+      "id": "delegation_oversight",
+      "name": "Delegation and oversight calibration",
+      "category": "skill",
+      "description": "Ability to assign work to others (or agents), set expectations, and adjust oversight based on task complexity—more oversight for sensitive or strategic work, less for repetitive tasks.",
+      "how_measured_or_observed": "Experience leading projects or coordinating others; how they describe dividing work; comfort with 'managing' rather than doing all work oneself.",
+      "question_hints": ["When working in a team, do you prefer to do things yourself or delegate and review?", "How do you decide how closely to supervise someone else's work?"]
+    },
+    {
+      "id": "feedback_refinement",
+      "name": "Feedback and refinement",
+      "category": "skill",
+      "description": "Tendency to give constructive feedback, refine others' output, and improve quality through iteration. Important for managing AI agents and improving outcomes.",
+      "how_measured_or_observed": "Whether they 'challenge with open-ended questions' to improve output; how they handle suboptimal work from others; preference for iteration vs one-shot delivery.",
+      "question_hints": ["When someone's work isn't quite right, do you fix it yourself or give feedback and ask for revisions?", "Do you prefer to iterate on a solution or get it right the first time?"]
+    },
+    {
+      "id": "adaptability_learning",
+      "name": "Adaptability and learning capacity",
+      "category": "behavioral",
+      "description": "Willingness and ability to learn new tools, domains, and ways of working as the environment changes. Key for resilience when roles and tasks shift due to AI.",
+      "how_measured_or_observed": "Response to 'how do you feel about learning something completely new?'; history of switching domains or tools; comfort with 'building on what I know' vs 'seeking new challenges'.",
+      "question_hints": ["Do you seek out new challenges or prefer to deepen existing skills?", "How quickly do you adopt new tools or methods at work or school?"]
+    },
+    {
+      "id": "judgment_taste",
+      "name": "Judgment and taste",
+      "category": "cognitive",
+      "description": "Ability to make nuanced decisions when there is no clear rule or data answer; includes aesthetic, ethical, or strategic 'taste' that is hard to automate.",
+      "how_measured_or_observed": "How they handle decisions with no single right answer; preference for 'it depends on context'; examples of choosing between good options.",
+      "question_hints": ["When two options both seem good, how do you decide?", "Can you think of a time when the 'right' answer wasn't obvious from data alone?"]
+    },
+    {
+      "id": "motivation_drivers",
+      "name": "Motivation drivers",
+      "category": "behavioral",
+      "description": "What energizes the person: goals, mastery, recognition, helping others, novelty, stability, etc. Informs fit for roles that remain human-centric vs those that are being automated.",
+      "how_measured_or_observed": "Self-report on what makes work satisfying; choice of activities in free time; alignment with gaming/competition, social, creative, strategic, or neutral clusters.",
+      "question_hints": ["What kind of work or activities make you feel most engaged?", "Do you prefer competition and goals or collaboration and helping others?"]
+    },
+    {
+      "id": "routine_execution",
+      "name": "Routine execution and process adherence",
+      "category": "skill",
+      "description": "Ability to perform repetitive, well-defined tasks consistently. Often highly automatable; value depends on whether the role is purely routine or includes variation.",
+      "how_measured_or_observed": "Preference for 'clear instructions with no games or stories'; comfort with repetitive workflows; self-report on liking predictable, step-by-step work.",
+      "question_hints": ["Do you prefer predictable, step-by-step tasks or varied, novel ones?", "How do you feel about doing the same type of task repeatedly?"]
+    },
+    {
+      "id": "intermediation_friction",
+      "name": "Intermediation and friction-based value",
+      "category": "skill",
+      "description": "Roles or behaviors that add value mainly by reducing others' friction (e.g. navigating complexity, handling tedious processes). Highly exposed when AI can remove that friction.",
+      "how_measured_or_observed": "Whether they describe their value as 'helping others navigate complexity' or 'managing tedious processes'; orientation toward efficiency vs relationship-building in transactions.",
+      "question_hints": ["Do you see yourself as someone who 'saves others time' by handling details?", "How much of your ideal job would be coordinating or navigating bureaucracy for others?"]
+    }
+  ]
+}
