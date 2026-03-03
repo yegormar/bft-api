@@ -1,143 +1,409 @@
 {
-  "version": "1.0",
+  "version": "1.1",
   "sources": [
     "Citrini Research (2028 GIC thought exercise)",
     "Microsoft New Future of Work Report 2025"
   ],
-  "description": "Skills: trainable capabilities and learned techniques. Developed by applying practice to aptitudes and traits. Includes former foundational_literacy (e.g. instruction clarity, AI literacy) as core skills for the AI era.",
+  "description": "Skills: trainable capabilities and learned techniques. Developed by applying practice to aptitudes and traits. Aligned with AI-era skills analysis (shrinks/stays/grows) and structural dimensions (replication risk, leverage, authority pathway, scarcity, transferability, time-to-compound).",
   "skills": [
     {
       "id": "structured_problem_solving",
       "name": "Structured problem solving",
       "description": "Ability to break down complex problems into steps, plan methodically, and execute in an ordered way. Valued in roles that require clear processes and predictable outcomes. Distinct from research_analysis: this is about sequence of actions and planning, not information gathering first.",
+      "ai_trend": "stays",
+      "ai_category": "cross_cutting_meta",
+      "ai_future_rationale": "Stays – planning and structuring work remains useful, but the premium shifts from pure execution toward using structure to direct humans and AI agents effectively.",
       "how_measured_or_observed": "Whether their first step is to make a plan or list steps (not to look up information); preference for clear goals and deadlines; scenario questions that separate 'what do you do first?' into planning vs gathering-info vs trying-quickly.",
-      "question_hints": ["When facing a new problem, is your first instinct to plan the steps or to look for information first?", "Do you prefer to have a clear plan before you start, or to adjust as you go?"]
+      "question_hints": [
+        "When facing a new problem, is your first instinct to plan the steps or to look for information first?",
+        "Do you prefer to have a clear plan before you start, or to adjust as you go?"
+      ],
+      "structural_scores": {
+        "replication_risk": 3,
+        "leverage_multiplier": 3,
+        "authority_pathway": 2,
+        "scarcity_durability": 3,
+        "transferability": 4,
+        "time_to_compound": 3
+      }
     },
     {
       "id": "research_analysis",
       "name": "Research and analytical depth",
       "description": "Tendency to gather information, look for similar examples, and analyze before acting. Distinct from structured_problem_solving: the first move is information intake (search, read, compare), not planning the sequence of actions. Can be routine (automated) or high-level synthesis.",
+      "ai_trend": "mixed",
+      "ai_category": "high_level_analytical_judgment",
+      "ai_future_rationale": "Routine research and compilation shrink in value, but deeper analytical synthesis across complex information remains valuable when tied to judgment and decision-making.",
       "how_measured_or_observed": "Whether their first move is to look for similar examples, search for data, or read up; preference for data-driven decisions; depth of explanation when solving problems. Probe explicitly so it is not conflated with 'planning' (which is about order of actions).",
-      "question_hints": ["When you don't know how to do something, do you usually look for examples or similar cases first?", "Do you prefer to gather information before acting, or to act and then look things up as needed?"]
+      "question_hints": [
+        "When you don't know how to do something, do you usually look for examples or similar cases first?",
+        "Do you prefer to gather information before acting, or to act and then look things up as needed?"
+      ],
+      "structural_scores": {
+        "replication_risk": 4,
+        "leverage_multiplier": 3,
+        "authority_pathway": 2,
+        "scarcity_durability": 2,
+        "transferability": 4,
+        "time_to_compound": 2
+      }
     },
     {
       "id": "human_ai_coordination",
       "name": "Human-AI coordination",
       "description": "Emerging skill of working effectively with AI agents: knowing when to delegate, how to brief them, and how to integrate their output into human workflows. Distinct from human-human collaboration; this is about calibrating interaction with non-human 'workers'.",
+      "ai_trend": "grows",
+      "ai_category": "systems_and_orchestration",
+      "ai_future_rationale": "Grows – as agents handle more execution, the premium shifts to people who can direct, calibrate, and integrate AI into workflows.",
       "how_measured_or_observed": "Experience or comfort describing how they would use AI for a task; whether they think in terms of briefing, checking, and iterating with an agent; curiosity about how to get the best from tools.",
-      "question_hints": ["If you had a smart assistant that could do some of your work, how would you decide what to give it and what to do yourself?", "How do you think about checking or improving output from an AI or automated tool?"]
+      "question_hints": [
+        "If you had a smart assistant that could do some of your work, how would you decide what to give it and what to do yourself?",
+        "How do you think about checking or improving output from an AI or automated tool?"
+      ],
+      "structural_scores": {
+        "replication_risk": 1,
+        "leverage_multiplier": 5,
+        "authority_pathway": 3,
+        "scarcity_durability": 3,
+        "transferability": 5,
+        "time_to_compound": 3
+      }
     },
     {
       "id": "strategic_planning",
       "name": "Strategic planning and logic",
       "description": "Ability to think ahead, weigh options, and align actions with longer-term goals. Distinct from problem_formulation (which is about defining the right problem); this is about prioritization and execution strategy once the problem is set.",
+      "ai_trend": "grows",
+      "ai_category": "problem_framing_and_direction",
+      "ai_future_rationale": "Grows – with execution increasingly automated, deciding which paths to pursue and how to allocate resources becomes more important.",
       "how_measured_or_observed": "Preference for puzzles, strategy, research; how they describe decision-making under constraints; interest in planning and logic.",
-      "question_hints": ["Do you enjoy puzzles, strategy, or logical thinking?", "How do you balance short-term tasks with long-term goals?"]
+      "question_hints": [
+        "Do you enjoy puzzles, strategy, or logical thinking?",
+        "How do you balance short-term tasks with long-term goals?"
+      ],
+      "structural_scores": {
+        "replication_risk": 2,
+        "leverage_multiplier": 4,
+        "authority_pathway": 4,
+        "scarcity_durability": 4,
+        "transferability": 4,
+        "time_to_compound": 4
+      }
     },
     {
       "id": "problem_formulation",
       "name": "Problem formulation and goal framing",
       "description": "Ability to move from a vague goal or messy situation to a well-defined, actionable problem. Includes asking 'why', challenging assumptions, and framing the core question that creates the most value. As AI gets better at execution, the human premium shifts upstream to diagnosis and framing—identifying which tasks are worth doing before solving them.",
+      "ai_trend": "grows",
+      "ai_category": "problem_framing_and_direction",
+      "ai_future_rationale": "Grows – defining the right problem and framing goals becomes the core human premium when AI executes many possible solutions cheaply.",
       "how_measured_or_observed": "Do they accept the initial problem as given or step back and ask 'what are we really trying to achieve?'; ability to rephrase a vague request into a specific, answerable question; whether they spend time defining the problem before acting.",
-      "question_hints": ["When given a task, do you usually start right away or first figure out if it's the right task?", "How do you react when a goal is very broad, like 'improve customer satisfaction'?"]
+      "question_hints": [
+        "When given a task, do you usually start right away or first figure out if it's the right task?",
+        "How do you react when a goal is very broad, like 'improve customer satisfaction'?"
+      ],
+      "structural_scores": {
+        "replication_risk": 1,
+        "leverage_multiplier": 5,
+        "authority_pathway": 4,
+        "scarcity_durability": 4,
+        "transferability": 5,
+        "time_to_compound": 4
+      }
     },
     {
       "id": "systems_thinking",
       "name": "Systems thinking",
       "description": "Ability to model how the components of a process or organization interact; understanding how a failure in one part can cascade. Vital when managing a complex web of AI agents and humans—each doing a part of a larger process. Distinct from strategic_planning (which is about goals and prioritization); this is about understanding interdependencies and feedback loops.",
+      "ai_trend": "grows",
+      "ai_category": "systems_and_orchestration",
+      "ai_future_rationale": "Grows – directly corresponds to the 'systems thinking' amplifier skill in the AI documents; core to designing and operating complex human–AI workflows.",
       "how_measured_or_observed": "Whether they describe problems in terms of parts and connections; how they anticipate knock-on effects of a change; comfort with multi-step, multi-actor processes.",
-      "question_hints": ["When something goes wrong in a project, do you tend to look at one cause or at how several things might be connected?", "How do you think about the way different people (or tools) in a process affect each other?"]
+      "question_hints": [
+        "When something goes wrong in a project, do you tend to look at one cause or at how several things might be connected?",
+        "How do you think about the way different people (or tools) in a process affect each other?"
+      ],
+      "structural_scores": {
+        "replication_risk": 1,
+        "leverage_multiplier": 5,
+        "authority_pathway": 4,
+        "scarcity_durability": 4,
+        "transferability": 5,
+        "time_to_compound": 5
+      }
     },
     {
       "id": "aesthetic_taste",
       "name": "Aesthetic and cultural taste",
       "description": "Nuanced judgment about quality, style, and fit that is culturally embedded and hard to replicate with rules or data. Includes aesthetic preference, brand voice, and 'what feels right' in creative or customer-facing contexts.",
+      "ai_trend": "grows",
+      "ai_category": "high_level_analytical_judgment",
+      "ai_future_rationale": "Grows – as AI can generate many options, human judgment about what 'feels right' in context becomes more valuable.",
       "how_measured_or_observed": "How they choose between options when there is no clear metric; examples of defending a choice on grounds of 'fit' or 'tone'; comfort making calls that depend on context and culture.",
-      "question_hints": ["When two options are both 'correct' but feel different, how do you choose?", "Can you think of a time when the right answer depended on taste or context rather than rules?"]
+      "question_hints": [
+        "When two options are both 'correct' but feel different, how do you choose?",
+        "Can you think of a time when the right answer depended on taste or context rather than rules?"
+      ],
+      "structural_scores": {
+        "replication_risk": 1,
+        "leverage_multiplier": 3,
+        "authority_pathway": 3,
+        "scarcity_durability": 4,
+        "transferability": 4,
+        "time_to_compound": 4
+      }
     },
     {
       "id": "epistemic_calibration",
       "name": "Epistemic calibration",
       "description": "Knowing what you don't know; when to verify information, when to trust vs audit (especially AI output), and when to override. Critical and scarce in an agentic world—people who blindly accept fluent-sounding output will be systematically disadvantaged. More procedural than aesthetic taste.",
+      "ai_trend": "grows",
+      "ai_category": "high_level_analytical_judgment",
+      "ai_future_rationale": "Grows – explicitly called out in the AI documents as 'epistemic calibration'; central for overseeing AI outputs and owning decisions.",
       "how_measured_or_observed": "Whether they describe habits of checking sources or questioning confident-sounding answers; response to 'when would you double-check something an expert or a tool told you?'; awareness of their own uncertainty.",
-      "question_hints": ["When you get an answer that sounds convincing, how do you decide whether to trust it?", "Can you think of a time when you had to question something you initially believed was correct?"]
+      "question_hints": [
+        "When you get an answer that sounds convincing, how do you decide whether to trust it?",
+        "Can you think of a time when you had to question something you initially believed was correct?"
+      ],
+      "structural_scores": {
+        "replication_risk": 2,
+        "leverage_multiplier": 4,
+        "authority_pathway": 4,
+        "scarcity_durability": 4,
+        "transferability": 5,
+        "time_to_compound": 4
+      }
     },
     {
       "id": "instruction_clarity",
       "name": "Instruction clarity and literal communication",
       "description": "Ability to write and give clear, literal instructions that others (or AI agents) can follow without ambiguity. Core literacy for the age of AI, like reading and writing for the industrial age. Critical for human-AI collaboration and delegation.",
+      "ai_trend": "grows",
+      "ai_category": "cross_cutting_meta",
+      "ai_future_rationale": "Grows – listed as a cross-cutting meta skill in the AI documents; required to get reliable output from agents.",
       "how_measured_or_observed": "Ability to explain a process step-by-step; preference for clear vs vague wording; self-awareness of how others interpret their requests.",
-      "question_hints": ["When you explain a task to someone, do you tend to be very specific or leave room for interpretation?", "Have you ever had to give instructions to a tool or system? How did you approach it?"]
+      "question_hints": [
+        "When you explain a task to someone, do you tend to be very specific or leave room for interpretation?",
+        "Have you ever had to give instructions to a tool or system? How did you approach it?"
+      ],
+      "structural_scores": {
+        "replication_risk": 2,
+        "leverage_multiplier": 5,
+        "authority_pathway": 3,
+        "scarcity_durability": 3,
+        "transferability": 5,
+        "time_to_compound": 3
+      }
     },
     {
       "id": "ai_literacy",
       "name": "AI and systems literacy (conceptual)",
       "description": "Practical, non-technical understanding of how AI agents work: capabilities, limitations, and failure modes (e.g. training data, bias, hallucination, importance of context). Enables effective delegation and oversight—someone who thinks an AI 'understands' like a human will oversee it poorly.",
+      "ai_trend": "grows",
+      "ai_category": "cross_cutting_meta",
+      "ai_future_rationale": "Grows – matches 'AI literacy' / 'AI tool fluency' in the AI documents; fundamental amplifier for almost all other skills.",
       "how_measured_or_observed": "How they describe AI's strengths and weaknesses; whether they can predict when an AI might fail; ability to troubleshoot a poor AI output (e.g. 'it probably didn't have enough context').",
-      "question_hints": ["If an AI gave you a completely wrong answer, what do you think might have caused it?", "What kinds of tasks do you think AI is inherently better or worse at than humans?"]
+      "question_hints": [
+        "If an AI gave you a completely wrong answer, what do you think might have caused it?",
+        "What kinds of tasks do you think AI is inherently better or worse at than humans?"
+      ],
+      "structural_scores": {
+        "replication_risk": 1,
+        "leverage_multiplier": 5,
+        "authority_pathway": 3,
+        "scarcity_durability": 3,
+        "transferability": 5,
+        "time_to_compound": 3
+      }
     },
     {
       "id": "verification_epistemic_hygiene",
       "name": "Verification and epistemic hygiene",
       "description": "Habit of fact-checking and sense-checking outputs; spotting confident-sounding errors; knowing when to trust vs audit (especially AI-generated content). Will become a baseline professional skill. Distinct from epistemic_calibration (which is the cognitive capacity); this is the practiced behavior.",
+      "ai_trend": "grows",
+      "ai_category": "high_level_analytical_judgment",
+      "ai_future_rationale": "Grows – explicitly listed in the AI documents; critical for safe, high-quality use of AI in any knowledge work.",
       "how_measured_or_observed": "Whether they describe checking facts or sources routinely; response to scenarios where an AI or person gives a plausible-but-wrong answer; self-report on verifying before sharing or acting.",
-      "question_hints": ["When you use information from a tool or another person, how often do you verify it before relying on it?", "Have you ever caught an error in something that looked correct at first glance? How?"]
+      "question_hints": [
+        "When you use information from a tool or another person, how often do you verify it before relying on it?",
+        "Have you ever caught an error in something that looked correct at first glance? How?"
+      ],
+      "structural_scores": {
+        "replication_risk": 2,
+        "leverage_multiplier": 4,
+        "authority_pathway": 3,
+        "scarcity_durability": 3,
+        "transferability": 5,
+        "time_to_compound": 3
+      }
     },
     {
       "id": "delegation_oversight",
       "name": "Delegation and oversight calibration",
       "description": "Ability to assign work to others (or agents), set expectations, and adjust oversight based on task complexity—more oversight for sensitive or strategic work, less for repetitive tasks.",
+      "ai_trend": "grows",
+      "ai_category": "systems_and_orchestration",
+      "ai_future_rationale": "Grows – singled out as a cross-cutting meta skill; central to being an effective 'agent boss' and human manager.",
       "how_measured_or_observed": "Experience leading projects or coordinating others; how they describe dividing work; comfort with 'managing' rather than doing all work oneself.",
-      "question_hints": ["When working in a team, do you prefer to do things yourself or delegate and review?", "How do you decide how closely to supervise someone else's work?"]
+      "question_hints": [
+        "When working in a team, do you prefer to do things yourself or delegate and review?",
+        "How do you decide how closely to supervise someone else's work?"
+      ],
+      "structural_scores": {
+        "replication_risk": 1,
+        "leverage_multiplier": 5,
+        "authority_pathway": 4,
+        "scarcity_durability": 4,
+        "transferability": 5,
+        "time_to_compound": 4
+      }
     },
     {
       "id": "feedback_refinement",
       "name": "Feedback and refinement",
       "description": "Tendency to give constructive feedback, refine others' output, and improve quality through iteration. Important for managing AI agents and improving outcomes.",
+      "ai_trend": "grows",
+      "ai_category": "cross_cutting_meta",
+      "ai_future_rationale": "Grows – listed as a compounding meta skill; needed to iteratively improve both human and AI-generated work.",
       "how_measured_or_observed": "Whether they challenge with open-ended questions to improve output; how they handle suboptimal work from others; preference for iteration vs one-shot delivery.",
-      "question_hints": ["When someone's work isn't quite right, do you fix it yourself or give feedback and ask for revisions?", "Do you prefer to iterate on a solution or get it right the first time?"]
+      "question_hints": [
+        "When someone's work isn't quite right, do you fix it yourself or give feedback and ask for revisions?",
+        "Do you prefer to iterate on a solution or get it right the first time?"
+      ],
+      "structural_scores": {
+        "replication_risk": 2,
+        "leverage_multiplier": 4,
+        "authority_pathway": 3,
+        "scarcity_durability": 3,
+        "transferability": 5,
+        "time_to_compound": 3
+      }
     },
     {
       "id": "workflow_orchestration",
       "name": "Orchestration and workflow design",
       "description": "Ability to decompose a complex goal into discrete tasks distributed across humans and AI agents; designing handoffs, context for each step, and managing the process for a coherent final product. Higher-order than managing a single agent.",
+      "ai_trend": "grows",
+      "ai_category": "systems_and_orchestration",
+      "ai_future_rationale": "Grows – directly aligned with 'workflow design across humans and AI' and 'multi-agent coordination' in the AI documents.",
       "how_measured_or_observed": "How they approach multi-step, multi-actor projects; whether they think in terms of processes and handoffs; comfort designing systems where they don't do every step themselves.",
-      "question_hints": ["If you had to run a complex project with several smart assistants, how would you break down the work and who would do what?", "How would you ensure quality and consistency across different parts done by different people or agents?"]
+      "question_hints": [
+        "If you had to run a complex project with several smart assistants, how would you break down the work and who would do what?",
+        "How would you ensure quality and consistency across different parts done by different people or agents?"
+      ],
+      "structural_scores": {
+        "replication_risk": 1,
+        "leverage_multiplier": 5,
+        "authority_pathway": 4,
+        "scarcity_durability": 4,
+        "transferability": 4,
+        "time_to_compound": 4
+      }
     },
     {
       "id": "context_memory_management",
       "name": "Context and memory management",
       "description": "Understanding what information an AI agent (or collaborator) needs to do a task well; what to include, what to leave out; maintaining continuity across sessions. A metacognitive skill that separates effective AI users from ineffective ones.",
+      "ai_trend": "grows",
+      "ai_category": "cross_cutting_meta",
+      "ai_future_rationale": "Grows – directly matches the 'context management' meta skill; key to getting reliable results from agents at scale.",
       "how_measured_or_observed": "Whether they think about what context to provide when asking for help; how they maintain consistency in ongoing projects; awareness of 'what the other side needs to know'.",
-      "question_hints": ["When you ask someone (or a tool) to help with a task, how do you decide what background to give them?", "If you had to hand off a project and come back later, what would you make sure to document or pass on?"]
+      "question_hints": [
+        "When you ask someone (or a tool) to help with a task, how do you decide what background to give them?",
+        "If you had to hand off a project and come back later, what would you make sure to document or pass on?"
+      ],
+      "structural_scores": {
+        "replication_risk": 2,
+        "leverage_multiplier": 4,
+        "authority_pathway": 3,
+        "scarcity_durability": 3,
+        "transferability": 5,
+        "time_to_compound": 3
+      }
     },
     {
       "id": "ethical_reputational_risk_sensing",
       "name": "Ethical and reputational risk sensing",
       "description": "Ability to recognize when an AI-generated or human output could cause harm, embarrassment, or legal exposure before deploying it. As agents act more autonomously, the human in the loop needs sharper instincts, not just rule-following.",
+      "ai_trend": "grows",
+      "ai_category": "ai_governance_and_risk",
+      "ai_future_rationale": "Grows – part of AI governance and risk; necessary wherever AI affects people, brands, or regulated domains.",
       "how_measured_or_observed": "Response to scenarios where output is technically correct but risky (tone, audience, liability); whether they describe checking for unintended consequences; past examples of catching a risk before release.",
-      "question_hints": ["Before sharing or publishing something, what do you check for besides accuracy?", "Can you think of a time when something that was 'correct' could still have been harmful or inappropriate to use?"]
+      "question_hints": [
+        "Before sharing or publishing something, what do you check for besides accuracy?",
+        "Can you think of a time when something that was 'correct' could still have been harmful or inappropriate to use?"
+      ],
+      "structural_scores": {
+        "replication_risk": 1,
+        "leverage_multiplier": 4,
+        "authority_pathway": 5,
+        "scarcity_durability": 4,
+        "transferability": 4,
+        "time_to_compound": 4
+      }
     },
     {
       "id": "cross_domain_synthesis",
       "name": "Cross-domain synthesis",
       "description": "Connecting ideas across fields that AI tends to keep siloed. AI is strong within a domain; the creative leap across domains still favors humans with broad curiosity and pattern recognition across contexts.",
+      "ai_trend": "grows",
+      "ai_category": "high_level_analytical_judgment",
+      "ai_future_rationale": "Grows – explicitly listed as a growing skill; central to high-level analytical judgment and creative problem solving.",
       "how_measured_or_observed": "Whether they draw analogies from other fields; breadth of interests and ability to link them; examples of solving a problem by applying an idea from another domain.",
-      "question_hints": ["Do you often see connections between ideas from different subjects or fields?", "Can you think of a time when an idea from one area helped you in a completely different one?"]
+      "question_hints": [
+        "Do you often see connections between ideas from different subjects or fields?",
+        "Can you think of a time when an idea from one area helped you in a completely different one?"
+      ],
+      "structural_scores": {
+        "replication_risk": 1,
+        "leverage_multiplier": 5,
+        "authority_pathway": 4,
+        "scarcity_durability": 4,
+        "transferability": 5,
+        "time_to_compound": 4
+      }
     },
     {
       "id": "routine_execution",
       "name": "Routine execution and process adherence",
       "description": "Ability to perform repetitive, well-defined tasks consistently. Often highly automatable; value depends on whether the role is purely routine or includes variation.",
+      "ai_trend": "shrinks",
+      "ai_category": "shrinking_routine_execution",
+      "ai_future_rationale": "Shrinks – matches 'routine digital execution' in the AI documents; useful as a risk marker, not a long-term investment focus.",
       "how_measured_or_observed": "Preference for 'clear instructions with no games or stories'; comfort with repetitive workflows; self-report on liking predictable, step-by-step work.",
-      "question_hints": ["Do you prefer predictable, step-by-step tasks or varied, novel ones?", "How do you feel about doing the same type of task repeatedly?"]
+      "question_hints": [
+        "Do you prefer predictable, step-by-step tasks or varied, novel ones?",
+        "How do you feel about doing the same type of task repeatedly?"
+      ],
+      "structural_scores": {
+        "replication_risk": 4,
+        "leverage_multiplier": 1,
+        "authority_pathway": 0,
+        "scarcity_durability": 1,
+        "transferability": 3,
+        "time_to_compound": 1
+      }
     },
     {
       "id": "intermediation_friction",
       "name": "Intermediation and friction-based value",
       "description": "Roles or behaviors that add value mainly by reducing others' friction (e.g. navigating complexity, handling tedious processes). Highly exposed when AI can remove that friction.",
+      "ai_trend": "shrinks",
+      "ai_category": "shrinking_intermediation",
+      "ai_future_rationale": "Shrinks – explicitly called out as intermediation/friction-based value that compresses when agents can remove friction directly.",
       "how_measured_or_observed": "Whether they describe their value as 'helping others navigate complexity' or 'managing tedious processes'; orientation toward efficiency vs relationship-building in transactions.",
-      "question_hints": ["Do you see yourself as someone who 'saves others time' by handling details?", "How much of your ideal job would be coordinating or navigating bureaucracy for others?"]
+      "question_hints": [
+        "Do you see yourself as someone who 'saves others time' by handling details?",
+        "How much of your ideal job would be coordinating or navigating bureaucracy for others?"
+      ],
+      "structural_scores": {
+        "replication_risk": 5,
+        "leverage_multiplier": 1,
+        "authority_pathway": 1,
+        "scarcity_durability": 1,
+        "transferability": 3,
+        "time_to_compound": 1
+      }
     }
   ]
 }

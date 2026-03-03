@@ -76,6 +76,15 @@ if (Number.isNaN(topP) || topP < 0 || topP > 1) {
   exit(`LLM_TOP_P must be a number between 0 and 1. Got: ${topPRaw}`);
 }
 
+const numCtxRaw = (process.env.LLM_NUM_CTX || process.env.OLLAMA_NUM_CTX || '').trim();
+const numCtx = numCtxRaw === '' ? null : (() => {
+  const n = parseInt(numCtxRaw, 10);
+  if (Number.isNaN(n) || n < 1) {
+    exit(`LLM_NUM_CTX (or OLLAMA_NUM_CTX) must be a positive integer when set. Got: ${numCtxRaw}`);
+  }
+  return n;
+})();
+
 const systemPromptFile = process.env.LLM_SYSTEM_PROMPT_FILE || null;
 if (!systemPromptFile || systemPromptFile.trim() === '') {
   exit('LLM_SYSTEM_PROMPT_FILE is required. Set it in .env (e.g. conf/assessment_system_prompt.txt).');
@@ -127,6 +136,18 @@ if (reportRecommendationsSystemPromptFile) {
   }
 }
 
+// Optional: seconds between periodic LLM checkups (keep-alive). Documented default in env.example: 180.
+const checkupIntervalSecRaw = (process.env.LLM_CHECKUP_INTERVAL_SEC || '').trim();
+const checkupIntervalSec = checkupIntervalSecRaw === ''
+  ? 180
+  : (() => {
+    const n = parseInt(checkupIntervalSecRaw, 10);
+    if (Number.isNaN(n) || n < 1) {
+      exit(`LLM_CHECKUP_INTERVAL_SEC must be a positive integer when set. Got: ${checkupIntervalSecRaw}`);
+    }
+    return n;
+  })();
+
 function resolveProjectPath(relativePath) {
   if (!relativePath) return null;
   const normalized = path.isAbsolute(relativePath) ? relativePath : path.join(PROJECT_ROOT, relativePath);
@@ -152,8 +173,11 @@ const llm = {
   temperature,
   maxTokens,
   topP,
+  numCtx,
   systemPromptFile,
   handoffSystemPromptFile: handoffSystemPromptFile || null,
+  /** Seconds between periodic LLM checkups (keep-alive). Default 180 when unset; see env.example. */
+  checkupIntervalSec,
 
   get enabled() {
     if (!this.model) return false;

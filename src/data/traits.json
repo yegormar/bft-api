@@ -1,52 +1,163 @@
 {
-  "version": "1.0",
+  "version": "1.1",
   "sources": [
     "Citrini Research (2028 GIC thought exercise)",
     "Microsoft New Future of Work Report 2025"
   ],
-  "description": "Traits: personality and behavioral tendencies. How you behave; stable 'handling' that shapes fit for environments.",
+  "description": "Traits: personality and behavioral tendencies. How you behave; stable 'handling' that shapes fit for environments. Used with values and skills to understand AI-era potential.",
   "traits": [
     {
       "id": "experimentation_risk_tolerance",
       "name": "Experimentation and risk tolerance",
       "description": "Comfort with starting something new and uncertain before all information is in; willingness to try and iterate despite ambiguity. About the act of beginning and tolerating uncertainty, not the process of learning over time (see adaptability_learning).",
+      "ai_future_rationale": "Grows – people who are willing to start experiments in new tools, workflows, and domains are better positioned to discover AI-era opportunities instead of waiting until paths are fully defined.",
       "how_measured_or_observed": "Willingness to start without full information; preference for novelty and challenge over predictability; response to 'would you rather start a project with unclear scope or one with very clear steps?'. Do not use 'learning something new' alone—that blurs with adaptability.",
-      "question_hints": ["Do you prefer to start something even when the outcome is uncertain, or wait until you have a clearer picture?", "When given a new challenge, do you feel energized by the risk or more comfortable once the path is predictable?"]
+      "question_hints": [
+        "Do you prefer to start something even when the outcome is uncertain, or wait until you have a clearer picture?",
+        "When given a new challenge, do you feel energized by the risk or more comfortable once the path is predictable?"
+      ],
+      "related_skill_clusters": [
+        "human_ai_coordination",
+        "delegation_oversight",
+        "feedback_refinement",
+        "workflow_orchestration"
+      ],
+      "score_scale": {
+        "min": 1,
+        "max": 5,
+        "interpretation": {
+          "low": "Prefers clear paths and low risk; may adopt AI-era tools and workflows more slowly and benefit from environments with predictable change.",
+          "medium": "Can handle some uncertainty and experimentation when supported; suitable for hybrid roles that mix stable tasks with occasional new tools or workflows.",
+          "high": "Energized by trying new tools, workflows, and domains before they are fully defined; strong fit for AI-era transformation, experimentation, and agent-orchestration roles."
+        }
+      }
     },
     {
       "id": "adaptability_learning",
       "name": "Adaptability and learning capacity",
       "description": "Willingness and ability to learn new tools, domains, and ways of working as the environment changes—the process of learning and changing over time. Distinct from experimentation_risk_tolerance (which is about starting something uncertain); this is about how they respond when things shift and they must acquire new skills.",
+      "ai_future_rationale": "Grows – as roles, tools, and industries keep shifting in the AI era, the ability to keep learning and re-tooling is a core resilience factor.",
       "how_measured_or_observed": "How they describe the process of picking up new skills (not just willingness to start); history of switching domains or tools; speed and comfort adopting new methods. Ask about a time they had to learn something new and how they went about it.",
-      "question_hints": ["When your job or tools changed, how quickly did you adapt and feel effective again?", "Do you seek out new challenges to learn from, or prefer to deepen existing skills before branching out?"]
+      "question_hints": [
+        "When your job or tools changed, how quickly did you adapt and feel effective again?",
+        "Do you seek out new challenges to learn from, or prefer to deepen existing skills before branching out?"
+      ],
+      "related_skill_clusters": [
+        "ai_literacy",
+        "systems_thinking",
+        "human_ai_coordination",
+        "context_memory_management",
+        "cross_domain_synthesis"
+      ],
+      "score_scale": {
+        "min": 1,
+        "max": 5,
+        "interpretation": {
+          "low": "Prefers to stick with familiar tools and domains; may need extra support when roles or technologies change quickly.",
+          "medium": "Can adapt with some discomfort; able to reskill into adjacent areas over time when change is gradual and supported.",
+          "high": "Thrives on learning new tools and domains; strong foundation for moving into emerging AI-era skill stacks over a 10–15 year horizon."
+        }
+      }
     },
     {
       "id": "social_collaboration",
       "name": "Human-human collaboration and influence",
       "description": "Genuine coordination with other people: relationship trust, emotional attunement, influence, and teamwork. Distinct from intermediation (friction with a friendly face) and from human-AI coordination (see human_ai_coordination). Remains deeply human and hard to automate.",
+      "ai_future_rationale": "Grows – as execution tasks automate, value concentrates in roles that depend on trust, influence, and human coordination rather than routine processing.",
       "how_measured_or_observed": "Preference for team vs solo work; tendency to build trust and read others; whether they describe collaboration in terms of relationship and influence vs efficiency and task-handoff.",
-      "question_hints": ["Do you prefer working with others to solve problems or working independently?", "When you work in a team, do you focus more on the relationship and trust or on dividing tasks efficiently?"]
+      "question_hints": [
+        "Do you prefer working with others to solve problems or working independently?",
+        "When you work in a team, do you focus more on the relationship and trust or on dividing tasks efficiently?"
+      ],
+      "related_skill_clusters": [
+        "delegation_oversight",
+        "feedback_refinement",
+        "workflow_orchestration",
+        "ethical_reputational_risk_sensing"
+      ],
+      "score_scale": {
+        "min": 1,
+        "max": 5,
+        "interpretation": {
+          "low": "Prefers independent work with limited interpersonal coordination; may be better suited to infrastructure or technical roles with fewer relationship demands.",
+          "medium": "Comfortable collaborating when needed; can succeed in mixed solo/team environments with some trust-building responsibility.",
+          "high": "Energized by working with others, building trust, and influencing teams; strong fit for AI-era roles where human relationship capital and coordination are central."
+        }
+      }
     },
     {
       "id": "comfort_ambiguous_ownership",
       "name": "Comfort with ambiguous ownership",
       "description": "In agentic workflows, it is often unclear who 'did' the work. Comfort directing, editing, and taking responsibility for output one didn't personally generate; those who need to feel personal authorship may resist adoption or struggle.",
+      "ai_future_rationale": "Grows – many AI-era roles involve directing agents and signing off on work you did not personally execute; comfort with shared and fuzzy authorship is critical.",
       "how_measured_or_observed": "Reaction to 'how do you feel about putting your name on work that involved significant help from others or tools?'; comfort with editing and signing off on others' drafts; need for personal credit vs team outcome.",
-      "question_hints": ["When a project succeeds because of a team (or tools), how do you feel about claiming credit or responsibility?", "Would you be comfortable submitting work that you heavily edited but didn't write from scratch?"]
+      "question_hints": [
+        "When a project succeeds because of a team (or tools), how do you feel about claiming credit or responsibility?",
+        "Would you be comfortable submitting work that you heavily edited but didn't write from scratch?"
+      ],
+      "related_skill_clusters": [
+        "human_ai_coordination",
+        "delegation_oversight",
+        "workflow_orchestration",
+        "verification_epistemic_hygiene"
+      ],
+      "score_scale": {
+        "min": 1,
+        "max": 5,
+        "interpretation": {
+          "low": "Strong preference for personally doing the work they sign; may resist high-delegation, high-agent roles unless expectations are carefully managed.",
+          "medium": "Can share ownership when expectations are clear; suitable for hybrid roles that mix direct execution with oversight.",
+          "high": "Comfortable owning outcomes produced by teams and tools they direct; strong fit for AI-era orchestration, management, and governance paths."
+        }
+      }
     },
     {
       "id": "ambiguity_resilience",
       "name": "Resilience to ambiguity and change",
       "description": "Capacity to remain composed, motivated, and effective amid constant change, unclear futures, and evolving job demands. Psychological foundation for continuous learning and adaptation; mental models that treat flux as the default. Distinct from adaptability_learning (which is the behavior of learning); this is the internal state that enables it.",
+      "ai_future_rationale": "Grows – as AI reshapes tasks and roles, the ability to stay grounded and effective in uncertainty becomes a core foundation for long-term career resilience.",
       "how_measured_or_observed": "Reaction to scenarios of disruption ('how would you feel if your core job task was automated next month?'); ability to describe past change without excessive negativity; comfort with 'not knowing' what's next.",
-      "question_hints": ["How do you stay motivated when priorities or tools seem to change constantly?", "Tell me about a time you had to work toward a goal when the path was very unclear."]
+      "question_hints": [
+        "How do you stay motivated when priorities or tools seem to change constantly?",
+        "Tell me about a time you had to work toward a goal when the path was very unclear."
+      ],
+      "related_skill_clusters": [
+        "systems_thinking",
+        "problem_formulation",
+        "strategic_planning",
+        "cross_domain_synthesis"
+      ],
+      "score_scale": {
+        "min": 1,
+        "max": 5,
+        "interpretation": {
+          "low": "Feels stressed or demotivated when plans or tools change frequently; may prefer more stable, infrastructure-coupled paths.",
+          "medium": "Can handle some ambiguity with support; suitable for roles where change is present but not constant.",
+          "high": "Stays effective and motivated in shifting environments; strong foundation for roles in AI-era transformation, governance, and system design."
+        }
+      }
     },
     {
       "id": "motivation_drivers",
-      "name": "Motivation drivers",
-      "description": "What energizes the person: goals, mastery, recognition, helping others, novelty, stability, etc. Informs fit for roles that remain human-centric vs those that are being automated.",
-      "how_measured_or_observed": "Self-report on what makes work satisfying; choice of activities in free time; alignment with gaming/competition, social, creative, strategic, or neutral clusters.",
-      "question_hints": ["What kind of work or activities make you feel most engaged?", "Do you prefer competition and goals or collaboration and helping others?"]
+      "name": "Motivation drivers (meta-trait)",
+      "description": "Summary pattern of what energizes the person across values: goals, mastery, recognition, helping others, novelty, stability, etc. Informs fit for roles that remain human-centric vs those that are being automated.",
+      "ai_future_rationale": "Stays – understanding what truly motivates someone remains essential for matching them to AI-era skill stacks and roles where they will persist and grow, not just survive.",
+      "how_measured_or_observed": "Self-report on what makes work satisfying; choice of activities in free time; alignment with gaming/competition, social, creative, strategic, or neutral clusters. In practice, often derived from scores on specific values rather than assessed independently.",
+      "question_hints": [
+        "What kind of work or activities make you feel most engaged?",
+        "Do you prefer competition and goals or collaboration and helping others?"
+      ],
+      "derived_from_values": true,
+      "related_skill_clusters": [],
+      "score_scale": {
+        "min": 1,
+        "max": 5,
+        "interpretation": {
+          "low": "No single strong motivational driver identified; suggests broader exploration and careful use of values to guide path choices.",
+          "medium": "Some clearer motivational themes; can be used alongside values to steer toward or away from certain clusters.",
+          "high": "Very distinct motivational profile (e.g. impact-first, autonomy-first); should strongly inform which AI-era skill and role clusters are recommended."
+        }
+      }
     }
   ]
 }

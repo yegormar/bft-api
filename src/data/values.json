@@ -1,5 +1,5 @@
 {
-  "version": "1.0",
+  "version": "1.1",
   "sources": [
     "Citrini Research (2028 GIC thought exercise)",
     "Microsoft New Future of Work Report 2025",
@@ -11,71 +11,255 @@
       "id": "helping_others_impact",
       "name": "Helping others / impact on people",
       "description": "Wanting work to improve other people's lives, serve a community, or contribute to something larger than oneself. Non-negotiable for many in care, education, health, social impact, or mission-driven roles.",
+      "ai_future_rationale": "Stays – human-centric, impact-oriented work remains valuable even as AI scales; it steers people toward health, education, coaching, and advisory paths that are structurally needed.",
       "how_measured_or_observed": "Self-report on what makes work meaningful; choices between 'high pay but little impact' vs 'lower pay but clear benefit to others'; examples of activities or roles they've found satisfying because of who they helped.",
-      "question_hints": ["What would have to be true about your work for you to feel it was meaningful?", "Would you rather earn more in a job that didn't help anyone directly, or less in one where you could see the difference you make?"]
+      "question_hints": [
+        "What would have to be true about your work for you to feel it was meaningful?",
+        "Would you rather earn more in a job that didn't help anyone directly, or less in one where you could see the difference you make?"
+      ],
+      "related_skill_clusters": [
+        "ethical_reputational_risk_sensing",
+        "systems_thinking",
+        "cross_domain_synthesis"
+      ],
+      "score_scale": {
+        "min": 1,
+        "max": 5,
+        "interpretation": {
+          "low": "Impact on other people is not a primary driver; other values (e.g. autonomy or financial success) will likely matter more for path fit.",
+          "medium": "Helping others matters, but can be traded off against other goals; suitable for many AI-era roles that mix impact with other priorities.",
+          "high": "Needs clear, visible impact on people to feel work is meaningful; should prioritize AI-era paths in health, education, coaching, or human-centric advisory work."
+        }
+      }
     },
     {
       "id": "mastery_growth",
       "name": "Mastery and growth",
       "description": "Wanting to get better at something over time, build expertise, and feel a sense of progress. Non-negotiable for people who need to feel they're learning and improving, not just maintaining.",
+      "ai_future_rationale": "Grows – long-run resilience in an AI-shaped world favors people who want to keep deepening skills, rather than optimizing for comfort or purely static roles.",
       "how_measured_or_observed": "Whether they describe satisfaction in terms of 'getting better' or 'learning new things'; discomfort with roles that feel repetitive with no growth; preference for stretch over comfort.",
-      "question_hints": ["How important is it to you that your work keeps challenging you to improve?", "Do you get restless when you feel you've stopped learning in a role?"]
+      "question_hints": [
+        "How important is it to you that your work keeps challenging you to improve?",
+        "Do you get restless when you feel you've stopped learning in a role?"
+      ],
+      "related_skill_clusters": [
+        "ai_literacy",
+        "systems_thinking",
+        "cross_domain_synthesis",
+        "epistemic_calibration"
+      ],
+      "score_scale": {
+        "min": 1,
+        "max": 5,
+        "interpretation": {
+          "low": "Content with stable roles that do not change much; may be comfortable in infrastructure or routine execution pathways if other values align.",
+          "medium": "Wants some growth over time; suitable for roles with periodic upskilling but not constant reinvention.",
+          "high": "Needs continuous learning and deeper mastery; strong fit for AI-era paths where tools and responsibilities evolve rapidly."
+        }
+      }
     },
     {
       "id": "autonomy_independence",
       "name": "Autonomy and independence",
       "description": "Wanting to decide how, when, or where you work; to be trusted with ownership and minimal micromanagement. Non-negotiable for people who feel stifled by heavy structure or supervision.",
+      "ai_future_rationale": "Stays – AI-era work can increase leverage for self-directed people (e.g. independent operators orchestrating agents), but also makes some highly structured roles more intense.",
       "how_measured_or_observed": "Reaction to 'how do you feel when someone else sets your schedule or process?'; preference for self-directed projects vs clearly defined tasks; examples of when they've sought or resisted more freedom.",
-      "question_hints": ["How much do you need to feel you're in charge of your own work and schedule?", "Would you rather have clear instructions and support, or more freedom to figure it out yourself?"]
+      "question_hints": [
+        "How much do you need to feel you're in charge of your own work and schedule?",
+        "Would you rather have clear instructions and support, or more freedom to figure it out yourself?"
+      ],
+      "related_skill_clusters": [
+        "workflow_orchestration",
+        "human_ai_coordination",
+        "delegation_oversight",
+        "strategic_planning"
+      ],
+      "score_scale": {
+        "min": 1,
+        "max": 5,
+        "interpretation": {
+          "low": "Comfortable with structure, oversight, and externally set goals; can fit well into more hierarchical or process-driven roles.",
+          "medium": "Wants some control but can tolerate guidance; suitable for hybrid environments with clear goals but room for self-direction.",
+          "high": "Needs significant control over tasks, time, and methods; best suited to roles where they can orchestrate agents, projects, or ventures with high ownership."
+        }
+      }
     },
     {
       "id": "security_stability",
       "name": "Security and stability",
       "description": "Wanting predictable income, job security, or a clear path so that the future feels safe. Non-negotiable for people who prioritize reducing financial or career risk over upside.",
+      "ai_future_rationale": "Stays – but the way to achieve it may shift toward infrastructure-coupled or governance roles rather than routine cognitive work that is highly exposed to automation.",
       "how_measured_or_observed": "Reaction to uncertainty (e.g. gig work, startups, frequent change); importance of benefits, steady paycheck, or 'safe' industries; trade-offs they'd make for stability.",
-      "question_hints": ["How important is it that your job and income feel predictable and secure?", "Would you take a higher-risk opportunity if it meant less stability?"]
+      "question_hints": [
+        "How important is it that your job and income feel predictable and secure?",
+        "Would you take a higher-risk opportunity if it meant less stability?"
+      ],
+      "related_skill_clusters": [
+        "systems_thinking",
+        "verification_epistemic_hygiene",
+        "ethical_reputational_risk_sensing",
+        "routine_execution"
+      ],
+      "score_scale": {
+        "min": 1,
+        "max": 5,
+        "interpretation": {
+          "low": "Willing to accept volatility and career risk; may pursue startup-style or experimental AI-era paths.",
+          "medium": "Values some stability but can handle periods of change; suitable for many hybrid roles as long as there is a visible path.",
+          "high": "Needs strong predictability and clear paths; should favor infrastructure-coupled, governance, or regulated domains less exposed to rapid automation."
+        }
+      }
     },
     {
       "id": "recognition_visibility",
       "name": "Recognition and visibility",
       "description": "Wanting to be known, respected, or seen for one's work; to have a reputation or influence. Non-negotiable for people who are motivated by status, awards, or being the go-to person.",
+      "ai_future_rationale": "Grows – as synthetic content and automated execution flood the world, distinctive human signal, reputation, and visible leadership become more valuable.",
       "how_measured_or_observed": "Whether they describe satisfaction in terms of 'being known' or 'getting credit'; preference for visible vs behind-the-scenes roles; reaction to anonymous or supporting roles.",
-      "question_hints": ["How much does it matter to you that others recognize your contribution or know your name?", "Would you be okay in a role where you did great work but rarely got direct credit?"]
+      "question_hints": [
+        "How much does it matter to you that others recognize your contribution or know your name?",
+        "Would you be okay in a role where you did great work but rarely got direct credit?"
+      ],
+      "related_skill_clusters": [
+        "ethical_reputational_risk_sensing",
+        "cross_domain_synthesis",
+        "systems_thinking",
+        "workflow_orchestration"
+      ],
+      "score_scale": {
+        "min": 1,
+        "max": 5,
+        "interpretation": {
+          "low": "Comfortable contributing behind the scenes without much external recognition; may prefer technical or specialist roles.",
+          "medium": "Likes some recognition but does not need to be the visible face; suitable for many team-based paths.",
+          "high": "Strong desire to be seen and recognized; best matched with paths that include leadership, visible ownership, or trust-based client roles."
+        }
+      }
     },
     {
       "id": "creativity_self_expression",
       "name": "Creativity and self-expression",
       "description": "Wanting work that lets you create something new, express yourself, or leave a personal mark. Non-negotiable for people who feel empty in purely execution or maintenance roles.",
+      "ai_future_rationale": "Grows – as routine execution is automated, original framing, taste, and expression become relatively scarcer and more valuable, especially when combined with AI tools.",
       "how_measured_or_observed": "Importance of 'making something that's mine' or 'doing it my way'; discomfort with purely prescribed output; examples of when they've sought or sacrificed creative outlet.",
-      "question_hints": ["How important is it that your work lets you create something or express your own ideas?", "Could you be happy in a job where the output was mostly defined by someone else?"]
+      "question_hints": [
+        "How important is it that your work lets you create something or express your own ideas?",
+        "Could you be happy in a job where the output was mostly defined by someone else?"
+      ],
+      "related_skill_clusters": [
+        "aesthetic_taste",
+        "cross_domain_synthesis",
+        "problem_formulation"
+      ],
+      "score_scale": {
+        "min": 1,
+        "max": 5,
+        "interpretation": {
+          "low": "Does not need much creative freedom at work; may be fine in more procedural or infrastructure-oriented roles.",
+          "medium": "Wants some room for ideas within structure; can fit many hybrid roles where creative input is part of the job.",
+          "high": "Needs strong creative or expressive outlet; should be steered toward AI-era paths where directing, curating, or inventing is central."
+        }
+      }
     },
     {
       "id": "financial_success",
       "name": "Financial success and earning",
       "description": "Wanting to earn well, build wealth, or use income as a clear measure of success. Non-negotiable for people who prioritize pay and financial upside when choosing paths.",
+      "ai_future_rationale": "Stays – income remains a key constraint and motivator, but the highest resilience in an AI-shaped world will come from skill stacks tied to authority, infrastructure, and complex coordination.",
       "how_measured_or_observed": "How they rank pay vs other factors; reaction to 'would you take a pay cut for meaning or growth?'; importance of salary in past or hypothetical choices.",
-      "question_hints": ["How important is earning a high income when you think about your future career?", "Would you trade some pay for more meaning, flexibility, or learning?"]
+      "question_hints": [
+        "How important is earning a high income when you think about your future career?",
+        "Would you trade some pay for more meaning, flexibility, or learning?"
+      ],
+      "related_skill_clusters": [
+        "systems_thinking",
+        "strategic_planning",
+        "workflow_orchestration"
+      ],
+      "score_scale": {
+        "min": 1,
+        "max": 5,
+        "interpretation": {
+          "low": "Income is secondary to other goals (impact, creativity, balance, etc.); path selection can prioritize non-monetary fit.",
+          "medium": "Wants reasonable pay but can trade off for other values; suitable for many mid-range AI-era paths.",
+          "high": "Strong focus on earnings; recommendations should emphasize structurally advantaged skill stacks and roles with high upside, while being honest about competition and risk."
+        }
+      }
     },
     {
       "id": "work_life_balance_wellbeing",
       "name": "Work-life balance and wellbeing",
       "description": "Wanting time and energy for life outside work—family, health, hobbies, rest. Non-negotiable for people who are unwilling to sacrifice wellbeing or relationships for career intensity.",
+      "ai_future_rationale": "Stays – sustainable careers still require health and rest; some AI-augmented roles will allow more flexibility, others will be high-intensity and should be avoided if this value is high.",
       "how_measured_or_observed": "Importance of hours, flexibility, or boundaries; reaction to 'high-intensity career with little free time'; examples of when they've protected or sacrificed balance.",
-      "question_hints": ["How important is it that your job leaves you time and energy for the rest of your life?", "Would you accept a role that required long hours and little flexibility if it advanced your career?"]
+      "question_hints": [
+        "How important is it that your job leaves you time and energy for the rest of your life?",
+        "Would you accept a role that required long hours and little flexibility if it advanced your career?"
+      ],
+      "related_skill_clusters": [
+        "human_ai_coordination",
+        "workflow_orchestration"
+      ],
+      "score_scale": {
+        "min": 1,
+        "max": 5,
+        "interpretation": {
+          "low": "Willing to trade time and energy for career intensity or upside; can consider demanding AI-era paths if other values align.",
+          "medium": "Wants some balance but can handle intense periods; suitable for many roles as long as there is some boundary control.",
+          "high": "Needs strong boundaries and reliable time for non-work life; should favor AI-era paths that use automation to support flexibility rather than maximize intensity."
+        }
+      }
     },
     {
       "id": "challenge_achievement",
       "name": "Challenge and achievement",
       "description": "Wanting to tackle hard problems, hit ambitious goals, or prove oneself. Non-negotiable for people who are motivated by difficulty and the feeling of having overcome something.",
+      "ai_future_rationale": "Grows – the most durable AI-era work is often difficult: designing systems, governing risk, managing complexity, and owning high-stakes decisions.",
       "how_measured_or_observed": "Whether they seek or avoid 'stretch' goals; satisfaction from overcoming obstacles vs avoiding them; preference for easy wins vs hard victories.",
-      "question_hints": ["Do you get more satisfaction from achieving something difficult or from doing something well that came easily?", "How do you feel when a goal is so hard you're not sure you'll make it?"]
+      "question_hints": [
+        "Do you get more satisfaction from achieving something difficult or from doing something well that came easily?",
+        "How do you feel when a goal is so hard you're not sure you'll make it?"
+      ],
+      "related_skill_clusters": [
+        "systems_thinking",
+        "strategic_planning",
+        "problem_formulation",
+        "cross_domain_synthesis"
+      ],
+      "score_scale": {
+        "min": 1,
+        "max": 5,
+        "interpretation": {
+          "low": "Prefers lower-intensity goals and clear wins; may not seek out the most complex or high-pressure AI-era roles.",
+          "medium": "Likes some challenge but also values manageability; suitable for many mid-complexity paths.",
+          "high": "Energized by hard problems and stretch goals; strong fit for complex AI-era systems, governance, and transformation work."
+        }
+      }
     },
     {
       "id": "belonging_community",
       "name": "Belonging and community",
       "description": "Wanting to be part of a team, culture, or community where you fit. Non-negotiable for people who need to feel they belong and that their workplace or field shares their values.",
+      "ai_future_rationale": "Stays – human collaboration, culture, and community remain central even as tools change; this value helps distinguish solitary infrastructure paths from high-contact, community-oriented work.",
       "how_measured_or_observed": "Importance of 'fitting in' or 'people like me'; reaction to remote/solo vs in-person/team; examples of when culture or community made or broke a role for them.",
-      "question_hints": ["How important is it that you feel part of a team or community at work?", "Could you be happy in a role where you worked mostly alone or with people you didn't click with?"]
+      "question_hints": [
+        "How important is it that you feel part of a team or community at work?",
+        "Could you be happy in a role where you worked mostly alone or with people you didn't click with?"
+      ],
+      "related_skill_clusters": [
+        "delegation_oversight",
+        "feedback_refinement",
+        "workflow_orchestration"
+      ],
+      "score_scale": {
+        "min": 1,
+        "max": 5,
+        "interpretation": {
+          "low": "Can tolerate or even prefer more solitary or transactional work; may fit well in individual-contributor or infrastructure roles.",
+          "medium": "Likes some sense of team but can handle mixed environments; suitable for many hybrid paths.",
+          "high": "Needs strong sense of community and shared values; should favor AI-era paths in team-based, culture-rich environments (e.g. education, health, mission-driven orgs)."
+        }
+      }
     }
   ]
 }

@@ -50,6 +50,22 @@ Assessment data lives in **`src/data/`** (not in `conf/`):
 
 Each data file has version, sources, description, and items with id, name, description, how_measured_or_observed, question_hints. Sources: Citrini 2028 GIC, Microsoft New Future of Work Report 2025. See **`conf/README.md`** for LLM prompts and config.
 
+## Scripts
+
+### NOC enrichment (preparation)
+
+**`src/scripts/enrich-noc-with-mappings.js`** – Enriches each NOC 2021 occupation with LLM-generated mappings to skills, traits, and values (high compatibility only, rating 1–5). Validates IDs against `src/data/skills.json`, `traits.json`, and `values.json`; on invalid IDs sends one correction request to the LLM. Writes `data/noc-2021-enriched.json` (or paths from env/CLI).
+
+Run from project root:
+
+```bash
+node src/scripts/enrich-noc-with-mappings.js [--debug] [--input path] [--output path] [--limit N]
+```
+
+If the output file already exists, occupations already present (by `nocCode`) are skipped (resume). Use `--limit N` or `NOC_ENRICHMENT_LIMIT` to process only the first N occupations and exit (e.g. for testing).
+
+Uses the same LLM `.env` vars as the API (`LLM_PROVIDER`, `LLM_BASE_URL`, `LLM_MODEL`, `LLM_API_KEY` for cloud, `LLM_TEMPERATURE`, `LLM_MAX_TOKENS`, `LLM_TOP_P`). Optional: `NOC_JSON_INPUT`, `NOC_JSON_OUTPUT`, `NOC_ENRICHMENT_SYSTEM_PROMPT_FILE`, `DEBUG=1` to print LLM prompt and response. See `env.example`.
+
 ## Structure
 
 - `server.js` – entry point

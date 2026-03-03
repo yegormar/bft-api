@@ -14,10 +14,10 @@ const useOllama =
 /**
  * Call Ollama chat API with the given messages.
  * @param {Array<{ role: 'system' | 'user' | 'assistant', content: string }>} messages
- * @param {{ stream?: boolean }} options - stream: false for single response (default)
+ * @param {{ stream?: boolean, quiet?: boolean }} opts - stream: false for single response (default); quiet: skip request/response logging (e.g. for checkup)
  * @returns {Promise<{ content: string, done: boolean }>} - message content and done flag
  */
-async function chat(messages, options = {}) {
+async function chat(messages, opts = {}) {
   if (!useOllama) {
     throw new Error('Ollama is not configured or provider is not ollama/ollama_cloud');
   }
@@ -30,18 +30,24 @@ async function chat(messages, options = {}) {
     headers.Authorization = `Bearer ${llmConfig.apiKey}`;
   }
 
+  const requestOptions = {
+    temperature: llmConfig.temperature,
+    num_predict: llmConfig.maxTokens,
+    top_p: llmConfig.topP,
+  };
+  if (llmConfig.numCtx != null) {
+    requestOptions.num_ctx = llmConfig.numCtx;
+  }
   const body = {
     model: llmConfig.model,
     messages,
     stream: false,
-    options: {
-      temperature: llmConfig.temperature,
-      num_predict: llmConfig.maxTokens,
-      top_p: llmConfig.topP,
-    },
+    options: requestOptions,
   };
 
-  logRequest(url, body);
+  if (!opts.quiet) {
+    logRequest(url, body);
+  }
 
   const res = await fetch(url, {
     method: 'POST',
@@ -67,7 +73,9 @@ async function chat(messages, options = {}) {
   const content = data.message?.content ?? '';
   const done = data.done ?? true;
 
-  logResponse(content);
+  if (!opts.quiet) {
+    logResponse(content);
+  }
 
   return { content, done };
 }
@@ -81,7 +89,8 @@ function logRequest(url, body) {
   console.log(`${BORDER}`);
   console.log(`  URL:    ${url}`);
   console.log(`  Model:  ${body.model}`);
-  console.log(`  Options: temperature=${body.options.temperature}, num_predict=${body.options.num_predict}, top_p=${body.options.top_p}`);
+  const opts = `temperature=${body.options.temperature}, num_predict=${body.options.num_predict}, top_p=${body.options.top_p}` + (body.options.num_ctx != null ? `, num_ctx=${body.options.num_ctx}` : '');
+  console.log(`  Options: ${opts}`);
   console.log('  ---');
   body.messages.forEach((m, i) => {
     console.log(`  Message[${i}] role: ${m.role}  (${m.content.length} chars)`);
