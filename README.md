@@ -21,7 +21,7 @@ The API listens on **port 3001** by default so it doesn't conflict with the UI d
 
 Routes are mounted under `/api`:
 
-- **Sessions:** `POST /api/sessions`, `GET /api/sessions/:id`, `PATCH /api/sessions/:id`
+- **Sessions:** `POST /api/sessions`, `GET /api/sessions/:id`, `GET /api/sessions/:id/health`, `PATCH /api/sessions/:id`
 - **Assessments:** `POST /api/sessions/:sessionId/answers`, `GET /api/sessions/:sessionId/assessment`
 - **Reports:** `GET /api/sessions/:sessionId/report`
 
