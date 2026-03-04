@@ -36,7 +36,8 @@ async function getNextQuestion(req, res, next) {
       res.status(404).json({ error: 'Session not found' });
       return;
     }
-    const result = await assessmentService.getNextQuestion(sessionId);
+    const bftUserId = req.bftUserId || '';
+    const result = await assessmentService.getNextQuestion(sessionId, bftUserId);
     res.json(result);
   } catch (err) {
     next(err);

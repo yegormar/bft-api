@@ -12,6 +12,7 @@ const llmConfig = require('../../config/llm');
 
 const PROJECT_ROOT = path.resolve(__dirname, '..', '..');
 const PERSONALITY_CLUSTERS_PATH = path.join(PROJECT_ROOT, 'conf', 'personality_clusters.json');
+const SCENARIO_DESIGN_INSTRUCTIONS_PATH = path.join(PROJECT_ROOT, 'conf', 'scenario_design_instructions.txt');
 
 let personalityClustersCache = null;
 
@@ -118,7 +119,7 @@ function parseResponse(content) {
   }
 }
 
-const VALID_TYPES = new Set(['single_choice', 'multi_choice']);
+const VALID_TYPES = new Set(['single_choice', 'multi_choice', 'rank']);
 
 /**
  * Validate nextQuestion object. idOptional: when true, id is not required (assigned in code).
@@ -142,7 +143,7 @@ function validateNextQuestionObject(q, idOptional = false) {
     errors.push('"nextQuestion.description" must be a string or omitted.');
   }
   if (!VALID_TYPES.has(q.type)) {
-    errors.push(`"nextQuestion.type" must be exactly "single_choice" or "multi_choice". Got: ${JSON.stringify(q.type)}.`);
+    errors.push(`"nextQuestion.type" must be one of "single_choice", "multi_choice", or "rank". Got: ${JSON.stringify(q.type)}.`);
   }
   if (!Array.isArray(q.options) || q.options.length === 0) {
     errors.push('"nextQuestion.options" must be a non-empty array of { "text": string, "value": string }.');
@@ -166,8 +167,8 @@ function validateNextQuestionObject(q, idOptional = false) {
       }
     });
   }
-  if (q.maxSelections != null && (typeof q.maxSelections !== 'number' || q.maxSelections < 1 || !Number.isInteger(q.maxSelections))) {
-    errors.push('"nextQuestion.maxSelections" must be a positive integer or omitted.');
+  if (q.type !== 'rank' && q.maxSelections != null && (typeof q.maxSelections !== 'number' || q.maxSelections < 1 || !Number.isInteger(q.maxSelections))) {
+    errors.push('"nextQuestion.maxSelections" must be a positive integer or omitted (omit for rank).');
   }
   return { valid: errors.length === 0, errors };
 }
@@ -211,36 +212,61 @@ function buildCorrectionUserMessage(rawContent, validationErrors) {
   return lines.join('\n');
 }
 
-const SCENARIO_SYSTEM_PROMPT = `You are the Built for Tomorrow interview assistant. Your task is to generate exactly ONE scenario-based interview question.
+function getScenarioDesignInstructions() {
+  try {
+    return fs.readFileSync(SCENARIO_DESIGN_INSTRUCTIONS_PATH, 'utf8').trim();
+  } catch {
+    return '';
+  }
+}
 
-You will be given a set of dimensions (aptitudes, traits, values, or skills) to probe. Create a single question that feels like a real situation (e.g. "Imagine you're leading a project and the requirements keep changing...") so we can infer something about those dimensions from the answer. Do NOT ask separate questions per dimension; weave them into one scenario.
+const SCENARIO_SYSTEM_BASE = `You are the Built for Tomorrow interview assistant. Your task is to generate exactly ONE scenario-based interview question.
+
+You will be given a set of dimensions (aptitudes, traits, values, or skills) to probe. Create a single question that feels like a real situation (e.g. "Imagine you're leading a project and the requirements keep changing...") so we can infer something about those dimensions from the answer. Do NOT ask separate questions per dimension; weave them into one scenario. Do NOT use the dimension names or obvious synonyms (e.g. balance, free time, challenge, flexibility) in the scenario or options—the situation and choices should imply them without naming them.
 
 Response format — reply with exactly one JSON object. No markdown, no code fences.
 - "completed": false (we are not ending the interview).
-- "nextQuestion": object with "title" (string), optional "description", "type" ("single_choice" or "multi_choice"), "options" (array of {"text": string, "value": string}). Do NOT include "id" — we assign it server-side.
+- "nextQuestion": object with "title" (string), optional "description", "type" ("single_choice", "multi_choice", or "rank"), "options" (array of {"text": string, "value": string}). For "rank", the user will order the options; do not use maxSelections. Do NOT include "id" — we assign it server-side.
 - "assessmentSummary": optional 1–2 sentence summary of what the answer might suggest.
 
 Do not repeat or rephrase questions you are told were already asked.`;
 
-function buildScenarioUserPrompt(dimensionSet, askedTitles, answers) {
-  const lines = ['Generate one scenario-based interview question that naturally probes the following dimensions:'];
+function getScenarioSystemPrompt() {
+  const designInstructions = getScenarioDesignInstructions();
+  if (designInstructions) {
+    return designInstructions + '\n\n---\n\n' + SCENARIO_SYSTEM_BASE;
+  }
+  return SCENARIO_SYSTEM_BASE;
+}
+
+function buildScenarioUserPrompt(dimensionSet, askedTitles, answers, preferredResponseType = null) {
+  const lines = [
+    'Generate one scenario-based interview question that naturally probes the following dimensions.',
+    'Do not use the dimension names or their obvious synonyms (e.g. balance, free time, challenge, flexibility, stretch goal) in the scenario or options—let the situation and the choices imply them.',
+    '',
+    'Dimensions to probe:',
+  ];
   dimensionSet.forEach((d) => {
     lines.push(`- ${d.dimensionType} "${d.name}": ${d.how_measured_or_observed || 'Use question_hints below.'}`);
     if (Array.isArray(d.question_hints) && d.question_hints.length > 0) {
       d.question_hints.forEach((h) => lines.push(`  Hint: ${h}`));
     }
   });
+  if (preferredResponseType && ['single_choice', 'multi_choice', 'rank'].includes(preferredResponseType)) {
+    lines.push('');
+    lines.push(`Preferred response type for this scenario: ${preferredResponseType}. Use this type if it fits the situation; otherwise choose the best fit.`);
+  }
   if (askedTitles.length > 0) {
     lines.push('');
     lines.push('Do not repeat or rephrase these already-asked questions:');
     askedTitles.forEach((t) => lines.push(`- ${t}`));
   }
   lines.push('');
-  lines.push('Answers so far (for context). Each line is: question asked → option value the user chose:');
+  lines.push('Answers so far (for context). Each line is: question asked → option value(s) the user chose (for rank, an ordered array):');
   (answers || []).forEach((a, i) => {
     const title = (askedTitles && askedTitles[i]) ? askedTitles[i] : (a.questionId || a.questionTitle || `Q${i + 1}`);
     const v = a.value ?? a.selected ?? a.answer ?? a.text ?? JSON.stringify(a);
-    lines.push(`- "${title}" → ${v}`);
+    lines.push(`- "${title}" → ${Array.isArray(v) ? JSON.stringify(v) : v}`);
   });
   lines.push('');
   lines.push('Reply with one JSON object: { "completed": false, "nextQuestion": { "title", "description"?, "type", "options" }, "assessmentSummary"?: "..." }. No "id" in nextQuestion.');
@@ -256,10 +282,10 @@ function buildScenarioUserPrompt(dimensionSet, askedTitles, answers) {
  * @param {object} [preSurveyProfile] - Pre-survey profile for tailoring
  * @returns {Promise<{ assessmentSummary?: string, nextQuestion: object | null }>}
  */
-async function generateScenarioQuestion(dimensionSet, askedQuestionTitles, answers, preSurveyProfile = null) {
+async function generateScenarioQuestion(dimensionSet, askedQuestionTitles, answers, preSurveyProfile = null, preferredResponseType = null) {
   const tailoring = buildTailoringBlock(preSurveyProfile);
-  const systemContent = SCENARIO_SYSTEM_PROMPT + tailoring;
-  const userContent = buildScenarioUserPrompt(dimensionSet, askedQuestionTitles || [], answers);
+  const systemContent = getScenarioSystemPrompt() + tailoring;
+  const userContent = buildScenarioUserPrompt(dimensionSet, askedQuestionTitles || [], answers, preferredResponseType);
 
   const messages = [
     { role: 'system', content: systemContent },
@@ -362,4 +388,5 @@ module.exports = {
   buildUserPrompt,
   buildScenarioUserPrompt,
   buildTailoringBlock,
+  validateNextQuestionObject,
 };

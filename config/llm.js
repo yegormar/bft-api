@@ -107,33 +107,36 @@ if (handoffSystemPromptFile) {
 }
 
 const reportProfileSystemPromptFile = (process.env.LLM_REPORT_PROFILE_SYSTEM_PROMPT_FILE || '').trim();
-if (reportProfileSystemPromptFile) {
-  const reportProfilePath = path.isAbsolute(reportProfileSystemPromptFile)
-    ? reportProfileSystemPromptFile
-    : path.join(PROJECT_ROOT, reportProfileSystemPromptFile);
-  if (!fs.existsSync(reportProfilePath)) {
-    exit(`LLM_REPORT_PROFILE_SYSTEM_PROMPT_FILE does not exist: ${reportProfilePath}`);
-  }
+if (!reportProfileSystemPromptFile) {
+  exit('LLM_REPORT_PROFILE_SYSTEM_PROMPT_FILE is required. Set it in .env (e.g. conf/report_profile_system_prompt.txt).');
+}
+const reportProfilePath = path.isAbsolute(reportProfileSystemPromptFile)
+  ? reportProfileSystemPromptFile
+  : path.join(PROJECT_ROOT, reportProfileSystemPromptFile);
+if (!fs.existsSync(reportProfilePath)) {
+  exit(`LLM_REPORT_PROFILE_SYSTEM_PROMPT_FILE does not exist: ${reportProfilePath}`);
 }
 
 const reportHybridSystemPromptFile = (process.env.LLM_REPORT_HYBRID_SYSTEM_PROMPT_FILE || '').trim();
-if (reportHybridSystemPromptFile) {
-  const reportHybridPath = path.isAbsolute(reportHybridSystemPromptFile)
-    ? reportHybridSystemPromptFile
-    : path.join(PROJECT_ROOT, reportHybridSystemPromptFile);
-  if (!fs.existsSync(reportHybridPath)) {
-    exit(`LLM_REPORT_HYBRID_SYSTEM_PROMPT_FILE does not exist: ${reportHybridPath}`);
-  }
+if (!reportHybridSystemPromptFile) {
+  exit('LLM_REPORT_HYBRID_SYSTEM_PROMPT_FILE is required. Set it in .env (e.g. conf/report_hybrid_system_prompt.txt).');
+}
+const reportHybridPath = path.isAbsolute(reportHybridSystemPromptFile)
+  ? reportHybridSystemPromptFile
+  : path.join(PROJECT_ROOT, reportHybridSystemPromptFile);
+if (!fs.existsSync(reportHybridPath)) {
+  exit(`LLM_REPORT_HYBRID_SYSTEM_PROMPT_FILE does not exist: ${reportHybridPath}`);
 }
 
 const reportRecommendationsSystemPromptFile = (process.env.LLM_REPORT_RECOMMENDATIONS_SYSTEM_PROMPT_FILE || '').trim();
-if (reportRecommendationsSystemPromptFile) {
-  const reportRecPath = path.isAbsolute(reportRecommendationsSystemPromptFile)
-    ? reportRecommendationsSystemPromptFile
-    : path.join(PROJECT_ROOT, reportRecommendationsSystemPromptFile);
-  if (!fs.existsSync(reportRecPath)) {
-    exit(`LLM_REPORT_RECOMMENDATIONS_SYSTEM_PROMPT_FILE does not exist: ${reportRecPath}`);
-  }
+if (!reportRecommendationsSystemPromptFile) {
+  exit('LLM_REPORT_RECOMMENDATIONS_SYSTEM_PROMPT_FILE is required. Set it in .env (e.g. conf/report_recommendations_system_prompt.txt).');
+}
+const reportRecPath = path.isAbsolute(reportRecommendationsSystemPromptFile)
+  ? reportRecommendationsSystemPromptFile
+  : path.join(PROJECT_ROOT, reportRecommendationsSystemPromptFile);
+if (!fs.existsSync(reportRecPath)) {
+  exit(`LLM_REPORT_RECOMMENDATIONS_SYSTEM_PROMPT_FILE does not exist: ${reportRecPath}`);
 }
 
 // Optional: seconds between periodic LLM checkups (keep-alive). Documented default in env.example: 180.
@@ -176,6 +179,9 @@ const llm = {
   numCtx,
   systemPromptFile,
   handoffSystemPromptFile: handoffSystemPromptFile || null,
+  reportProfileSystemPromptFile,
+  reportHybridSystemPromptFile,
+  reportRecommendationsSystemPromptFile,
   /** Seconds between periodic LLM checkups (keep-alive). Default 180 when unset; see env.example. */
   checkupIntervalSec,
 

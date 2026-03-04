@@ -2,6 +2,7 @@ const router = require('express').Router();
 const sessionsController = require('../controllers/sessionsController');
 
 router.post('/', sessionsController.create);
+router.get('/:id/health', sessionsController.getHealth);
 router.get('/:id', sessionsController.getById);
 router.patch('/:id', sessionsController.update);
 

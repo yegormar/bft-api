@@ -21,8 +21,10 @@ function create(preSurveyProfile = null, clientId = null) {
     preSurveyProfile: preSurveyProfile ?? undefined,
   };
   sessions.set(id, session);
+  const hasProfile = preSurveyProfile != null && Object.keys(preSurveyProfile).length > 0;
+  console.log('[bft] session created sessionId=%s hasProfile=%s', id, hasProfile);
   if (preSurveyProfile) {
-    console.log('[session] Pre-survey profile for session', id, JSON.stringify(preSurveyProfile, null, 2));
+    console.log('[bft] session preSurveyProfile sessionId=%s profile=%s', id, JSON.stringify(preSurveyProfile));
   }
   return session;
 }

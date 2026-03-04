@@ -1,0 +1,42 @@
+# Copy to .env and set values. All listed below are required unless marked optional.
+
+# Server
+PORT=3000
+NODE_ENV=development
+CORS_ORIGIN=http://localhost:5173
+
+# Questino generation optimizations
+BFT_QUESTIONS_STORE_DIR=./data/questions-store
+BFT_PREGEN_QUEUE_CAP=3
+BFT_PREGEN_REFILL_THRESHOLD=1
+BFT_QUESTION_LLM_TIMEOUT_MS=10000
+
+# LLM configuration - Ollama Cloud
+LLM_PROVIDER=ollama_cloud
+LLM_BASE_URL=https://ollama.com
+LLM_API_KEY=
+LLM_MODEL=gpt-oss:20b-cloud
+LLM_THINK=false
+
+# LLM configuration - Ollama local
+# LLM_PROVIDER=ollama
+# LLM_BASE_URL=http://ubuntu-llm:11434
+# LLM_MODEL=gemma3:12b
+# LLM_THINK=false 
+
+LLM_WEB_SEARCH=true
+LLM_TEMPERATURE=0.5
+LLM_MAX_TOKENS=32768
+LLM_NUM_CTX=32768
+LLM_TOP_P=0.9
+
+# Prompts – paths relative to project root (conf/). Add more as needed.
+LLM_SYSTEM_PROMPT_FILE=conf/assessment_system_prompt.txt
+LLM_REPORT_PROFILE_SYSTEM_PROMPT_FILE=conf/report_profile_system_prompt.txt
+LLM_REPORT_HYBRID_SYSTEM_PROMPT_FILE=conf/report_hybrid_system_prompt.txt
+LLM_REPORT_RECOMMENDATIONS_SYSTEM_PROMPT_FILE=conf/report_recommendations_system_prompt.txt
+
+# NOC enrichment script
+NOC_LLM_DELAY_MS=5000
+NOC_LLM_REQUEST_TIMEOUT_MS=30000
+NOC_LLM_MAX_RETRIES=3
