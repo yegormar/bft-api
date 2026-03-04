@@ -66,6 +66,9 @@ if (storeDir) {
 /** Map dimensionType (singular) to coverage object key (plural) so we read/write the same keys. */
 const COVERAGE_KEY_BY_TYPE = { aptitude: 'aptitudes', trait: 'traits', value: 'values', skill: 'skills' };
 
+/** Weights for rank order: 1st = 1.0, 2nd = 0.6, 3rd = 0.3; positions 4+ contribute 0. */
+const RANK_WEIGHTS = [1, 0.6, 0.3];
+
 function getInterviewConfig() {
   const minRaw = process.env.MIN_SIGNAL_PER_DIMENSION;
   const minSignal = minRaw !== undefined && minRaw !== '' ? parseInt(minRaw, 10) : 1;
@@ -99,8 +102,14 @@ function getOrInitInterviewState(sessionId) {
         values: {},
         skills: {},
       },
+      servedQuestions: {},
+      dimensionScoresAggregate: { traits: {}, values: {} },
     };
     interviewStateBySession.set(sessionId, state);
+  }
+  if (state.servedQuestions == null) state.servedQuestions = {};
+  if (state.dimensionScoresAggregate == null) {
+    state.dimensionScoresAggregate = { traits: {}, values: {} };
   }
   return state;
 }
@@ -131,24 +140,28 @@ function isInterviewComplete(coverage, config, model, totalQuestionsAsked = 0) {
   return true;
 }
 
-/** Enrich a batch's dimensions with name, question_hints, how_measured from assessment model. */
+/** Enrich a batch's dimensions with name, question_hints, how_measured, score_scale from assessment model. */
 function enrichBatchDimensionSet(batch, model) {
   const m = model || assessmentModel.load();
   return (batch.dimensions || []).map((d) => {
     const full = assessmentModel.getDimension(d.dimensionType, d.dimensionId);
-    return {
+    const out = {
       dimensionType: d.dimensionType,
       dimensionId: d.dimensionId,
       name: (full && full.name) || d.dimensionId,
       question_hints: (full && full.question_hints) || [],
       how_measured_or_observed: (full && full.how_measured_or_observed) || '',
     };
+    if (full && full.score_scale && typeof full.score_scale === 'object') {
+      out.score_scale = full.score_scale;
+    }
+    return out;
   });
 }
 
 /**
  * Select next batch for scenario: prefer least-used batches, then by least coverage of batch dimensions.
- * @returns {{ batchId: string, dimensionSet: Array<object>, preferredResponseType: string } | null}
+ * @returns {{ batchId: string, dimensionSet: Array<object>, preferredResponseType?: string } | null}
  */
 function selectNextBatch(state, model) {
   const { batches } = getScenarioBatches();
@@ -179,7 +192,7 @@ function selectNextBatch(state, model) {
   return {
     batchId: batch.id,
     dimensionSet,
-    preferredResponseType: batch.preferredResponseType || 'single_choice',
+    preferredResponseType: batch.preferredResponseType,
   };
 }
 
@@ -205,13 +218,19 @@ function selectNextDimensionSet(coverage, model, options = {}) {
       : withMinCount
           .sort(() => Math.random() - 0.5)
           .slice(0, maxDimensions);
-  return selected.map((d) => ({
-    dimensionType: d.dimensionType,
-    dimensionId: d.dimensionId,
-    name: d.name,
-    question_hints: d.question_hints || [],
-    how_measured_or_observed: d.how_measured_or_observed || '',
-  }));
+  return selected.map((d) => {
+    const out = {
+      dimensionType: d.dimensionType,
+      dimensionId: d.dimensionId,
+      name: d.name,
+      question_hints: d.question_hints || [],
+      how_measured_or_observed: d.how_measured_or_observed || '',
+    };
+    if (d.score_scale && typeof d.score_scale === 'object') {
+      out.score_scale = d.score_scale;
+    }
+    return out;
+  });
 }
 
 /**
@@ -284,6 +303,12 @@ function applyServedQuestionToState(sessionId, question, dimensionSet, assessmen
     dimensionType: d.dimensionType,
     dimensionId: d.dimensionId,
   }));
+  state.servedQuestions[assignedId] = {
+    title: question.title,
+    description: question.description,
+    type: question.type || 'single_choice',
+    options: question.options || [],
+  };
   if (batchId) {
     if (!state.usedBatchIds) state.usedBatchIds = [];
     state.usedBatchIds.push(batchId);
@@ -362,6 +387,21 @@ const MAIN_QUESTIONS = [
   },
 ];
 
+function addDimensionScoresToAggregate(aggregate, dims, scoresByDimensionId) {
+  if (!aggregate || !dims || !scoresByDimensionId) return;
+  for (const dim of dims) {
+    if (dim.dimensionType !== 'trait' && dim.dimensionType !== 'value') continue;
+    const score = scoresByDimensionId[dim.dimensionId];
+    if (score == null || typeof score !== 'number') continue;
+    const bucketKey = COVERAGE_KEY_BY_TYPE[dim.dimensionType];
+    const bucket = bucketKey ? aggregate[bucketKey] : undefined;
+    if (!bucket || typeof bucket !== 'object') continue;
+    if (!bucket[dim.dimensionId]) bucket[dim.dimensionId] = { sum: 0, count: 0 };
+    bucket[dim.dimensionId].sum += score;
+    bucket[dim.dimensionId].count += 1;
+  }
+}
+
 function submitAnswers(sessionId, payload) {
   const existing = answersBySession.get(sessionId) || [];
   const answers = Array.isArray(payload.answers) ? payload.answers : [payload];
@@ -370,7 +410,7 @@ function submitAnswers(sessionId, payload) {
   console.log('[bft] answers submitted sessionId=%s count=%s total=%s', sessionId, answers.length, existing.length);
 
   const state = getOrInitInterviewState(sessionId);
-  const { coverage, questionToDimension } = state;
+  const { coverage, questionToDimension, servedQuestions, dimensionScoresAggregate } = state;
   for (const a of answers) {
     const qid = a.questionId || a.question_id;
     if (!qid) continue;
@@ -385,9 +425,90 @@ function submitAnswers(sessionId, payload) {
       coverage[key][id].questionCount += 1;
       coverage[key][id].lastQuestionId = qid;
     }
+
+    const served = servedQuestions[qid];
+    if (!served || !Array.isArray(served.options)) continue;
+    const options = served.options;
+    const qType = served.type || 'single_choice';
+    const rawValue = a.value ?? a.selected ?? a.answer ?? a.text;
+
+    if (qType === 'single_choice' && typeof rawValue === 'string') {
+      const option = options.find((o) => o && o.value === rawValue);
+      if (option && option.dimensionScores && typeof option.dimensionScores === 'object') {
+        console.log('[bft] answer sessionId=%s questionId=%s value=%s optionText=%s scoresApplied=%s', sessionId, qid, rawValue, (option.text || '').slice(0, 60), JSON.stringify(option.dimensionScores));
+        addDimensionScoresToAggregate(dimensionScoresAggregate, dims, option.dimensionScores);
+      } else if (option && (!option.dimensionScores || typeof option.dimensionScores !== 'object')) {
+        console.log('[bft] answer sessionId=%s questionId=%s value=%s optionText=%s (no dimensionScores, coverage only)', sessionId, qid, rawValue, (option.text || '').slice(0, 60));
+      }
+    } else if (qType === 'multi_choice' && Array.isArray(rawValue)) {
+      for (const v of rawValue) {
+        const option = options.find((o) => o && o.value === v);
+        if (option && option.dimensionScores && typeof option.dimensionScores === 'object') {
+          console.log('[bft] answer sessionId=%s questionId=%s value=%s optionText=%s scoresApplied=%s', sessionId, qid, v, (option.text || '').slice(0, 60), JSON.stringify(option.dimensionScores));
+          addDimensionScoresToAggregate(dimensionScoresAggregate, dims, option.dimensionScores);
+        }
+      }
+    } else if (qType === 'rank' && Array.isArray(rawValue)) {
+      const valueToOption = new Map(options.filter((o) => o && o.value).map((o) => [o.value, o]));
+      let weightSum = 0;
+      const weightedByDim = {};
+      dims.forEach((d) => {
+        if (d.dimensionType === 'trait' || d.dimensionType === 'value') weightedByDim[d.dimensionId] = { sum: 0, w: 0 };
+      });
+      rawValue.forEach((v, i) => {
+        const w = RANK_WEIGHTS[i] ?? 0;
+        if (w <= 0) return;
+        const option = valueToOption.get(v);
+        if (!option || !option.dimensionScores) return;
+        weightSum += w;
+        Object.keys(weightedByDim).forEach((dimId) => {
+          const s = option.dimensionScores[dimId];
+          if (typeof s === 'number') {
+            weightedByDim[dimId].sum += w * s;
+            weightedByDim[dimId].w += w;
+          }
+        });
+      });
+      if (weightSum > 0) {
+        const scoresByDimensionId = {};
+        Object.keys(weightedByDim).forEach((dimId) => {
+          const { sum, w } = weightedByDim[dimId];
+          if (w > 0) scoresByDimensionId[dimId] = sum / w;
+        });
+        console.log('[bft] answer sessionId=%s questionId=%s type=rank order=%s scoresApplied=%s', sessionId, qid, JSON.stringify(rawValue), JSON.stringify(scoresByDimensionId));
+        addDimensionScoresToAggregate(dimensionScoresAggregate, dims, scoresByDimensionId);
+      }
+    }
   }
 
   return existing;
+}
+
+function buildDimensionScoresOutput(aggregate, model) {
+  if (!aggregate) return { traits: [], values: [] };
+  const m = model || assessmentModel.load();
+  const out = { traits: [], values: [] };
+  for (const type of ['traits', 'values']) {
+    const bucket = aggregate[type];
+    if (!bucket || typeof bucket !== 'object') continue;
+    const list = type === 'traits' ? m.traits : m.values;
+    const byId = type === 'traits' ? m.traitsById : m.valuesById;
+    for (const dimensionId of Object.keys(bucket)) {
+      const entry = bucket[dimensionId];
+      if (!entry || typeof entry.count !== 'number' || entry.count < 1) continue;
+      const mean = entry.sum / entry.count;
+      const band = mean <= 2 ? 'low' : mean >= 4 ? 'high' : 'medium';
+      const dim = byId.get(dimensionId);
+      out[type].push({
+        id: dimensionId,
+        name: (dim && dim.name) || dimensionId,
+        mean: Math.round(mean * 100) / 100,
+        band,
+        count: entry.count,
+      });
+    }
+  }
+  return out;
 }
 
 function getAssessment(sessionId) {
@@ -406,7 +527,45 @@ function getAssessment(sessionId) {
         }))
       : undefined;
 
-  return { sessionId, answers, assessmentSummaries: summaries, coverageSummary, insights };
+  const dimensionScores = state && state.dimensionScoresAggregate
+    ? buildDimensionScoresOutput(state.dimensionScoresAggregate)
+    : { traits: [], values: [] };
+
+  let askedQuestionsWithAnswers = undefined;
+  if (state && state.servedQuestions && typeof state.questionIndex === 'number') {
+    askedQuestionsWithAnswers = [];
+    for (let i = 0; i < state.questionIndex; i += 1) {
+      const questionId = `scenario_${i}`;
+      const served = state.servedQuestions[questionId];
+      const userAnswer = answers[i] ? (answers[i].value ?? answers[i].selected ?? answers[i].answer ?? answers[i].text) : undefined;
+      if (served) {
+        askedQuestionsWithAnswers.push({
+          questionId,
+          title: served.title,
+          description: served.description,
+          type: served.type,
+          options: (served.options || []).map((o) => ({
+            text: o.text,
+            value: o.value,
+            dimensionScores: o.dimensionScores,
+          })),
+          userAnswer,
+        });
+      } else {
+        askedQuestionsWithAnswers.push({ questionId, userAnswer });
+      }
+    }
+  }
+
+  return {
+    sessionId,
+    answers,
+    assessmentSummaries: summaries,
+    coverageSummary,
+    insights,
+    dimensionScores,
+    askedQuestionsWithAnswers,
+  };
 }
 
 /**
@@ -716,9 +875,9 @@ async function getNextQuestion(sessionId, bftUserId) {
 }
 
 /**
- * Session health: pre-generated queue size, measured dimensions, progress, and pregen status.
+ * Session health: pre-generated queue size, measured dimensions, progress, coverage, dimension scores, and pregen status.
  * @param {string} sessionId
- * @returns {{ sessionId: string, preGeneratedQuestions: number, questionsAsked: number, answersCount: number, measuredDimensions: object, interviewComplete: boolean, backgroundPregenRunning: boolean } | null} null if session not found
+ * @returns {{ sessionId: string, preGeneratedQuestions: number, questionsAsked: number, answersCount: number, measuredDimensions: object, coverage: object, dimensionScores: object, interviewComplete: boolean, backgroundPregenRunning: boolean } | null} null if session not found
  */
 function getSessionHealth(sessionId) {
   const session = sessionService.getById(sessionId);
@@ -749,6 +908,13 @@ function getSessionHealth(sessionId) {
   const queue = getOrInitPreGeneratedQueue(sessionId);
   const answers = answersBySession.get(sessionId) || [];
 
+  const coverage = {};
+  for (const { key } of types) {
+    coverage[key] = state.coverage[key] || {};
+  }
+
+  const dimensionScores = buildDimensionScoresOutput(state.dimensionScoresAggregate, model);
+
   return {
     sessionId,
     preGeneratedQuestions: queue.length,
@@ -760,6 +926,8 @@ function getSessionHealth(sessionId) {
       percentComplete: progress.percentComplete,
       byType,
     },
+    coverage,
+    dimensionScores,
     interviewComplete: isInterviewComplete(state.coverage, interviewConfig, model, state.questionIndex),
     backgroundPregenRunning: generatorBusyBySession.get(sessionId) === true,
   };

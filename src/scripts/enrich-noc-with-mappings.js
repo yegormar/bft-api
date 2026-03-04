@@ -168,14 +168,17 @@ function getLlmConfig() {
   if (Number.isNaN(topP) || topP < 0 || topP > 1) exit(`LLM_TOP_P must be 0-1. Got: ${topPRaw}`);
 
   const numCtxRaw = (process.env.LLM_NUM_CTX || process.env.OLLAMA_NUM_CTX || '').trim();
-  const numCtx = numCtxRaw === '' ? null : (() => {
-    const n = parseInt(numCtxRaw, 10);
-    if (Number.isNaN(n) || n < 1) exit(`LLM_NUM_CTX (or OLLAMA_NUM_CTX) must be a positive integer when set. Got: ${numCtxRaw}`);
-    return n;
-  })();
+  if (numCtxRaw === '') exit('LLM_NUM_CTX (or OLLAMA_NUM_CTX) is required. Set it in .env (e.g. 32768).');
+  const numCtx = parseInt(numCtxRaw, 10);
+  if (Number.isNaN(numCtx) || numCtx < 1) exit(`LLM_NUM_CTX (or OLLAMA_NUM_CTX) must be a positive integer. Got: ${numCtxRaw}`);
 
   const thinkRaw = (process.env.LLM_THINK || process.env.OLLAMA_THINK || '').trim().toLowerCase();
-  const think = thinkRaw === '' ? undefined : !['false', '0', 'no', 'off'].includes(thinkRaw);
+  if (thinkRaw === '') exit('LLM_THINK (or OLLAMA_THINK) is required. Set it in .env (e.g. false or low).');
+  const validThink = ['low', 'medium', 'high', 'true', 'false', '0', '1', 'no', 'off'];
+  if (!validThink.includes(thinkRaw)) exit(`LLM_THINK must be one of: low, medium, high, true, false. Got: ${process.env.LLM_THINK || process.env.OLLAMA_THINK}`);
+  const thinkLevelRaw = (process.env.LLM_THINK_LEVEL || '').trim().toLowerCase();
+  const thinkLevel = thinkLevelRaw && ['low', 'medium', 'high'].includes(thinkLevelRaw) ? thinkLevelRaw : (['low', 'medium', 'high'].includes(thinkRaw) ? thinkRaw : undefined);
+  const think = thinkLevel === undefined ? !['false', '0', 'no', 'off'].includes(thinkRaw) : undefined;
 
   return {
     baseUrl: baseUrl.replace(/\/$/, ''),
@@ -185,6 +188,7 @@ function getLlmConfig() {
     maxTokens,
     topP,
     numCtx,
+    thinkLevel,
     think,
   };
 }
@@ -313,7 +317,9 @@ async function callOllama(llmConfig, messages, debug) {
     stream: false,
     options,
   };
-  if (llmConfig.think !== undefined) body.think = llmConfig.think;
+  const isGptOss = llmConfig.model && llmConfig.model.toLowerCase().includes('gpt-oss');
+  if (isGptOss && llmConfig.thinkLevel) body.think = llmConfig.thinkLevel;
+  else if (llmConfig.think !== undefined) body.think = llmConfig.think;
   const headers = { 'Content-Type': 'application/json' };
   if (llmConfig.apiKey) headers.Authorization = `Bearer ${llmConfig.apiKey}`;
 
@@ -534,7 +540,8 @@ async function main() {
 
   console.log('[enrich-noc] Input:', scriptConfig.input);
   console.log('[enrich-noc] Output:', scriptConfig.output);
-  console.log('[enrich-noc] LLM:', llmConfig.baseUrl, '| model:', llmConfig.model, llmConfig.apiKey ? '| auth: set' : '| auth: none', llmConfig.think !== undefined ? `| think: ${llmConfig.think ? 'on' : 'off'}` : '');
+  const thinkDesc = llmConfig.thinkLevel ? `think: ${llmConfig.thinkLevel}` : (llmConfig.think !== undefined ? `think: ${llmConfig.think ? 'on' : 'off'}` : '');
+console.log('[enrich-noc] LLM:', llmConfig.baseUrl, '| model:', llmConfig.model, llmConfig.apiKey ? '| auth: set' : '| auth: none', thinkDesc ? `| ${thinkDesc}` : '');
   console.log('[enrich-noc] Occupations to process:', total, scriptConfig.nocId ? `(NOC ${scriptConfig.nocId})` : limit != null ? `(limit ${limit})` : `(of ${totalInput})`);
   if (scriptConfig.delayMs > 0) console.log('[enrich-noc] Delay between requests:', scriptConfig.delayMs, 'ms');
   const reqTimeout = (process.env.NOC_LLM_REQUEST_TIMEOUT_MS || '').trim();

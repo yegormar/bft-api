@@ -1,12 +1,12 @@
 {
   "clusters": [
-    { "name": "gaming", "short": "game-like goals, challenges, or light competition" },
-    { "name": "technical", "short": "hands-on, logical, build-or-analyze tasks" },
-    { "name": "creative", "short": "playful, open-ended, imagination or storytelling" },
-    { "name": "social", "short": "teamwork, collaboration, or influencing others" },
-    { "name": "strategic", "short": "planning, logic, strategy, or puzzles" },
-    { "name": "neutral", "short": "clear, straightforward, no heavy metaphor" },
-    { "name": "adventurous", "short": "novelty, risk-taking, or experimentation" },
-    { "name": "structured", "short": "step-by-step, predictable, clear instructions" }
+    { "name": "gaming", "short": "game-like goals, challenges, or light competition", "avoid": "game-like goals, challenges, or competitive framing" },
+    { "name": "technical", "short": "hands-on, logical, build-or-analyze tasks", "avoid": "heavy technical jargon or build-or-analyze framing" },
+    { "name": "creative", "short": "playful, open-ended, imagination or storytelling", "avoid": "heavy storytelling or open-ended imagination" },
+    { "name": "social", "short": "teamwork, collaboration, or influencing others", "avoid": "heavy teamwork or collaboration framing" },
+    { "name": "strategic", "short": "planning, logic, strategy, or puzzles", "avoid": "heavy planning, strategy, or puzzle framing" },
+    { "name": "neutral", "short": "clear, straightforward, no heavy metaphor", "avoid": null },
+    { "name": "adventurous", "short": "novelty, risk-taking, or experimentation", "avoid": "emphasis on novelty or risk-taking" },
+    { "name": "structured", "short": "step-by-step, predictable, clear instructions", "avoid": "overly step-by-step or predictable framing" }
   ]
 }

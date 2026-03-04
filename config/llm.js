@@ -77,13 +77,13 @@ if (Number.isNaN(topP) || topP < 0 || topP > 1) {
 }
 
 const numCtxRaw = (process.env.LLM_NUM_CTX || process.env.OLLAMA_NUM_CTX || '').trim();
-const numCtx = numCtxRaw === '' ? null : (() => {
-  const n = parseInt(numCtxRaw, 10);
-  if (Number.isNaN(n) || n < 1) {
-    exit(`LLM_NUM_CTX (or OLLAMA_NUM_CTX) must be a positive integer when set. Got: ${numCtxRaw}`);
-  }
-  return n;
-})();
+if (numCtxRaw === '') {
+  exit('LLM_NUM_CTX (or OLLAMA_NUM_CTX) is required. Set it in .env (e.g. 32768).');
+}
+const numCtx = parseInt(numCtxRaw, 10);
+if (Number.isNaN(numCtx) || numCtx < 1) {
+  exit(`LLM_NUM_CTX (or OLLAMA_NUM_CTX) must be a positive integer. Got: ${numCtxRaw}`);
+}
 
 const systemPromptFile = process.env.LLM_SYSTEM_PROMPT_FILE || null;
 if (!systemPromptFile || systemPromptFile.trim() === '') {
@@ -139,17 +139,29 @@ if (!fs.existsSync(reportRecPath)) {
   exit(`LLM_REPORT_RECOMMENDATIONS_SYSTEM_PROMPT_FILE does not exist: ${reportRecPath}`);
 }
 
-// Optional: seconds between periodic LLM checkups (keep-alive). Documented default in env.example: 180.
+// Required. For GPT-OSS: use "low"|"medium"|"high". For other thinking models: true/false (or 0, 1, no, off).
+const thinkRaw = (process.env.LLM_THINK || process.env.OLLAMA_THINK || '').trim().toLowerCase();
+if (thinkRaw === '') {
+  exit('LLM_THINK (or OLLAMA_THINK) is required. Set it in .env (e.g. false or low).');
+}
+const validThink = ['low', 'medium', 'high', 'true', 'false', '0', '1', 'no', 'off'];
+if (!validThink.includes(thinkRaw)) {
+  exit(`LLM_THINK must be one of: low, medium, high, true, false. Got: ${process.env.LLM_THINK || process.env.OLLAMA_THINK}`);
+}
+const thinkLevelRaw = (process.env.LLM_THINK_LEVEL || '').trim().toLowerCase();
+const thinkLevelFromEnv = ['low', 'medium', 'high'].includes(thinkLevelRaw) ? thinkLevelRaw : null;
+const thinkFallback = thinkRaw;
+const thinkLevel = thinkLevelFromEnv || (['low', 'medium', 'high'].includes(thinkFallback) ? thinkFallback : undefined);
+const think = (thinkLevel === undefined) ? !['false', '0', 'no', 'off'].includes(thinkFallback) : undefined;
+
 const checkupIntervalSecRaw = (process.env.LLM_CHECKUP_INTERVAL_SEC || '').trim();
-const checkupIntervalSec = checkupIntervalSecRaw === ''
-  ? 180
-  : (() => {
-    const n = parseInt(checkupIntervalSecRaw, 10);
-    if (Number.isNaN(n) || n < 1) {
-      exit(`LLM_CHECKUP_INTERVAL_SEC must be a positive integer when set. Got: ${checkupIntervalSecRaw}`);
-    }
-    return n;
-  })();
+if (checkupIntervalSecRaw === '') {
+  exit('LLM_CHECKUP_INTERVAL_SEC is required. Set it in .env (e.g. 180).');
+}
+const checkupIntervalSec = parseInt(checkupIntervalSecRaw, 10);
+if (Number.isNaN(checkupIntervalSec) || checkupIntervalSec < 1) {
+  exit(`LLM_CHECKUP_INTERVAL_SEC must be a positive integer. Got: ${checkupIntervalSecRaw}`);
+}
 
 function resolveProjectPath(relativePath) {
   if (!relativePath) return null;
@@ -177,12 +189,16 @@ const llm = {
   maxTokens,
   topP,
   numCtx,
+  /** For GPT-OSS: "low"|"medium"|"high" when LLM_THINK is low/medium/high. */
+  thinkLevel,
+  /** For other thinking models (Qwen, DeepSeek): true/false from LLM_THINK. Ignored when model is GPT-OSS. */
+  think,
   systemPromptFile,
   handoffSystemPromptFile: handoffSystemPromptFile || null,
   reportProfileSystemPromptFile,
   reportHybridSystemPromptFile,
   reportRecommendationsSystemPromptFile,
-  /** Seconds between periodic LLM checkups (keep-alive). Default 180 when unset; see env.example. */
+  /** Seconds between periodic LLM checkups (keep-alive). From LLM_CHECKUP_INTERVAL_SEC. */
   checkupIntervalSec,
 
   get enabled() {

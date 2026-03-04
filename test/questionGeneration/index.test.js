@@ -3,6 +3,7 @@
 const path = require('path');
 const os = require('os');
 const fs = require('fs');
+const { spawnSync } = require('node:child_process');
 const tmpDir = path.join(os.tmpdir(), `bft-qgen-index-test-${Date.now()}`);
 fs.mkdirSync(tmpDir, { recursive: true });
 process.env.BFT_QUESTION_LLM_TIMEOUT_MS = '5000';
@@ -71,17 +72,16 @@ describe('questionGeneration/index', () => {
   });
 
   describe('getQuestionGenConfig', () => {
-    it('throws when BFT_QUESTION_LLM_TIMEOUT_MS is unset (used by component on first request)', () => {
-      const prev = process.env.BFT_QUESTION_LLM_TIMEOUT_MS;
-      delete process.env.BFT_QUESTION_LLM_TIMEOUT_MS;
-      try {
-        assert.throws(
-          () => questionGenerator.getQuestionGenConfig(),
-          /BFT_QUESTION_LLM_TIMEOUT_MS is required/
-        );
-      } finally {
-        if (prev !== undefined) process.env.BFT_QUESTION_LLM_TIMEOUT_MS = prev;
-      }
+    it('process exits when BFT_QUESTION_LLM_TIMEOUT_MS is unset (used by component on first request)', () => {
+      const env = { ...process.env };
+      delete env.BFT_QUESTION_LLM_TIMEOUT_MS;
+      const child = spawnSync(
+        process.execPath,
+        ['-e', "require('./config/questionGeneration').getQuestionGenConfig()"],
+        { cwd: path.resolve(__dirname, '../..'), env, encoding: 'utf8' }
+      );
+      assert.strictEqual(child.status, 1);
+      assert.match(child.stderr || '', /BFT_QUESTION_LLM_TIMEOUT_MS is required/);
     });
   });
 });

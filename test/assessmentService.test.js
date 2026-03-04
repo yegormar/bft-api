@@ -9,6 +9,9 @@ fs.mkdirSync(tmpDir, { recursive: true });
 process.env.BFT_QUESTIONS_STORE_DIR = tmpDir;
 process.env.BFT_SKIP_BACKGROUND_PREGEN = '1';
 process.env.BFT_QUESTION_LLM_TIMEOUT_MS = '5000';
+process.env.LLM_NUM_CTX = '32768';
+process.env.LLM_THINK = 'false';
+process.env.LLM_CHECKUP_INTERVAL_SEC = '180';
 
 const { describe, it } = require('node:test');
 const assert = require('node:assert');

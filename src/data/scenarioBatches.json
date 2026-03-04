@@ -15,8 +15,7 @@
         { "dimensionType": "trait", "dimensionId": "social_collaboration" },
         { "dimensionType": "value", "dimensionId": "belonging_community" },
         { "dimensionType": "trait", "dimensionId": "comfort_ambiguous_ownership" }
-      ],
-      "preferredResponseType": "single_choice"
+      ]
     },
     {
       "id": "batch_02",
@@ -24,8 +23,7 @@
       "dimensions": [
         { "dimensionType": "value", "dimensionId": "autonomy_independence" },
         { "dimensionType": "trait", "dimensionId": "experimentation_risk_tolerance" }
-      ],
-      "preferredResponseType": "single_choice"
+      ]
     },
     {
       "id": "batch_03",
@@ -33,8 +31,7 @@
       "dimensions": [
         { "dimensionType": "trait", "dimensionId": "adaptability_learning" },
         { "dimensionType": "value", "dimensionId": "mastery_growth" }
-      ],
-      "preferredResponseType": "single_choice"
+      ]
     },
     {
       "id": "batch_04",
@@ -42,8 +39,7 @@
       "dimensions": [
         { "dimensionType": "trait", "dimensionId": "ambiguity_resilience" },
         { "dimensionType": "value", "dimensionId": "security_stability" }
-      ],
-      "preferredResponseType": "single_choice"
+      ]
     },
     {
       "id": "batch_05",
@@ -51,8 +47,7 @@
       "dimensions": [
         { "dimensionType": "value", "dimensionId": "helping_others_impact" },
         { "dimensionType": "value", "dimensionId": "recognition_visibility" }
-      ],
-      "preferredResponseType": "single_choice"
+      ]
     },
     {
       "id": "batch_06",
@@ -60,8 +55,7 @@
       "dimensions": [
         { "dimensionType": "value", "dimensionId": "creativity_self_expression" },
         { "dimensionType": "value", "dimensionId": "challenge_achievement" }
-      ],
-      "preferredResponseType": "single_choice"
+      ]
     },
     {
       "id": "batch_07",
@@ -70,7 +64,7 @@
         { "dimensionType": "value", "dimensionId": "financial_success" },
         { "dimensionType": "value", "dimensionId": "helping_others_impact" }
       ],
-      "preferredResponseType": "single_choice"
+      "preferredResponseType": "rank"
     },
     {
       "id": "batch_08",
@@ -79,7 +73,7 @@
         { "dimensionType": "value", "dimensionId": "work_life_balance_wellbeing" },
         { "dimensionType": "value", "dimensionId": "challenge_achievement" }
       ],
-      "preferredResponseType": "single_choice"
+      "preferredResponseType": "rank"
     },
     {
       "id": "batch_09",
@@ -87,8 +81,7 @@
       "dimensions": [
         { "dimensionType": "trait", "dimensionId": "social_collaboration" },
         { "dimensionType": "value", "dimensionId": "recognition_visibility" }
-      ],
-      "preferredResponseType": "single_choice"
+      ]
     },
     {
       "id": "batch_10",
@@ -96,8 +89,7 @@
       "dimensions": [
         { "dimensionType": "trait", "dimensionId": "comfort_ambiguous_ownership" },
         { "dimensionType": "value", "dimensionId": "recognition_visibility" }
-      ],
-      "preferredResponseType": "single_choice"
+      ]
     },
     {
       "id": "batch_11",
@@ -105,8 +97,7 @@
       "dimensions": [
         { "dimensionType": "trait", "dimensionId": "experimentation_risk_tolerance" },
         { "dimensionType": "value", "dimensionId": "mastery_growth" }
-      ],
-      "preferredResponseType": "single_choice"
+      ]
     },
     {
       "id": "batch_12",
@@ -114,8 +105,7 @@
       "dimensions": [
         { "dimensionType": "trait", "dimensionId": "ambiguity_resilience" },
         { "dimensionType": "value", "dimensionId": "autonomy_independence" }
-      ],
-      "preferredResponseType": "single_choice"
+      ]
     },
     {
       "id": "batch_13",
@@ -123,8 +113,7 @@
       "dimensions": [
         { "dimensionType": "value", "dimensionId": "belonging_community" },
         { "dimensionType": "value", "dimensionId": "work_life_balance_wellbeing" }
-      ],
-      "preferredResponseType": "single_choice"
+      ]
     },
     {
       "id": "batch_14",
@@ -132,8 +121,7 @@
       "dimensions": [
         { "dimensionType": "value", "dimensionId": "creativity_self_expression" },
         { "dimensionType": "value", "dimensionId": "autonomy_independence" }
-      ],
-      "preferredResponseType": "single_choice"
+      ]
     },
     {
       "id": "batch_15",
@@ -142,7 +130,7 @@
         { "dimensionType": "value", "dimensionId": "security_stability" },
         { "dimensionType": "value", "dimensionId": "financial_success" }
       ],
-      "preferredResponseType": "single_choice"
+      "preferredResponseType": "rank"
     },
     {
       "id": "batch_16",
@@ -150,8 +138,7 @@
       "dimensions": [
         { "dimensionType": "trait", "dimensionId": "experimentation_risk_tolerance" },
         { "dimensionType": "trait", "dimensionId": "adaptability_learning" }
-      ],
-      "preferredResponseType": "single_choice"
+      ]
     },
     {
       "id": "batch_17",
@@ -159,8 +146,7 @@
       "dimensions": [
         { "dimensionType": "value", "dimensionId": "helping_others_impact" },
         { "dimensionType": "value", "dimensionId": "belonging_community" }
-      ],
-      "preferredResponseType": "single_choice"
+      ]
     },
     {
       "id": "batch_18",
@@ -168,8 +154,7 @@
       "dimensions": [
         { "dimensionType": "value", "dimensionId": "challenge_achievement" },
         { "dimensionType": "value", "dimensionId": "mastery_growth" }
-      ],
-      "preferredResponseType": "single_choice"
+      ]
     },
     {
       "id": "batch_19",
@@ -177,8 +162,7 @@
       "dimensions": [
         { "dimensionType": "value", "dimensionId": "recognition_visibility" },
         { "dimensionType": "value", "dimensionId": "creativity_self_expression" }
-      ],
-      "preferredResponseType": "single_choice"
+      ]
     },
     {
       "id": "batch_20",
@@ -186,8 +170,7 @@
       "dimensions": [
         { "dimensionType": "trait", "dimensionId": "comfort_ambiguous_ownership" },
         { "dimensionType": "value", "dimensionId": "work_life_balance_wellbeing" }
-      ],
-      "preferredResponseType": "single_choice"
+      ]
     }
   ]
 }

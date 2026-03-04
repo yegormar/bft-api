@@ -44,6 +44,9 @@ async function chat(messages, opts = {}) {
     stream: false,
     options: requestOptions,
   };
+  const isGptOss = llmConfig.model && llmConfig.model.toLowerCase().includes('gpt-oss');
+  if (isGptOss && llmConfig.thinkLevel) body.think = llmConfig.thinkLevel;
+  else if (llmConfig.think !== undefined) body.think = llmConfig.think;
 
   if (!opts.quiet) {
     logRequest(url, body);

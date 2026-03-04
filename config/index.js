@@ -33,10 +33,14 @@ if (corsOrigin === undefined || corsOrigin === '') {
   exit('CORS_ORIGIN is required. Set it in .env (e.g. http://localhost:3000).');
 }
 
-/** Optional. If set, questions are persisted by profile and reused; used-question tracking is file-based. If unset, store is disabled. */
 const questionsStoreDirRaw = process.env.BFT_QUESTIONS_STORE_DIR;
-const questionsStoreDir =
-  questionsStoreDirRaw !== undefined && questionsStoreDirRaw !== '' ? questionsStoreDirRaw.trim() : null;
+if (questionsStoreDirRaw === undefined || questionsStoreDirRaw === '') {
+  exit('BFT_QUESTIONS_STORE_DIR is required. Set it in .env (e.g. ./data/questions-store).');
+}
+const questionsStoreDir = questionsStoreDirRaw.trim();
+if (questionsStoreDir === '') {
+  exit('BFT_QUESTIONS_STORE_DIR must be non-empty. Set it in .env (e.g. ./data/questions-store).');
+}
 
 module.exports = {
   port,

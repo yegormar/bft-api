@@ -24,12 +24,23 @@ function getPersonalityClusters() {
     personalityClustersCache = (data.clusters || []).map((c) => ({
       name: c.name,
       short: c.short || c.name,
+      avoid: c.avoid ?? null,
     }));
     return personalityClustersCache;
   } catch {
     return [];
   }
 }
+
+/** Human-readable labels for scenario settings in the tailoring prompt. */
+const SCENARIO_SETTING_LABELS = {
+  school: 'school (projects, classes, deadlines)',
+  work: 'work or part-time job',
+  hobbies: 'hobbies or side projects',
+  sports: 'sports or team activities',
+  social: 'friends or social situations',
+  online: 'online or tech (games, apps, communities)',
+};
 
 /** One-line style synthesis: avoid contradictions (e.g. neutral "no metaphor" vs gaming "game-like"). */
 function synthesizeStyleLine(dominantNames, byShort) {
@@ -46,31 +57,124 @@ function synthesizeStyleLine(dominantNames, byShort) {
   return `Blend: ${shorts.join('; ')}.`;
 }
 
+/** One-line voice synthesis so the model has a single north star for how to write. */
+function buildVoiceLine(preSurveyProfile, byShort) {
+  const parts = [];
+  const demographics = preSurveyProfile.demographics;
+  const ageGroup = demographics?.ageGroup;
+  if (ageGroup) {
+    const reader = ageGroup.includes('Middle school') ? 'a middle-school reader' : ageGroup.includes('High school') ? 'a high-school reader' : ageGroup.includes('College') ? 'a college-age reader' : 'this reader';
+    parts.push(`Write for ${reader}`);
+  }
+  const toneInstruction = preSurveyProfile.toneInstruction;
+  const secondaryTone = preSurveyProfile.secondaryTone;
+  if (toneInstruction && typeof toneInstruction === 'string') {
+    const firstClause = toneInstruction.split(/[.;]/)[0].trim().toLowerCase();
+    if (firstClause) parts.push(firstClause);
+  } else if (secondaryTone && secondaryTone !== 'neutral') {
+    const tonePhrase = (byShort.get(secondaryTone) || secondaryTone).toLowerCase();
+    if (tonePhrase) parts.push(tonePhrase);
+  }
+  const dominant = preSurveyProfile.dominant;
+  const secondary = preSurveyProfile.secondary;
+  const stylePhrases = [];
+  if (Array.isArray(dominant) && dominant.length > 0) {
+    dominant.forEach((n) => { const s = byShort.get(n); if (s) stylePhrases.push(s); });
+  }
+  if (Array.isArray(secondary) && secondary.length > 0) {
+    secondary.forEach((n) => { const s = byShort.get(n); if (s && !stylePhrases.includes(s)) stylePhrases.push(s); });
+  }
+  if (stylePhrases.length > 0) {
+    const hasNeutral = Array.isArray(dominant) && dominant.includes('neutral');
+    const secondaryShorts = Array.isArray(secondary) ? secondary.map((n) => byShort.get(n)).filter(Boolean) : [];
+    const blendPhrases = hasNeutral && secondaryShorts.length > 0 ? secondaryShorts.slice(0, 2) : stylePhrases.slice(0, 2);
+    const styleBlurb = blendPhrases.length === 1
+      ? blendPhrases[0]
+      : `clear and relatable, with room for ${blendPhrases.join(' or ')} when it fits`;
+    parts.push(parts.length > 0 ? `keep scenarios ${styleBlurb}` : `scenarios should be ${styleBlurb}`);
+  }
+  if (parts.length === 0) return '';
+  const voiceSentence = parts.join('; ') + '.';
+  return voiceSentence.charAt(0).toUpperCase() + voiceSentence.slice(1);
+}
+
 /**
  * Build a short, non-contradictory tailoring block for the system prompt.
- * Uses AUDIENCE / STYLE / TONE so the LLM gets one clear instruction.
+ * Uses AUDIENCE, SETTINGS, STYLE (with secondary blend), AVOID, TONE, COMPLEXITY.
  */
 function buildTailoringBlock(preSurveyProfile) {
   if (!preSurveyProfile || typeof preSurveyProfile !== 'object') return '';
   const clusters = getPersonalityClusters();
   const byShort = new Map(clusters.map((c) => [c.name, c.short]));
+  const byAvoid = new Map(clusters.filter((c) => c.avoid).map((c) => [c.name, c.avoid]));
 
   const lines = [];
+
+  // AUDIENCE
   const demographics = preSurveyProfile.demographics;
   if (demographics && (demographics.ageGroup || demographics.gender)) {
     const audience = [demographics.ageGroup, demographics.gender].filter(Boolean).join(', ');
     if (audience) lines.push(`AUDIENCE: ${audience}.`);
   }
 
-  const dominant = preSurveyProfile.dominant;
-  const styleLine = synthesizeStyleLine(dominant, byShort);
-  if (styleLine) lines.push(`STYLE: ${styleLine}`);
-
-  const secondaryTone = preSurveyProfile.secondaryTone;
-  if (secondaryTone && secondaryTone !== 'neutral') {
-    const toneShort = byShort.get(secondaryTone);
-    if (toneShort) lines.push(`TONE: ${toneShort}.`);
+  // SETTINGS: preferred scenario contexts from Q7
+  const preferredSettings = preSurveyProfile.preferredSettings;
+  if (Array.isArray(preferredSettings) && preferredSettings.length > 0) {
+    const labels = preferredSettings
+      .map((s) => SCENARIO_SETTING_LABELS[s] || s)
+      .join(', ');
+    lines.push(`SETTINGS: Prefer scenarios set in: ${labels}. Anchor dilemmas in these contexts when possible.`);
   }
+
+  // STYLE: dominant and secondary blend
+  const dominant = preSurveyProfile.dominant;
+  const secondary = preSurveyProfile.secondary;
+  if (Array.isArray(secondary) && secondary.length > 0) {
+    const primaryShorts = (Array.isArray(dominant) ? dominant : [])
+      .map((n) => byShort.get(n))
+      .filter(Boolean);
+    const secondaryShorts = secondary.map((n) => byShort.get(n)).filter(Boolean);
+    const parts = [];
+    if (primaryShorts.length > 0) parts.push(`Primarily ${primaryShorts.join('; ')}.`);
+    if (secondaryShorts.length > 0) parts.push(`Also ${secondaryShorts.join('; ')}. Blend both when possible.`);
+    if (parts.length > 0) lines.push(`STYLE: ${parts.join(' ')}`);
+  } else {
+    const styleLine = synthesizeStyleLine(Array.isArray(dominant) ? dominant : [], byShort);
+    if (styleLine) lines.push(`STYLE: ${styleLine}`);
+  }
+
+  // AVOID: clusters not chosen (exclude neutral)
+  const avoidClusters = preSurveyProfile.avoidClusters;
+  if (Array.isArray(avoidClusters) && avoidClusters.length > 0) {
+    const avoidPhrases = avoidClusters
+      .map((name) => byAvoid.get(name) || `avoid ${byShort.get(name) || name} framing`)
+      .filter(Boolean);
+    if (avoidPhrases.length > 0) {
+      lines.push(`AVOID: ${avoidPhrases.join('; ')}. Do not use these framings.`);
+    }
+  }
+
+  // TONE: prefer toneInstruction (from Q5), else secondaryTone → cluster short
+  const toneInstruction = preSurveyProfile.toneInstruction;
+  if (toneInstruction && typeof toneInstruction === 'string' && toneInstruction.trim()) {
+    lines.push(`TONE: ${toneInstruction.trim()}`);
+  } else {
+    const secondaryTone = preSurveyProfile.secondaryTone;
+    if (secondaryTone && secondaryTone !== 'neutral') {
+      const toneShort = byShort.get(secondaryTone);
+      if (toneShort) lines.push(`TONE: ${toneShort}.`);
+    }
+  }
+
+  // COMPLEXITY: from age group (Q2)
+  const complexityInstruction = preSurveyProfile.complexityInstruction;
+  if (complexityInstruction && typeof complexityInstruction === 'string' && complexityInstruction.trim()) {
+    lines.push(`COMPLEXITY: ${complexityInstruction.trim()}`);
+  }
+
+  // VOICE: one-line north star so the model knows how to sound (audience + tone + style)
+  const voiceLine = buildVoiceLine(preSurveyProfile, byShort);
+  if (voiceLine) lines.push(`VOICE: ${voiceLine}`);
 
   if (lines.length === 0) return '';
   lines.push('Match this audience and style; avoid formal or corporate wording.');
@@ -123,8 +227,9 @@ const VALID_TYPES = new Set(['single_choice', 'multi_choice', 'rank']);
 
 /**
  * Validate nextQuestion object. idOptional: when true, id is not required (assigned in code).
+ * scoringOptions: { expectedDimensionIds: string[], scoreMin: number, scoreMax: number } to require and validate dimensionScores on each option.
  */
-function validateNextQuestionObject(q, idOptional = false) {
+function validateNextQuestionObject(q, idOptional = false, scoringOptions = null) {
   const errors = [];
   if (q == null || typeof q !== 'object') {
     return { valid: false, errors: ['nextQuestion must be a non-null object.'] };
@@ -139,12 +244,23 @@ function validateNextQuestionObject(q, idOptional = false) {
   if (typeof q.title !== 'string' || q.title.trim() === '') {
     errors.push('"nextQuestion.title" must be a non-empty string.');
   }
-  if (q.description != null && typeof q.description !== 'string') {
+  const requireDescription = scoringOptions != null;
+  if (requireDescription) {
+    if (typeof q.description !== 'string' || q.description.trim() === '') {
+      errors.push('"nextQuestion.description" is required and must be a non-empty string (the 2–3 sentence scenario the person reads before the options).');
+    }
+  } else if (q.description != null && typeof q.description !== 'string') {
     errors.push('"nextQuestion.description" must be a string or omitted.');
   }
   if (!VALID_TYPES.has(q.type)) {
     errors.push(`"nextQuestion.type" must be one of "single_choice", "multi_choice", or "rank". Got: ${JSON.stringify(q.type)}.`);
   }
+  const expectedIds = scoringOptions && Array.isArray(scoringOptions.expectedDimensionIds) && scoringOptions.expectedDimensionIds.length > 0
+    ? scoringOptions.expectedDimensionIds
+    : null;
+  const scoreMin = scoringOptions && typeof scoringOptions.scoreMin === 'number' ? scoringOptions.scoreMin : 1;
+  const scoreMax = scoringOptions && typeof scoringOptions.scoreMax === 'number' ? scoringOptions.scoreMax : 5;
+
   if (!Array.isArray(q.options) || q.options.length === 0) {
     errors.push('"nextQuestion.options" must be a non-empty array of { "text": string, "value": string }.');
   } else {
@@ -164,6 +280,29 @@ function validateNextQuestionObject(q, idOptional = false) {
           errors.push(`"nextQuestion.options": duplicate option value "${opt.value}". Each value must be unique.`);
         }
         seenValues.add(opt.value);
+      }
+      if (expectedIds) {
+        if (opt.dimensionScores == null || typeof opt.dimensionScores !== 'object') {
+          errors.push(`"nextQuestion.options[${i}].dimensionScores" is required and must be an object with keys: ${expectedIds.join(', ')}.`);
+        } else {
+          const keys = Object.keys(opt.dimensionScores);
+          const missing = expectedIds.filter((id) => !keys.includes(id));
+          const extra = keys.filter((k) => !expectedIds.includes(k));
+          if (missing.length > 0) {
+            errors.push(`"nextQuestion.options[${i}].dimensionScores" missing keys: ${missing.join(', ')}.`);
+          }
+          if (extra.length > 0) {
+            errors.push(`"nextQuestion.options[${i}].dimensionScores" has unexpected keys: ${extra.join(', ')}. Use only: ${expectedIds.join(', ')}.`);
+          }
+          expectedIds.forEach((dimId) => {
+            const v = opt.dimensionScores[dimId];
+            if (v === undefined || v === null) return;
+            const n = Number(v);
+            if (!Number.isInteger(n) || n < scoreMin || n > scoreMax) {
+              errors.push(`"nextQuestion.options[${i}].dimensionScores.${dimId}" must be an integer from ${scoreMin} to ${scoreMax}. Got: ${v}.`);
+            }
+          });
+        }
       }
     });
   }
@@ -224,9 +363,11 @@ const SCENARIO_SYSTEM_BASE = `You are the Built for Tomorrow interview assistant
 
 You will be given a set of dimensions (aptitudes, traits, values, or skills) to probe. Create a single question that feels like a real situation (e.g. "Imagine you're leading a project and the requirements keep changing...") so we can infer something about those dimensions from the answer. Do NOT ask separate questions per dimension; weave them into one scenario. Do NOT use the dimension names or obvious synonyms (e.g. balance, free time, challenge, flexibility) in the scenario or options—the situation and choices should imply them without naming them.
 
+Scoring: For each option you output, you must also output a "dimensionScores" object. The user message will list the exact dimension IDs to use as keys and the score meaning (low/medium/high) for each dimension. For each option, set dimensionScores so that each dimension ID has an integer from 1 to 5: 1-2 = low alignment with that dimension, 3 = neutral/mixed, 4-5 = high alignment. You design the scenario and options, so you know how much each choice implies high or low on each dimension; use the per-dimension interpretation text in the user message to assign scores consistently.
+
 Response format — reply with exactly one JSON object. No markdown, no code fences.
 - "completed": false (we are not ending the interview).
-- "nextQuestion": object with "title" (string), optional "description", "type" ("single_choice", "multi_choice", or "rank"), "options" (array of {"text": string, "value": string}). For "rank", the user will order the options; do not use maxSelections. Do NOT include "id" — we assign it server-side.
+- "nextQuestion": object with "title" (string), "description" (string, REQUIRED: the 2–3 sentence scenario setup and dilemma that the person reads before the options), "type" ("single_choice", "multi_choice", or "rank"), "options" (array of {"text": string, "value": string, "dimensionScores": object}). Each option must have "dimensionScores": an object whose keys are the dimension IDs listed in the user message and whose values are integers 1-5. For "rank", the user will order the options; do not use maxSelections. Do NOT include "id" — we assign it server-side.
 - "assessmentSummary": optional 1–2 sentence summary of what the answer might suggest.
 
 Do not repeat or rephrase questions you are told were already asked.`;
@@ -252,6 +393,22 @@ function buildScenarioUserPrompt(dimensionSet, askedTitles, answers, preferredRe
       d.question_hints.forEach((h) => lines.push(`  Hint: ${h}`));
     }
   });
+
+  const dimensionsWithScale = (dimensionSet || []).filter((d) => d.score_scale && typeof d.score_scale === 'object');
+  if (dimensionsWithScale.length > 0) {
+    lines.push('');
+    lines.push('Score scale (use for dimensionScores). For each dimension, assign 1-5 per option based on what that choice implies:');
+    dimensionsWithScale.forEach((d) => {
+      const scale = d.score_scale;
+      const min = scale.min != null ? scale.min : 1;
+      const max = scale.max != null ? scale.max : 5;
+      const interp = scale.interpretation || {};
+      lines.push(`- dimensionId "${d.dimensionId}" (min=${min}, max=${max}): low = ${interp.low || 'low alignment'}; medium = ${interp.medium || 'neutral'}; high = ${interp.high || 'high alignment'}.`);
+    });
+    lines.push('');
+    lines.push('Dimension IDs to use as keys in dimensionScores: ' + dimensionsWithScale.map((d) => d.dimensionId).join(', ') + '.');
+  }
+
   if (preferredResponseType && ['single_choice', 'multi_choice', 'rank'].includes(preferredResponseType)) {
     lines.push('');
     lines.push(`Preferred response type for this scenario: ${preferredResponseType}. Use this type if it fits the situation; otherwise choose the best fit.`);
@@ -269,12 +426,13 @@ function buildScenarioUserPrompt(dimensionSet, askedTitles, answers, preferredRe
     lines.push(`- "${title}" → ${Array.isArray(v) ? JSON.stringify(v) : v}`);
   });
   lines.push('');
-  lines.push('Reply with one JSON object: { "completed": false, "nextQuestion": { "title", "description"?, "type", "options" }, "assessmentSummary"?: "..." }. No "id" in nextQuestion.');
+  lines.push('Reply with one JSON object: { "completed": false, "nextQuestion": { "title", "description" (REQUIRED: 2–3 sentence scenario), "type", "options" (each with "text", "value", "dimensionScores") }, "assessmentSummary"?: "..." }. No "id" in nextQuestion.');
   return lines.join('\n');
 }
 
 /**
  * Generate one scenario-based question that probes the given dimension set.
+ * On validation failure, gives the LLM one chance to correct (sends errors back); if still invalid, returns null.
  * Question id is NOT returned; the caller assigns it.
  * @param {Array<object>} dimensionSet - [{ dimensionType, dimensionId, name, question_hints, how_measured_or_observed }]
  * @param {string[]} askedQuestionTitles - Titles of questions already asked (for deduplication)
@@ -287,28 +445,52 @@ async function generateScenarioQuestion(dimensionSet, askedQuestionTitles, answe
   const systemContent = getScenarioSystemPrompt() + tailoring;
   const userContent = buildScenarioUserPrompt(dimensionSet, askedQuestionTitles || [], answers, preferredResponseType);
 
-  const messages = [
+  const dimensionsWithScale = (dimensionSet || []).filter((d) => d.score_scale && typeof d.score_scale === 'object');
+  const scoringOptions =
+    dimensionsWithScale.length > 0
+      ? {
+          expectedDimensionIds: dimensionsWithScale.map((d) => d.dimensionId),
+          scoreMin: dimensionsWithScale[0].score_scale.min != null ? dimensionsWithScale[0].score_scale.min : 1,
+          scoreMax: dimensionsWithScale[0].score_scale.max != null ? dimensionsWithScale[0].score_scale.max : 5,
+        }
+      : null;
+
+  let messages = [
     { role: 'system', content: systemContent },
     { role: 'user', content: userContent },
   ];
 
-  const content = (await ollamaClient.chat(messages)).content;
-  const parsed = parseResponse(content);
-  if (!parsed || typeof parsed !== 'object') {
-    return { assessmentSummary: null, nextQuestion: null };
+  const validateAndReturn = (content) => {
+    const parsed = parseResponse(content);
+    if (!parsed || typeof parsed !== 'object') return { valid: false, errors: ['Response could not be parsed as JSON.'], assessmentSummary: null, nextQuestion: null };
+    const q = parsed.nextQuestion;
+    const qValidation = q ? validateNextQuestionObject(q, true, scoringOptions) : { valid: false, errors: ['Missing nextQuestion.'] };
+    if (!qValidation.valid) return { valid: false, errors: qValidation.errors, assessmentSummary: parsed.assessmentSummary || null, nextQuestion: null };
+    const { id, ...rest } = q;
+    return { valid: true, assessmentSummary: parsed.assessmentSummary || null, nextQuestion: rest };
+  };
+
+  let content = (await ollamaClient.chat(messages)).content;
+  let result = validateAndReturn(content);
+
+  if (!result.valid) {
+    console.warn('[LLM] Scenario question validation failed, requesting one correction:', result.errors);
+    messages.push({ role: 'assistant', content });
+    messages.push({
+      role: 'user',
+      content: buildCorrectionUserMessage(content, result.errors),
+    });
+    content = (await ollamaClient.chat(messages)).content;
+    result = validateAndReturn(content);
+    if (!result.valid) {
+      console.warn('[LLM] Scenario question correction still invalid:', result.errors);
+      return { assessmentSummary: result.assessmentSummary || null, nextQuestion: null };
+    }
   }
 
-  const q = parsed.nextQuestion;
-  const qValidation = q ? validateNextQuestionObject(q, true) : { valid: false, errors: ['Missing nextQuestion.'] };
-  if (!qValidation.valid) {
-    console.warn('[LLM] Scenario question validation failed:', qValidation.errors);
-    return { assessmentSummary: parsed.assessmentSummary || null, nextQuestion: null };
-  }
-
-  const { id, ...rest } = q;
   return {
-    assessmentSummary: parsed.assessmentSummary || null,
-    nextQuestion: rest,
+    assessmentSummary: result.assessmentSummary || null,
+    nextQuestion: result.nextQuestion,
   };
 }
 
