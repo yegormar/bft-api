@@ -1,0 +1,193 @@
+{
+  "version": "1.0",
+  "description": "Offline-prepared dimension batches for interview scenarios. Each batch defines 2–3 traits/values to probe in a single scenario. During the interview, select batches (e.g. by coverage) so total questions ≤ 20. Overlap of dimensions across batches is intentional for reliability.",
+  "constraints": {
+    "maxQuestionsPerInterview": 20,
+    "maxDescriptionSentences": 3,
+    "shortAnswers": true,
+    "allowedResponseTypes": ["single_choice", "multi_choice", "rank"]
+  },
+  "batches": [
+    {
+      "id": "batch_01",
+      "theme": "Team, belonging, and ownership",
+      "dimensions": [
+        { "dimensionType": "trait", "dimensionId": "social_collaboration" },
+        { "dimensionType": "value", "dimensionId": "belonging_community" },
+        { "dimensionType": "trait", "dimensionId": "comfort_ambiguous_ownership" }
+      ],
+      "preferredResponseType": "single_choice"
+    },
+    {
+      "id": "batch_02",
+      "theme": "Autonomy and risk",
+      "dimensions": [
+        { "dimensionType": "value", "dimensionId": "autonomy_independence" },
+        { "dimensionType": "trait", "dimensionId": "experimentation_risk_tolerance" }
+      ],
+      "preferredResponseType": "single_choice"
+    },
+    {
+      "id": "batch_03",
+      "theme": "Learning and growth",
+      "dimensions": [
+        { "dimensionType": "trait", "dimensionId": "adaptability_learning" },
+        { "dimensionType": "value", "dimensionId": "mastery_growth" }
+      ],
+      "preferredResponseType": "single_choice"
+    },
+    {
+      "id": "batch_04",
+      "theme": "Ambiguity vs stability",
+      "dimensions": [
+        { "dimensionType": "trait", "dimensionId": "ambiguity_resilience" },
+        { "dimensionType": "value", "dimensionId": "security_stability" }
+      ],
+      "preferredResponseType": "single_choice"
+    },
+    {
+      "id": "batch_05",
+      "theme": "Impact and recognition",
+      "dimensions": [
+        { "dimensionType": "value", "dimensionId": "helping_others_impact" },
+        { "dimensionType": "value", "dimensionId": "recognition_visibility" }
+      ],
+      "preferredResponseType": "single_choice"
+    },
+    {
+      "id": "batch_06",
+      "theme": "Creativity and challenge",
+      "dimensions": [
+        { "dimensionType": "value", "dimensionId": "creativity_self_expression" },
+        { "dimensionType": "value", "dimensionId": "challenge_achievement" }
+      ],
+      "preferredResponseType": "single_choice"
+    },
+    {
+      "id": "batch_07",
+      "theme": "Pay vs meaning",
+      "dimensions": [
+        { "dimensionType": "value", "dimensionId": "financial_success" },
+        { "dimensionType": "value", "dimensionId": "helping_others_impact" }
+      ],
+      "preferredResponseType": "single_choice"
+    },
+    {
+      "id": "batch_08",
+      "theme": "Balance and stretch",
+      "dimensions": [
+        { "dimensionType": "value", "dimensionId": "work_life_balance_wellbeing" },
+        { "dimensionType": "value", "dimensionId": "challenge_achievement" }
+      ],
+      "preferredResponseType": "single_choice"
+    },
+    {
+      "id": "batch_09",
+      "theme": "Collaboration and credit",
+      "dimensions": [
+        { "dimensionType": "trait", "dimensionId": "social_collaboration" },
+        { "dimensionType": "value", "dimensionId": "recognition_visibility" }
+      ],
+      "preferredResponseType": "single_choice"
+    },
+    {
+      "id": "batch_10",
+      "theme": "Ownership and visibility",
+      "dimensions": [
+        { "dimensionType": "trait", "dimensionId": "comfort_ambiguous_ownership" },
+        { "dimensionType": "value", "dimensionId": "recognition_visibility" }
+      ],
+      "preferredResponseType": "single_choice"
+    },
+    {
+      "id": "batch_11",
+      "theme": "Experimentation and mastery",
+      "dimensions": [
+        { "dimensionType": "trait", "dimensionId": "experimentation_risk_tolerance" },
+        { "dimensionType": "value", "dimensionId": "mastery_growth" }
+      ],
+      "preferredResponseType": "single_choice"
+    },
+    {
+      "id": "batch_12",
+      "theme": "Resilience and autonomy",
+      "dimensions": [
+        { "dimensionType": "trait", "dimensionId": "ambiguity_resilience" },
+        { "dimensionType": "value", "dimensionId": "autonomy_independence" }
+      ],
+      "preferredResponseType": "single_choice"
+    },
+    {
+      "id": "batch_13",
+      "theme": "Community and balance",
+      "dimensions": [
+        { "dimensionType": "value", "dimensionId": "belonging_community" },
+        { "dimensionType": "value", "dimensionId": "work_life_balance_wellbeing" }
+      ],
+      "preferredResponseType": "single_choice"
+    },
+    {
+      "id": "batch_14",
+      "theme": "Creativity and autonomy",
+      "dimensions": [
+        { "dimensionType": "value", "dimensionId": "creativity_self_expression" },
+        { "dimensionType": "value", "dimensionId": "autonomy_independence" }
+      ],
+      "preferredResponseType": "single_choice"
+    },
+    {
+      "id": "batch_15",
+      "theme": "Security and income",
+      "dimensions": [
+        { "dimensionType": "value", "dimensionId": "security_stability" },
+        { "dimensionType": "value", "dimensionId": "financial_success" }
+      ],
+      "preferredResponseType": "single_choice"
+    },
+    {
+      "id": "batch_16",
+      "theme": "Risk and adaptability",
+      "dimensions": [
+        { "dimensionType": "trait", "dimensionId": "experimentation_risk_tolerance" },
+        { "dimensionType": "trait", "dimensionId": "adaptability_learning" }
+      ],
+      "preferredResponseType": "single_choice"
+    },
+    {
+      "id": "batch_17",
+      "theme": "Impact and belonging",
+      "dimensions": [
+        { "dimensionType": "value", "dimensionId": "helping_others_impact" },
+        { "dimensionType": "value", "dimensionId": "belonging_community" }
+      ],
+      "preferredResponseType": "single_choice"
+    },
+    {
+      "id": "batch_18",
+      "theme": "Challenge and mastery",
+      "dimensions": [
+        { "dimensionType": "value", "dimensionId": "challenge_achievement" },
+        { "dimensionType": "value", "dimensionId": "mastery_growth" }
+      ],
+      "preferredResponseType": "single_choice"
+    },
+    {
+      "id": "batch_19",
+      "theme": "Recognition and expression",
+      "dimensions": [
+        { "dimensionType": "value", "dimensionId": "recognition_visibility" },
+        { "dimensionType": "value", "dimensionId": "creativity_self_expression" }
+      ],
+      "preferredResponseType": "single_choice"
+    },
+    {
+      "id": "batch_20",
+      "theme": "Ownership and balance",
+      "dimensions": [
+        { "dimensionType": "trait", "dimensionId": "comfort_ambiguous_ownership" },
+        { "dimensionType": "value", "dimensionId": "work_life_balance_wellbeing" }
+      ],
+      "preferredResponseType": "single_choice"
+    }
+  ]
+}
