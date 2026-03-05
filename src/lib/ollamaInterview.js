@@ -13,6 +13,44 @@ const llmConfig = require('../../config/llm');
 const PROJECT_ROOT = path.resolve(__dirname, '..', '..');
 const PERSONALITY_CLUSTERS_PATH = path.join(PROJECT_ROOT, 'conf', 'personality_clusters.json');
 const SCENARIO_DESIGN_INSTRUCTIONS_PATH = path.join(PROJECT_ROOT, 'conf', 'scenario_design_instructions.txt');
+const FORBIDDEN_SCENARIO_WORDS_PATH = path.join(PROJECT_ROOT, 'conf', 'forbidden_scenario_words.txt');
+
+const DEFAULT_FORBIDDEN_SCENARIO_WORDS = [
+  'responsibility',
+  'full responsibility',
+  'integrity',
+  'balance',
+  'work-life',
+  'challenge',
+  'flexibility',
+  'teamwork',
+  'delegate',
+  'delegation',
+  'stretch goal',
+  'comfort zone',
+  'free time',
+  'split the work',
+  'divide the task',
+  'take charge',
+  'other commitments',
+  'take full responsibility',
+];
+
+function resolveScenarioStepPath(envKey, examplePath) {
+  const raw = process.env[envKey];
+  if (raw === undefined || (typeof raw === 'string' && raw.trim() === '')) {
+    console.error(`[config] ${envKey} is required. Set it in .env (see .env.example). Example: ${examplePath}`);
+    process.exit(1);
+  }
+  const resolved = path.isAbsolute(raw) ? raw : path.join(PROJECT_ROOT, raw);
+  if (!fs.existsSync(resolved)) {
+    console.error(`[config] ${envKey} does not exist: ${resolved}`);
+    process.exit(1);
+  }
+  return resolved;
+}
+const SCENARIO_STEP1_INSTRUCTIONS_PATH = resolveScenarioStepPath('BFT_SCENARIO_STEP1_INSTRUCTIONS_FILE', 'conf/scenario_step1_instructions.txt');
+const SCENARIO_STEP2_INSTRUCTIONS_PATH = resolveScenarioStepPath('BFT_SCENARIO_STEP2_INSTRUCTIONS_FILE', 'conf/scenario_step2_instructions.txt');
 
 let personalityClustersCache = null;
 
@@ -227,7 +265,8 @@ const VALID_TYPES = new Set(['single_choice', 'multi_choice', 'rank']);
 
 /**
  * Validate nextQuestion object. idOptional: when true, id is not required (assigned in code).
- * scoringOptions: { expectedDimensionIds: string[], scoreMin: number, scoreMax: number } to require and validate dimensionScores on each option.
+ * scoringOptions: { expectedDimensionIds: string[], scoreMin: number, scoreMax: number, allowPartialDimensionScores?: boolean }
+ * When allowPartialDimensionScores is true, do not require all expectedDimensionIds to be present; only validate that every key present is in expectedIds and value is 1-5.
  */
 function validateNextQuestionObject(q, idOptional = false, scoringOptions = null) {
   const errors = [];
@@ -258,6 +297,7 @@ function validateNextQuestionObject(q, idOptional = false, scoringOptions = null
   const expectedIds = scoringOptions && Array.isArray(scoringOptions.expectedDimensionIds) && scoringOptions.expectedDimensionIds.length > 0
     ? scoringOptions.expectedDimensionIds
     : null;
+  const allowPartial = scoringOptions && scoringOptions.allowPartialDimensionScores === true;
   const scoreMin = scoringOptions && typeof scoringOptions.scoreMin === 'number' ? scoringOptions.scoreMin : 1;
   const scoreMax = scoringOptions && typeof scoringOptions.scoreMax === 'number' ? scoringOptions.scoreMax : 5;
 
@@ -283,18 +323,22 @@ function validateNextQuestionObject(q, idOptional = false, scoringOptions = null
       }
       if (expectedIds) {
         if (opt.dimensionScores == null || typeof opt.dimensionScores !== 'object') {
-          errors.push(`"nextQuestion.options[${i}].dimensionScores" is required and must be an object with keys: ${expectedIds.join(', ')}.`);
+          if (!allowPartial) {
+            errors.push(`"nextQuestion.options[${i}].dimensionScores" is required and must be an object with keys: ${expectedIds.join(', ')}.`);
+          }
         } else {
           const keys = Object.keys(opt.dimensionScores);
-          const missing = expectedIds.filter((id) => !keys.includes(id));
           const extra = keys.filter((k) => !expectedIds.includes(k));
-          if (missing.length > 0) {
-            errors.push(`"nextQuestion.options[${i}].dimensionScores" missing keys: ${missing.join(', ')}.`);
-          }
           if (extra.length > 0) {
             errors.push(`"nextQuestion.options[${i}].dimensionScores" has unexpected keys: ${extra.join(', ')}. Use only: ${expectedIds.join(', ')}.`);
           }
-          expectedIds.forEach((dimId) => {
+          if (!allowPartial) {
+            const missing = expectedIds.filter((id) => !keys.includes(id));
+            if (missing.length > 0) {
+              errors.push(`"nextQuestion.options[${i}].dimensionScores" missing keys: ${missing.join(', ')}.`);
+            }
+          }
+          keys.forEach((dimId) => {
             const v = opt.dimensionScores[dimId];
             if (v === undefined || v === null) return;
             const n = Number(v);
@@ -357,6 +401,287 @@ function getScenarioDesignInstructions() {
   } catch {
     return '';
   }
+}
+
+function getForbiddenWordsList() {
+  try {
+    if (fs.existsSync(FORBIDDEN_SCENARIO_WORDS_PATH)) {
+      const raw = fs.readFileSync(FORBIDDEN_SCENARIO_WORDS_PATH, 'utf8');
+      const terms = raw
+        .split('\n')
+        .map((line) => line.trim().toLowerCase())
+        .filter((t) => t.length > 0 && !t.startsWith('#'));
+      return terms.length > 0 ? terms : DEFAULT_FORBIDDEN_SCENARIO_WORDS;
+    }
+  } catch {
+    // fall through to default
+  }
+  return DEFAULT_FORBIDDEN_SCENARIO_WORDS;
+}
+
+/**
+ * Check scenario title, description, and option texts for forbidden words (case-insensitive substring).
+ * @param {object} question - { title?, description?, options?: Array<{ text? }> }
+ * @param {string[]} forbiddenList - list of forbidden terms (lowercase)
+ * @returns {{ ok: boolean, found: string[] }}
+ */
+function checkForbiddenWords(question, forbiddenList) {
+  const found = [];
+  const texts = [];
+  if (question.title && typeof question.title === 'string') texts.push(question.title);
+  if (question.description && typeof question.description === 'string') texts.push(question.description);
+  (question.options || []).forEach((opt) => {
+    if (opt && typeof opt.text === 'string') texts.push(opt.text);
+  });
+  const combined = texts.join(' ').toLowerCase();
+  (forbiddenList || []).forEach((term) => {
+    if (term && combined.includes(term.toLowerCase())) found.push(term);
+  });
+  return { ok: found.length === 0, found };
+}
+
+function getScenarioStep1Instructions() {
+  try {
+    return fs.readFileSync(SCENARIO_STEP1_INSTRUCTIONS_PATH, 'utf8').trim();
+  } catch {
+    return '';
+  }
+}
+
+function getScenarioStep2Instructions() {
+  try {
+    return fs.readFileSync(SCENARIO_STEP2_INSTRUCTIONS_PATH, 'utf8').trim();
+  } catch {
+    return '';
+  }
+}
+
+const STEP1_FORMAT_LINE = `
+Response format: reply with exactly one JSON object. No markdown, no code fences.
+- "completed": false
+- "nextQuestion": object with "title" (string), "description" (string, 2-3 sentence scenario), "type" ("single_choice", "multi_choice", or "rank"), "options" (array of {"text": string, "value": string} only; do NOT include dimensionScores). For "rank" do not use maxSelections. Do NOT include "id".
+- "assessmentSummary": optional 1-2 sentence summary.
+`;
+
+function getScenarioOnlySystemPrompt() {
+  const designInstructions = getScenarioDesignInstructions();
+  const step1 = getScenarioStep1Instructions();
+  const base = step1 || 'Design one scenario with one clear dilemma and options as direct responses.';
+  const combined = designInstructions ? designInstructions + '\n\n---\n\n' + base : base;
+  return combined + STEP1_FORMAT_LINE;
+}
+
+function getScenarioStep2SystemPrompt() {
+  const step2 = getScenarioStep2Instructions();
+  return step2 || 'Assign dimensionScores (1-5) per option only for dimensions this scenario differentiates. Output JSON: { "optionScores": [ { "dimensionScores": { "dimId": 1..5 } }, ... ] } in option order.';
+}
+
+function buildScenarioOnlyUserPrompt(primaryDimension, batchTheme, askedTitles, answers, preferredResponseType, dilemmaAnchor) {
+  const lines = ['Generate one scenario-based interview question.'];
+  const anchor = typeof dilemmaAnchor === 'string' && dilemmaAnchor.trim() ? dilemmaAnchor.trim() : null;
+  if (anchor) {
+    lines.push('Dilemma anchor (situation only, no trait words): ' + anchor);
+  } else {
+    lines.push('Design one concrete dilemma with a real trade-off. Different choices should be defensible; do not name any trait or value.');
+  }
+  lines.push('Do not include dimensionScores in options. Output options with only "text" and "value".');
+  if (preferredResponseType && ['single_choice', 'multi_choice', 'rank'].includes(preferredResponseType)) {
+    lines.push(`Preferred response type: ${preferredResponseType}. Use it if it fits; otherwise choose the best fit.`);
+  }
+  if (askedTitles.length > 0) {
+    lines.push('');
+    lines.push('Do not repeat or rephrase these already-asked questions:');
+    askedTitles.forEach((t) => lines.push(`- ${t}`));
+  }
+  lines.push('');
+  lines.push('Answers so far (for context). Each line: question asked → option value(s) chosen:');
+  (answers || []).forEach((a, i) => {
+    const title = (askedTitles && askedTitles[i]) ? askedTitles[i] : (a.questionId || a.questionTitle || `Q${i + 1}`);
+    const v = a.value ?? a.selected ?? a.answer ?? a.text ?? JSON.stringify(a);
+    lines.push(`- "${title}" → ${Array.isArray(v) ? JSON.stringify(v) : v}`);
+  });
+  lines.push('');
+  lines.push('Reply with one JSON object: { "completed": false, "nextQuestion": { "title", "description", "type", "options" (each with "text", "value" only) }, "assessmentSummary"?: "..." }. No "id" in nextQuestion.');
+  return lines.join('\n');
+}
+
+function buildAssignScoresUserPrompt(question, dimensionSet) {
+  const lines = [
+    'Assign dimensionScores (1-5) for each option. Include only dimensions that this scenario actually differentiates; omit dimensions not relevant to the choices.',
+    '',
+    'Scenario:',
+    `Title: ${(question.title || '').trim() || '(none)'}`,
+    `Description: ${(question.description || '').trim() || '(none)'}`,
+    '',
+    'Options (in order):',
+  ];
+  (question.options || []).forEach((opt, i) => {
+    lines.push(`${i + 1}. value="${opt.value}" text="${(opt.text || '').trim() || ''}"`);
+  });
+  const dimensionsWithScale = (dimensionSet || []).filter((d) => d.score_scale && typeof d.score_scale === 'object');
+  if (dimensionsWithScale.length > 0) {
+    lines.push('');
+    lines.push('Dimensions (assign only those that apply to this scenario). Score 1-5 per dimension that applies:');
+    dimensionsWithScale.forEach((d) => {
+      const scale = d.score_scale;
+      const min = scale.min != null ? scale.min : 1;
+      const max = scale.max != null ? scale.max : 5;
+      const interp = scale.interpretation || {};
+      lines.push(`- ${d.dimensionId} (min=${min}, max=${max}): low = ${interp.low || 'low'}; medium = ${interp.medium || 'neutral'}; high = ${interp.high || 'high'}.`);
+    });
+  }
+  lines.push('');
+  lines.push('Reply with one JSON object: { "optionScores": [ { "dimensionScores": { "dimId": 1..5, ... } }, ... ] } with one element per option in the same order. Include only dimension IDs that this scenario differentiates.');
+  return lines.join('\n');
+}
+
+async function generateScenarioOnly(primaryDimension, batchTheme, askedTitles, answers, preSurveyProfile, preferredResponseType, dilemmaAnchor) {
+  const tailoring = buildTailoringBlock(preSurveyProfile);
+  const systemContent = getScenarioOnlySystemPrompt() + tailoring;
+  const userContent = buildScenarioOnlyUserPrompt(primaryDimension, batchTheme, askedTitles || [], answers, preferredResponseType, dilemmaAnchor);
+  const messages = [
+    { role: 'system', content: systemContent },
+    { role: 'user', content: userContent },
+  ];
+  let content = (await ollamaClient.chat(messages)).content;
+  let parsed = parseResponse(content);
+  let q = parsed && parsed.nextQuestion;
+  let validation = q ? validateNextQuestionObject(q, true, null) : { valid: false, errors: ['Missing nextQuestion.'] };
+  if (!validation.valid) {
+    console.warn('[LLM] Step 1 scenario validation failed, requesting one correction:', validation.errors);
+    messages.push({ role: 'assistant', content });
+    messages.push({ role: 'user', content: buildCorrectionUserMessage(content, validation.errors) });
+    content = (await ollamaClient.chat(messages)).content;
+    parsed = parseResponse(content);
+    q = parsed && parsed.nextQuestion;
+    validation = q ? validateNextQuestionObject(q, true, null) : { valid: false, errors: ['Missing nextQuestion.'] };
+    if (!validation.valid) {
+      console.warn('[LLM] Step 1 correction still invalid:', validation.errors);
+      return null;
+    }
+  }
+  const forbiddenList = getForbiddenWordsList();
+  let forbiddenCheck = checkForbiddenWords(q, forbiddenList);
+  if (!forbiddenCheck.ok) {
+    console.warn('[LLM] Step 1 scenario contains forbidden words, requesting one revision:', forbiddenCheck.found);
+    messages.push({ role: 'assistant', content });
+    messages.push({
+      role: 'user',
+      content: `Your scenario or options contain words we must avoid: ${forbiddenCheck.found.join(', ')}. Reply with a revised scenario (same JSON format) that avoids these words.`,
+    });
+    content = (await ollamaClient.chat(messages)).content;
+    parsed = parseResponse(content);
+    q = parsed && parsed.nextQuestion;
+    const revalidate = q ? validateNextQuestionObject(q, true, null) : { valid: false, errors: ['Missing nextQuestion.'] };
+    if (!revalidate.valid) {
+      console.warn('[LLM] Step 1 revision after forbidden-words check failed validation:', revalidate.errors);
+      return null;
+    }
+    forbiddenCheck = checkForbiddenWords(q, forbiddenList);
+    if (!forbiddenCheck.ok) {
+      console.warn('[LLM] Step 1 revision still contains forbidden words:', forbiddenCheck.found);
+      return null;
+    }
+  }
+  const { id, ...rest } = q;
+  return { nextQuestion: rest, assessmentSummary: parsed.assessmentSummary || null };
+}
+
+function validateOptionScoresResponse(optionScores, question, allowedDimensionIds, scoreMin, scoreMax) {
+  if (!Array.isArray(optionScores) || optionScores.length !== (question.options && question.options.length)) {
+    return { valid: false, errors: [`optionScores must be an array of length ${question.options?.length || 0}.`] };
+  }
+  const allowedSet = new Set(allowedDimensionIds || []);
+  const errors = [];
+  optionScores.forEach((item, i) => {
+    if (item == null || typeof item !== 'object') {
+      errors.push(`optionScores[${i}] must be an object with "dimensionScores".`);
+      return;
+    }
+    const ds = item.dimensionScores;
+    if (ds == null || typeof ds !== 'object') {
+      errors.push(`optionScores[${i}].dimensionScores must be an object.`);
+      return;
+    }
+    Object.keys(ds).forEach((dimId) => {
+      if (!allowedSet.has(dimId)) {
+        errors.push(`optionScores[${i}].dimensionScores has unexpected key "${dimId}". Allowed: ${allowedDimensionIds.join(', ')}.`);
+      }
+      const v = ds[dimId];
+      const n = Number(v);
+      if (!Number.isInteger(n) || n < scoreMin || n > scoreMax) {
+        errors.push(`optionScores[${i}].dimensionScores.${dimId} must be an integer from ${scoreMin} to ${scoreMax}. Got: ${v}.`);
+      }
+    });
+  });
+  return { valid: errors.length === 0, errors };
+}
+
+async function assignDimensionScores(question, dimensionSet) {
+  const dimensionsWithScale = (dimensionSet || []).filter((d) => d.score_scale && typeof d.score_scale === 'object');
+  const allowedIds = dimensionsWithScale.map((d) => d.dimensionId);
+  const scoreMin = dimensionsWithScale[0]?.score_scale?.min != null ? dimensionsWithScale[0].score_scale.min : 1;
+  const scoreMax = dimensionsWithScale[0]?.score_scale?.max != null ? dimensionsWithScale[0].score_scale.max : 5;
+
+  const systemContent = getScenarioStep2SystemPrompt();
+  const userContent = buildAssignScoresUserPrompt(question, dimensionSet);
+  const messages = [
+    { role: 'system', content: systemContent },
+    { role: 'user', content: userContent },
+  ];
+  let content = (await ollamaClient.chat(messages)).content;
+  let parsed = parseResponse(content);
+  let optionScores = parsed && parsed.optionScores;
+  let validation = validateOptionScoresResponse(optionScores, question, allowedIds, scoreMin, scoreMax);
+  if (!validation.valid) {
+    console.warn('[LLM] Step 2 optionScores validation failed, requesting one correction:', validation.errors);
+    messages.push({ role: 'assistant', content });
+    messages.push({ role: 'user', content: buildCorrectionUserMessage(content, validation.errors) });
+    content = (await ollamaClient.chat(messages)).content;
+    parsed = parseResponse(content);
+    optionScores = parsed && parsed.optionScores;
+    validation = validateOptionScoresResponse(optionScores, question, allowedIds, scoreMin, scoreMax);
+    if (!validation.valid) {
+      console.warn('[LLM] Step 2 correction still invalid:', validation.errors);
+      return null;
+    }
+  }
+  return optionScores;
+}
+
+async function generateScenarioQuestionTwoStep(dimensionSet, askedTitles, answers, preSurveyProfile, preferredResponseType, batchTheme, dilemmaAnchor) {
+  if (!dimensionSet || dimensionSet.length === 0) return { assessmentSummary: null, nextQuestion: null };
+  const primary = dimensionSet[0];
+  const theme = batchTheme && typeof batchTheme === 'string' ? batchTheme.trim() : null;
+  const anchor = dilemmaAnchor && typeof dilemmaAnchor === 'string' ? dilemmaAnchor.trim() : null;
+
+  const step1Result = await generateScenarioOnly(primary, theme, askedTitles || [], answers, preSurveyProfile, preferredResponseType, anchor);
+  if (!step1Result || !step1Result.nextQuestion) return { assessmentSummary: step1Result?.assessmentSummary || null, nextQuestion: null };
+  const question = step1Result.nextQuestion;
+
+  const optionScores = await assignDimensionScores(question, dimensionSet);
+  if (!optionScores) return { assessmentSummary: step1Result.assessmentSummary || null, nextQuestion: null };
+
+  for (let i = 0; i < question.options.length; i++) {
+    question.options[i].dimensionScores = optionScores[i] && optionScores[i].dimensionScores ? optionScores[i].dimensionScores : {};
+  }
+
+  const dimensionsWithScale = dimensionSet.filter((d) => d.score_scale && typeof d.score_scale === 'object');
+  const scoringOptions =
+    dimensionsWithScale.length > 0
+      ? {
+          expectedDimensionIds: dimensionsWithScale.map((d) => d.dimensionId),
+          scoreMin: dimensionsWithScale[0].score_scale.min != null ? dimensionsWithScale[0].score_scale.min : 1,
+          scoreMax: dimensionsWithScale[0].score_scale.max != null ? dimensionsWithScale[0].score_scale.max : 5,
+          allowPartialDimensionScores: true,
+        }
+      : null;
+  const finalValidation = validateNextQuestionObject(question, true, scoringOptions);
+  if (!finalValidation.valid) {
+    console.warn('[LLM] Merged question validation failed:', finalValidation.errors);
+    return { assessmentSummary: step1Result.assessmentSummary || null, nextQuestion: null };
+  }
+  return { assessmentSummary: step1Result.assessmentSummary || null, nextQuestion: question };
 }
 
 const SCENARIO_SYSTEM_BASE = `You are the Built for Tomorrow interview assistant. Your task is to generate exactly ONE scenario-based interview question.
@@ -432,66 +757,18 @@ function buildScenarioUserPrompt(dimensionSet, askedTitles, answers, preferredRe
 
 /**
  * Generate one scenario-based question that probes the given dimension set.
- * On validation failure, gives the LLM one chance to correct (sends errors back); if still invalid, returns null.
- * Question id is NOT returned; the caller assigns it.
- * @param {Array<object>} dimensionSet - [{ dimensionType, dimensionId, name, question_hints, how_measured_or_observed }]
+ * Uses two-step flow: step 1 scenario only (primary/theme), step 2 assign dimensionScores (partial allowed).
+ * @param {Array<object>} dimensionSet - [{ dimensionType, dimensionId, name, question_hints, how_measured_or_observed, score_scale? }]
  * @param {string[]} askedQuestionTitles - Titles of questions already asked (for deduplication)
  * @param {Array<object>} answers - Previous answers
  * @param {object} [preSurveyProfile] - Pre-survey profile for tailoring
+ * @param {string} [preferredResponseType] - single_choice, multi_choice, or rank
+ * @param {string} [batchTheme] - Optional batch theme for step 1 (e.g. "Team, belonging, and ownership")
+ * @param {string} [dilemmaAnchor] - Optional situation-only hint for step 1 (no trait words)
  * @returns {Promise<{ assessmentSummary?: string, nextQuestion: object | null }>}
  */
-async function generateScenarioQuestion(dimensionSet, askedQuestionTitles, answers, preSurveyProfile = null, preferredResponseType = null) {
-  const tailoring = buildTailoringBlock(preSurveyProfile);
-  const systemContent = getScenarioSystemPrompt() + tailoring;
-  const userContent = buildScenarioUserPrompt(dimensionSet, askedQuestionTitles || [], answers, preferredResponseType);
-
-  const dimensionsWithScale = (dimensionSet || []).filter((d) => d.score_scale && typeof d.score_scale === 'object');
-  const scoringOptions =
-    dimensionsWithScale.length > 0
-      ? {
-          expectedDimensionIds: dimensionsWithScale.map((d) => d.dimensionId),
-          scoreMin: dimensionsWithScale[0].score_scale.min != null ? dimensionsWithScale[0].score_scale.min : 1,
-          scoreMax: dimensionsWithScale[0].score_scale.max != null ? dimensionsWithScale[0].score_scale.max : 5,
-        }
-      : null;
-
-  let messages = [
-    { role: 'system', content: systemContent },
-    { role: 'user', content: userContent },
-  ];
-
-  const validateAndReturn = (content) => {
-    const parsed = parseResponse(content);
-    if (!parsed || typeof parsed !== 'object') return { valid: false, errors: ['Response could not be parsed as JSON.'], assessmentSummary: null, nextQuestion: null };
-    const q = parsed.nextQuestion;
-    const qValidation = q ? validateNextQuestionObject(q, true, scoringOptions) : { valid: false, errors: ['Missing nextQuestion.'] };
-    if (!qValidation.valid) return { valid: false, errors: qValidation.errors, assessmentSummary: parsed.assessmentSummary || null, nextQuestion: null };
-    const { id, ...rest } = q;
-    return { valid: true, assessmentSummary: parsed.assessmentSummary || null, nextQuestion: rest };
-  };
-
-  let content = (await ollamaClient.chat(messages)).content;
-  let result = validateAndReturn(content);
-
-  if (!result.valid) {
-    console.warn('[LLM] Scenario question validation failed, requesting one correction:', result.errors);
-    messages.push({ role: 'assistant', content });
-    messages.push({
-      role: 'user',
-      content: buildCorrectionUserMessage(content, result.errors),
-    });
-    content = (await ollamaClient.chat(messages)).content;
-    result = validateAndReturn(content);
-    if (!result.valid) {
-      console.warn('[LLM] Scenario question correction still invalid:', result.errors);
-      return { assessmentSummary: result.assessmentSummary || null, nextQuestion: null };
-    }
-  }
-
-  return {
-    assessmentSummary: result.assessmentSummary || null,
-    nextQuestion: result.nextQuestion,
-  };
+async function generateScenarioQuestion(dimensionSet, askedQuestionTitles, answers, preSurveyProfile = null, preferredResponseType = null, batchTheme = null, dilemmaAnchor = null) {
+  return generateScenarioQuestionTwoStep(dimensionSet, askedQuestionTitles || [], answers, preSurveyProfile, preferredResponseType, batchTheme, dilemmaAnchor);
 }
 
 /**
@@ -569,6 +846,10 @@ module.exports = {
   generateScenarioQuestion,
   buildUserPrompt,
   buildScenarioUserPrompt,
+  buildScenarioOnlyUserPrompt,
   buildTailoringBlock,
   validateNextQuestionObject,
+  checkForbiddenWords,
+  getForbiddenWordsList,
+  getScenarioOnlySystemPrompt,
 };

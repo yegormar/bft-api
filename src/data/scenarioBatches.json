@@ -11,6 +11,7 @@
     {
       "id": "batch_01",
       "theme": "Team, belonging, and ownership",
+      "dilemmaAnchor": "A situation where something is submitted or presented and there is a real choice about whose name is on it or who presents it, or how the group is represented.",
       "dimensions": [
         { "dimensionType": "trait", "dimensionId": "social_collaboration" },
         { "dimensionType": "value", "dimensionId": "belonging_community" },
@@ -78,6 +79,7 @@
     {
       "id": "batch_09",
       "theme": "Collaboration and credit",
+      "dilemmaAnchor": "A situation where something is submitted or presented and there is a real choice about whose name is on it or who presents it.",
       "dimensions": [
         { "dimensionType": "trait", "dimensionId": "social_collaboration" },
         { "dimensionType": "value", "dimensionId": "recognition_visibility" }
@@ -86,6 +88,7 @@
     {
       "id": "batch_10",
       "theme": "Ownership and visibility",
+      "dilemmaAnchor": "A situation where something is submitted or presented and there is a real choice about whose name is on it or who presents it.",
       "dimensions": [
         { "dimensionType": "trait", "dimensionId": "comfort_ambiguous_ownership" },
         { "dimensionType": "value", "dimensionId": "recognition_visibility" }

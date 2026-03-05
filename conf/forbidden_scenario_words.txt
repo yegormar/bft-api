@@ -1,0 +1,21 @@
+# Forbidden words in generated scenario title, description, and options (one term per line).
+# Case-insensitive substring match. Empty lines and lines starting with # are ignored.
+# If this file is missing or empty, the in-code default list in ollamaInterview.js is used.
+responsibility
+full responsibility
+integrity
+balance
+work-life
+challenge
+flexibility
+teamwork
+delegate
+delegation
+stretch goal
+comfort zone
+free time
+split the work
+divide the task
+take charge
+other commitments
+take full responsibility

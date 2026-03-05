@@ -66,14 +66,32 @@ if (storeDir) {
 /** Map dimensionType (singular) to coverage object key (plural) so we read/write the same keys. */
 const COVERAGE_KEY_BY_TYPE = { aptitude: 'aptitudes', trait: 'traits', value: 'values', skill: 'skills' };
 
+let devMaxQuestionsLogged = false;
+
 /** Weights for rank order: 1st = 1.0, 2nd = 0.6, 3rd = 0.3; positions 4+ contribute 0. */
 const RANK_WEIGHTS = [1, 0.6, 0.3];
 
 function getInterviewConfig() {
   const minRaw = process.env.MIN_SIGNAL_PER_DIMENSION;
   const minSignal = minRaw !== undefined && minRaw !== '' ? parseInt(minRaw, 10) : 1;
-  const maxRaw = process.env.MAX_INTERVIEW_QUESTIONS;
-  const maxQuestions = maxRaw !== undefined && maxRaw !== '' ? parseInt(maxRaw, 10) : undefined;
+  let maxQuestions;
+  if (config.nodeEnv === 'development') {
+    const devMaxRaw = process.env.BFT_DEV_MAX_QUESTIONS;
+    if (devMaxRaw !== undefined && devMaxRaw !== '') {
+      const devMax = parseInt(devMaxRaw, 10);
+      if (!Number.isNaN(devMax) && devMax >= 1) {
+        maxQuestions = devMax;
+        if (!devMaxQuestionsLogged) {
+          devMaxQuestionsLogged = true;
+          console.log('[bft] dev max questions cap active: %s', maxQuestions);
+        }
+      }
+    }
+  }
+  if (maxQuestions == null) {
+    const maxRaw = process.env.MAX_INTERVIEW_QUESTIONS;
+    maxQuestions = maxRaw !== undefined && maxRaw !== '' ? parseInt(maxRaw, 10) : undefined;
+  }
   return { minSignalPerDimension: minSignal, maxQuestions };
 }
 
@@ -140,7 +158,7 @@ function isInterviewComplete(coverage, config, model, totalQuestionsAsked = 0) {
   return true;
 }
 
-/** Enrich a batch's dimensions with name, question_hints, how_measured, score_scale from assessment model. */
+/** Enrich a batch's dimensions with name, description, question_hints, how_measured, score_scale from assessment model. */
 function enrichBatchDimensionSet(batch, model) {
   const m = model || assessmentModel.load();
   return (batch.dimensions || []).map((d) => {
@@ -149,6 +167,7 @@ function enrichBatchDimensionSet(batch, model) {
       dimensionType: d.dimensionType,
       dimensionId: d.dimensionId,
       name: (full && full.name) || d.dimensionId,
+      description: (full && full.description) || '',
       question_hints: (full && full.question_hints) || [],
       how_measured_or_observed: (full && full.how_measured_or_observed) || '',
     };
@@ -193,6 +212,8 @@ function selectNextBatch(state, model) {
     batchId: batch.id,
     dimensionSet,
     preferredResponseType: batch.preferredResponseType,
+    batchTheme: batch.theme ?? null,
+    dilemmaAnchor: batch.dilemmaAnchor ?? null,
   };
 }
 
@@ -652,6 +673,8 @@ function runBackgroundPregeneration(sessionId, lastQuestion, lastDimensionSet, b
           askedQuestionTitles: currentAskedTitles,
           answers: currentAnswers,
           preferredResponseType,
+          batchTheme: batchSelection?.batchTheme ?? null,
+          dilemmaAnchor: batchSelection?.dilemmaAnchor ?? null,
         });
         const nextQuestion = result?.question;
         const assessmentSummary = result?.assessmentSummary ?? null;
@@ -809,6 +832,8 @@ async function getNextQuestion(sessionId, bftUserId) {
     askedQuestionTitles: state.askedQuestionTitles,
     answers,
     preferredResponseType,
+    batchTheme: batchSelection?.batchTheme ?? null,
+    dilemmaAnchor: batchSelection?.dilemmaAnchor ?? null,
   });
 
   let nextQuestion;

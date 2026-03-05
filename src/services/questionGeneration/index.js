@@ -22,6 +22,8 @@ function createProcessor() {
       storeDir,
       bftUserId,
       preferredResponseType,
+      batchTheme,
+      dilemmaAnchor,
     } = context;
 
     if (ollamaClient.config.enabled) {
@@ -32,7 +34,9 @@ function createProcessor() {
         preSurveyProfile ?? null,
         timeoutMs,
         ollamaInterview.generateScenarioQuestion,
-        preferredResponseType ?? null
+        preferredResponseType ?? null,
+        batchTheme ?? null,
+        dilemmaAnchor ?? null
       );
       if (llmResult && llmResult.nextQuestion && typeof llmResult.nextQuestion === 'object' && llmResult.nextQuestion.title) {
         return {
