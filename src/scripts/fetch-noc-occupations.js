@@ -6,15 +6,23 @@
  *
  * Run from the bft-api project root:
  *   node src/scripts/fetch-noc-occupations.js <elements.csv> <output.json>
- * Or set NOC_ELEMENTS_CSV and NOC_JSON_OUTPUT in .env.
+ * Or set NOC_ELEMENTS_CSV and NOC_JSON_OUTPUT in scripts/.env (see scripts/scripts.env.example).
  *
  * Config: NOC_ELEMENTS_CSV (or first CLI arg) and NOC_JSON_OUTPUT (or second CLI arg) required.
- * See env.example.
  */
 
 const fs = require('fs');
 const path = require('path');
-require('dotenv').config();
+
+const PROJECT_ROOT = path.resolve(__dirname, '..', '..');
+const scriptsEnvPath = path.join(__dirname, '.env');
+const projectEnvPath = path.join(PROJECT_ROOT, '.env');
+if (fs.existsSync(projectEnvPath)) {
+  require('dotenv').config({ path: projectEnvPath });
+}
+if (fs.existsSync(scriptsEnvPath)) {
+  require('dotenv').config({ path: scriptsEnvPath, override: true });
+}
 
 const { parse } = require('csv-parse/sync');
 
@@ -44,10 +52,10 @@ function getConfig() {
   const csvPath = process.argv[2] || process.env.NOC_ELEMENTS_CSV;
   const outputPath = process.argv[3] || process.env.NOC_JSON_OUTPUT;
   if (!csvPath || String(csvPath).trim() === '') {
-    exit('CSV path is required. Set NOC_ELEMENTS_CSV in .env or pass as first argument (e.g. node fetch-noc-occupations.js ./docs/noc_2021_version_1.0_-_elements.csv ./data/noc-2021.json). See env.example.');
+    exit('CSV path is required. Set NOC_ELEMENTS_CSV in scripts/.env (see scripts/scripts.env.example) or pass as first argument (e.g. node fetch-noc-occupations.js ./docs/noc_2021_version_1.0_-_elements.csv ./data/noc-2021.json).');
   }
   if (!outputPath || String(outputPath).trim() === '') {
-    exit('Output path is required. Set NOC_JSON_OUTPUT in .env or pass as second argument. See env.example.');
+    exit('Output path is required. Set NOC_JSON_OUTPUT in scripts/.env (see scripts/scripts.env.example) or pass as second argument.');
   }
   const csvResolved = path.isAbsolute(csvPath) ? csvPath : path.resolve(process.cwd(), csvPath.trim());
   const outputResolved = path.isAbsolute(outputPath) ? outputPath : path.resolve(process.cwd(), outputPath.trim());

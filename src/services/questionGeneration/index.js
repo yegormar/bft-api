@@ -1,6 +1,6 @@
 /**
  * Question generation component: FIFO queue, LLM with timeout, store fallback.
- * Single entry point: requestQuestion(context) => Promise<{ question, dimensionSet, assessmentSummary, source } | null>
+ * Single entry point: requestQuestion(context) => Promise<{ question, dimensionSet?, assessmentSummary?, source? } | { question: null, reason: string }>
  */
 
 const ollamaClient = require('../../lib/ollamaClient');
@@ -15,6 +15,7 @@ function createProcessor() {
   return async function processOne(context) {
     const { timeoutMs } = getQuestionGenConfig();
     const {
+      sessionId,
       desiredDimensionSet,
       askedQuestionTitles,
       answers,
@@ -25,6 +26,8 @@ function createProcessor() {
       batchTheme,
       dilemmaAnchor,
     } = context;
+
+    let nullReason = null;
 
     if (ollamaClient.config.enabled) {
       const llmResult = await generateScenarioQuestionWithTimeout(
@@ -41,11 +44,18 @@ function createProcessor() {
       if (llmResult && llmResult.nextQuestion && typeof llmResult.nextQuestion === 'object' && llmResult.nextQuestion.title) {
         return {
           question: llmResult.nextQuestion,
-          dimensionSet: desiredDimensionSet,
+          dimensionSet: Array.isArray(llmResult.dimensionSet) && llmResult.dimensionSet.length > 0 ? llmResult.dimensionSet : desiredDimensionSet,
           assessmentSummary: llmResult.assessmentSummary ?? null,
           source: 'llm',
         };
       }
+      if (!llmResult) {
+        nullReason = 'LLM returned null (timeout or error; check for [bft] question generation timed out / failed above)';
+      } else {
+        nullReason = 'LLM result invalid (missing nextQuestion or title)';
+      }
+    } else {
+      nullReason = 'LLM disabled';
     }
 
     if (storeDir) {
@@ -65,9 +75,13 @@ function createProcessor() {
           source: 'store',
         };
       }
+      nullReason = (nullReason ? nullReason + '; ' : '') + 'store had no unused question for this profile';
+    } else {
+      nullReason = (nullReason ? nullReason + '; ' : '') + 'store not configured (no storeDir)';
     }
 
-    return null;
+    console.warn('[bft] question generator returning null sessionId=%s reason=%s', sessionId || '(no sessionId)', nullReason);
+    return { question: null, reason: nullReason };
   };
 }
 
@@ -76,7 +90,7 @@ const queue = createQueue(createProcessor());
 /**
  * Request a question for the given context. Enqueues to FIFO; when processed, tries LLM with timeout then store fallback.
  * @param {object} context - { sessionId, bftUserId, preSurveyProfile, storeDir, desiredDimensionSet, askedQuestionTitles, answers }
- * @returns {Promise<{ question: object, dimensionSet: Array<object>, assessmentSummary: string | null, source: 'llm'|'store' } | null>}
+ * @returns {Promise<{ question: object, dimensionSet: Array<object>, assessmentSummary: string | null, source: 'llm'|'store' } | { question: null, reason: string }>}
  */
 async function requestQuestion(context) {
   return queue.enqueue(context);

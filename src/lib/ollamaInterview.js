@@ -9,32 +9,11 @@ const path = require('path');
 const fs = require('fs');
 const ollamaClient = require('./ollamaClient');
 const llmConfig = require('../../config/llm');
+const assessmentModel = require('../data/assessmentModel');
 
 const PROJECT_ROOT = path.resolve(__dirname, '..', '..');
-const PERSONALITY_CLUSTERS_PATH = path.join(PROJECT_ROOT, 'conf', 'personality_clusters.json');
-const SCENARIO_DESIGN_INSTRUCTIONS_PATH = path.join(PROJECT_ROOT, 'conf', 'scenario_design_instructions.txt');
-const FORBIDDEN_SCENARIO_WORDS_PATH = path.join(PROJECT_ROOT, 'conf', 'forbidden_scenario_words.txt');
-
-const DEFAULT_FORBIDDEN_SCENARIO_WORDS = [
-  'responsibility',
-  'full responsibility',
-  'integrity',
-  'balance',
-  'work-life',
-  'challenge',
-  'flexibility',
-  'teamwork',
-  'delegate',
-  'delegation',
-  'stretch goal',
-  'comfort zone',
-  'free time',
-  'split the work',
-  'divide the task',
-  'take charge',
-  'other commitments',
-  'take full responsibility',
-];
+const PERSONALITY_CLUSTERS_PATH = path.join(PROJECT_ROOT, 'src', 'data', 'personality_clusters.json');
+const SCENARIO_DESIGN_INSTRUCTIONS_PATH = path.join(PROJECT_ROOT, 'conf', 'legacy', 'scenario_design_instructions.txt');
 
 function resolveScenarioStepPath(envKey, examplePath) {
   const raw = process.env[envKey];
@@ -44,13 +23,15 @@ function resolveScenarioStepPath(envKey, examplePath) {
   }
   const resolved = path.isAbsolute(raw) ? raw : path.join(PROJECT_ROOT, raw);
   if (!fs.existsSync(resolved)) {
+    const legacyPath = path.join(PROJECT_ROOT, 'conf', 'legacy', path.basename(raw));
+    if (fs.existsSync(legacyPath)) return legacyPath;
     console.error(`[config] ${envKey} does not exist: ${resolved}`);
     process.exit(1);
   }
   return resolved;
 }
-const SCENARIO_STEP1_INSTRUCTIONS_PATH = resolveScenarioStepPath('BFT_SCENARIO_STEP1_INSTRUCTIONS_FILE', 'conf/scenario_step1_instructions.txt');
-const SCENARIO_STEP2_INSTRUCTIONS_PATH = resolveScenarioStepPath('BFT_SCENARIO_STEP2_INSTRUCTIONS_FILE', 'conf/scenario_step2_instructions.txt');
+const SCENARIO_STEP1_INSTRUCTIONS_PATH = resolveScenarioStepPath('BFT_SCENARIO_STEP1_INSTRUCTIONS_FILE', 'conf/scenario_step1.txt');
+const SCENARIO_STEP2_INSTRUCTIONS_PATH = resolveScenarioStepPath('BFT_SCENARIO_STEP2_INSTRUCTIONS_FILE', 'conf/scenario_step2.txt');
 
 let personalityClustersCache = null;
 
@@ -69,16 +50,6 @@ function getPersonalityClusters() {
     return [];
   }
 }
-
-/** Human-readable labels for scenario settings in the tailoring prompt. */
-const SCENARIO_SETTING_LABELS = {
-  school: 'school (projects, classes, deadlines)',
-  work: 'work or part-time job',
-  hobbies: 'hobbies or side projects',
-  sports: 'sports or team activities',
-  social: 'friends or social situations',
-  online: 'online or tech (games, apps, communities)',
-};
 
 /** One-line style synthesis: avoid contradictions (e.g. neutral "no metaphor" vs gaming "game-like"). */
 function synthesizeStyleLine(dominantNames, byShort) {
@@ -138,7 +109,7 @@ function buildVoiceLine(preSurveyProfile, byShort) {
 
 /**
  * Build a short, non-contradictory tailoring block for the system prompt.
- * Uses AUDIENCE, SETTINGS, STYLE (with secondary blend), AVOID, TONE, COMPLEXITY.
+ * Uses AUDIENCE, STYLE (with secondary blend), AVOID, TONE, COMPLEXITY.
  */
 function buildTailoringBlock(preSurveyProfile) {
   if (!preSurveyProfile || typeof preSurveyProfile !== 'object') return '';
@@ -153,15 +124,6 @@ function buildTailoringBlock(preSurveyProfile) {
   if (demographics && (demographics.ageGroup || demographics.gender)) {
     const audience = [demographics.ageGroup, demographics.gender].filter(Boolean).join(', ');
     if (audience) lines.push(`AUDIENCE: ${audience}.`);
-  }
-
-  // SETTINGS: preferred scenario contexts from Q7
-  const preferredSettings = preSurveyProfile.preferredSettings;
-  if (Array.isArray(preferredSettings) && preferredSettings.length > 0) {
-    const labels = preferredSettings
-      .map((s) => SCENARIO_SETTING_LABELS[s] || s)
-      .join(', ');
-    lines.push(`SETTINGS: Prefer scenarios set in: ${labels}. Anchor dilemmas in these contexts when possible.`);
   }
 
   // STYLE: dominant and secondary blend
@@ -403,43 +365,6 @@ function getScenarioDesignInstructions() {
   }
 }
 
-function getForbiddenWordsList() {
-  try {
-    if (fs.existsSync(FORBIDDEN_SCENARIO_WORDS_PATH)) {
-      const raw = fs.readFileSync(FORBIDDEN_SCENARIO_WORDS_PATH, 'utf8');
-      const terms = raw
-        .split('\n')
-        .map((line) => line.trim().toLowerCase())
-        .filter((t) => t.length > 0 && !t.startsWith('#'));
-      return terms.length > 0 ? terms : DEFAULT_FORBIDDEN_SCENARIO_WORDS;
-    }
-  } catch {
-    // fall through to default
-  }
-  return DEFAULT_FORBIDDEN_SCENARIO_WORDS;
-}
-
-/**
- * Check scenario title, description, and option texts for forbidden words (case-insensitive substring).
- * @param {object} question - { title?, description?, options?: Array<{ text? }> }
- * @param {string[]} forbiddenList - list of forbidden terms (lowercase)
- * @returns {{ ok: boolean, found: string[] }}
- */
-function checkForbiddenWords(question, forbiddenList) {
-  const found = [];
-  const texts = [];
-  if (question.title && typeof question.title === 'string') texts.push(question.title);
-  if (question.description && typeof question.description === 'string') texts.push(question.description);
-  (question.options || []).forEach((opt) => {
-    if (opt && typeof opt.text === 'string') texts.push(opt.text);
-  });
-  const combined = texts.join(' ').toLowerCase();
-  (forbiddenList || []).forEach((term) => {
-    if (term && combined.includes(term.toLowerCase())) found.push(term);
-  });
-  return { ok: found.length === 0, found };
-}
-
 function getScenarioStep1Instructions() {
   try {
     return fs.readFileSync(SCENARIO_STEP1_INSTRUCTIONS_PATH, 'utf8').trim();
@@ -457,37 +382,94 @@ function getScenarioStep2Instructions() {
 }
 
 const STEP1_FORMAT_LINE = `
+
 Response format: reply with exactly one JSON object. No markdown, no code fences.
-- "completed": false
-- "nextQuestion": object with "title" (string), "description" (string, 2-3 sentence scenario), "type" ("single_choice", "multi_choice", or "rank"), "options" (array of {"text": string, "value": string} only; do NOT include dimensionScores). For "rank" do not use maxSelections. Do NOT include "id".
-- "assessmentSummary": optional 1-2 sentence summary.
+- "nextQuestions": array of exactly 3 scenario objects. Each scenario: "title" (string), "description" (string, 2-3 sentences), "type" ("single_choice", "multi_choice", or "rank"), "options" (array of {"text": string, "value": string} only; do NOT include dimensionScores). For "rank" do not use maxSelections. Do NOT include "id".
 `;
 
+/** Build the "THE DIMENSION YOU ARE MEASURING" block so the LLM always knows which trait/value to design for. */
+function buildDimensionBlockForStep1(primaryDimension) {
+  if (!primaryDimension || !primaryDimension.name) return '';
+  const scale = primaryDimension.score_scale && typeof primaryDimension.score_scale === 'object' ? primaryDimension.score_scale : {};
+  const interp = scale.interpretation || {};
+  const lines = [
+    '',
+    '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━',
+    'THE DIMENSION YOU ARE MEASURING',
+    '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━',
+    '',
+    `Name: ${primaryDimension.name}`,
+    '',
+    `Description: ${primaryDimension.description || ''}`,
+    '',
+    `How it manifests behaviorally: ${primaryDimension.how_measured_or_observed || ''}`,
+    '',
+    'Scoring scale:',
+    `- Low (1-2): ${interp.low || 'low'}`,
+    `- Medium (3): ${interp.medium || 'medium'}`,
+    `- High (4-5): ${interp.high || 'high'}`,
+    '',
+  ];
+  return lines.join('\n');
+}
+
+/**
+ * Build Step 1 system prompt: load step1 template and replace dimension placeholders.
+ * If the template has no dimension placeholders, appends the dimension block so the LLM always sees which trait/value is being assessed.
+ * @param {object} primaryDimension - one enriched dimension (name, description, how_measured_or_observed, score_scale)
+ * @returns {string}
+ */
+function getScenarioStep1SystemPromptWithDimension(primaryDimension) {
+  const rawStep1 = getScenarioStep1Instructions();
+  if (!rawStep1) return 'Generate exactly 3 scenario-based interview questions. Output JSON: { "nextQuestions": [ ... ] }.';
+  let step1 = rawStep1;
+  const scale = primaryDimension && primaryDimension.score_scale && typeof primaryDimension.score_scale === 'object' ? primaryDimension.score_scale : {};
+  const interp = scale.interpretation || {};
+  const replacements = {
+    '{{DIMENSION_NAME}}': (primaryDimension && primaryDimension.name) || 'the dimension',
+    '{{DIMENSION_DESCRIPTION}}': (primaryDimension && primaryDimension.description) || '',
+    '{{HOW_MEASURED_OR_OBSERVED}}': (primaryDimension && primaryDimension.how_measured_or_observed) || '',
+    '{{LOW_INTERPRETATION}}': interp.low || 'low',
+    '{{MEDIUM_INTERPRETATION}}': interp.medium || 'medium',
+    '{{HIGH_INTERPRETATION}}': interp.high || 'high',
+  };
+  Object.keys(replacements).forEach((key) => {
+    step1 = step1.split(key).join(replacements[key]);
+  });
+  if (primaryDimension && !rawStep1.includes('{{DIMENSION_NAME}}')) {
+    step1 = step1 + buildDimensionBlockForStep1(primaryDimension);
+  }
+  return step1 + STEP1_FORMAT_LINE;
+}
+
 function getScenarioOnlySystemPrompt() {
-  const designInstructions = getScenarioDesignInstructions();
   const step1 = getScenarioStep1Instructions();
   const base = step1 || 'Design one scenario with one clear dilemma and options as direct responses.';
-  const combined = designInstructions ? designInstructions + '\n\n---\n\n' + base : base;
-  return combined + STEP1_FORMAT_LINE;
+  return base + STEP1_FORMAT_LINE;
 }
 
-function getScenarioStep2SystemPrompt() {
-  const step2 = getScenarioStep2Instructions();
-  return step2 || 'Assign dimensionScores (1-5) per option only for dimensions this scenario differentiates. Output JSON: { "optionScores": [ { "dimensionScores": { "dimId": 1..5 } }, ... ] } in option order.';
+/**
+ * Build Step 2 system prompt. When primaryDimension is provided, prepends the dimension being assessed so the LLM always sees which trait/value is being scored.
+ * @param {object} [primaryDimension] - enriched primary dimension (name, dimensionId); when present, prepends "The dimension you are scoring for: ..."
+ * @returns {string}
+ */
+function getScenarioStep2SystemPrompt(primaryDimension) {
+  let step2 = getScenarioStep2Instructions();
+  if (!step2) step2 = 'Assign dimensionScores (1-5) per option only for dimensions this scenario differentiates. Output JSON: { "optionScores": [ { "dimensionScores": { "dimId": 1..5 } }, ... ] } in option order.';
+  if (primaryDimension && primaryDimension.name && primaryDimension.dimensionId) {
+    const header = `The dimension you are scoring for: ${primaryDimension.name} (dimension ID: ${primaryDimension.dimensionId}). The user message will list the exact score scale; assign optionScores for the chosen scenario only.\n\n`;
+    step2 = header + step2;
+  }
+  return step2;
 }
 
-function buildScenarioOnlyUserPrompt(primaryDimension, batchTheme, askedTitles, answers, preferredResponseType, dilemmaAnchor) {
-  const lines = ['Generate one scenario-based interview question.'];
-  const anchor = typeof dilemmaAnchor === 'string' && dilemmaAnchor.trim() ? dilemmaAnchor.trim() : null;
-  if (anchor) {
-    lines.push('Dilemma anchor (situation only, no trait words): ' + anchor);
-  } else {
-    lines.push('Design one concrete dilemma with a real trade-off. Different choices should be defensible; do not name any trait or value.');
+function buildScenarioStep1UserPrompt(askedTitles, answers, primaryDimension) {
+  const lines = [];
+  if (primaryDimension && primaryDimension.name && primaryDimension.dimensionId) {
+    lines.push(`Design exactly 3 scenarios that probe this dimension: ${primaryDimension.name} (ID: ${primaryDimension.dimensionId}). See the system prompt for description and scoring scale.`);
+    lines.push('');
   }
-  lines.push('Do not include dimensionScores in options. Output options with only "text" and "value".');
-  if (preferredResponseType && ['single_choice', 'multi_choice', 'rank'].includes(preferredResponseType)) {
-    lines.push(`Preferred response type: ${preferredResponseType}. Use it if it fits; otherwise choose the best fit.`);
-  }
+  lines.push('Generate exactly 3 scenarios as specified. Do not include dimensionScores in options.');
   if (askedTitles.length > 0) {
     lines.push('');
     lines.push('Do not repeat or rephrase these already-asked questions:');
@@ -501,7 +483,7 @@ function buildScenarioOnlyUserPrompt(primaryDimension, batchTheme, askedTitles, 
     lines.push(`- "${title}" → ${Array.isArray(v) ? JSON.stringify(v) : v}`);
   });
   lines.push('');
-  lines.push('Reply with one JSON object: { "completed": false, "nextQuestion": { "title", "description", "type", "options" (each with "text", "value" only) }, "assessmentSummary"?: "..." }. No "id" in nextQuestion.');
+  lines.push('Reply with one JSON object: { "nextQuestions": [ scenario1, scenario2, scenario3 ] }. No markdown, no code fences.');
   return lines.join('\n');
 }
 
@@ -535,56 +517,76 @@ function buildAssignScoresUserPrompt(question, dimensionSet) {
   return lines.join('\n');
 }
 
-async function generateScenarioOnly(primaryDimension, batchTheme, askedTitles, answers, preSurveyProfile, preferredResponseType, dilemmaAnchor) {
+/**
+ * Build Step 2 user prompt: all 3 scenarios + primary dimension. LLM chooses best and assigns scores.
+ * @param {Array<object>} threeScenarios - 3 questions (title, description, type, options)
+ * @param {object} primaryDimension - enriched primary dimension
+ * @returns {string}
+ */
+function buildStep2SelectAndScoreUserPrompt(threeScenarios, primaryDimension) {
+  const lines = [
+    'You have 3 scenarios below. Choose the best one for this interview, then assign optionScores for the chosen scenario only.',
+    '',
+    'Primary dimension (required in optionScores):',
+    `- ${primaryDimension.dimensionId}: ${primaryDimension.name}`,
+    '',
+  ];
+  const scale = primaryDimension.score_scale && typeof primaryDimension.score_scale === 'object' ? primaryDimension.score_scale : {};
+  const interp = scale.interpretation || {};
+  lines.push(`Score scale for ${primaryDimension.dimensionId}: low (1-2) = ${interp.low || 'low'}; medium (3) = ${interp.medium || 'medium'}; high (4-5) = ${interp.high || 'high'}.`);
+  lines.push('');
+  threeScenarios.forEach((q, idx) => {
+    lines.push(`--- Scenario ${idx} ---`);
+    lines.push(`Title: ${(q.title || '').trim() || '(none)'}`);
+    lines.push(`Description: ${(q.description || '').trim() || '(none)'}`);
+    lines.push(`Type: ${q.type || 'single_choice'}`);
+    lines.push('Options:');
+    (q.options || []).forEach((opt, i) => {
+      lines.push(`  ${i + 1}. value="${opt.value}" text="${(opt.text || '').trim() || ''}"`);
+    });
+    lines.push('');
+  });
+  lines.push('Reply with JSON: { "chosenScenarioIndex": 0|1|2, "optionScores": [ { "dimensionScores": { "' + primaryDimension.dimensionId + '": 1-5, ... } }, ... ] }. optionScores must have one element per option of the CHOSEN scenario only. You may add other dimension IDs to dimensionScores if the scenario clearly differentiates them.');
+  return lines.join('\n');
+}
+
+async function generateScenarioOnly(primaryDimension, askedTitles, answers, preSurveyProfile) {
   const tailoring = buildTailoringBlock(preSurveyProfile);
-  const systemContent = getScenarioOnlySystemPrompt() + tailoring;
-  const userContent = buildScenarioOnlyUserPrompt(primaryDimension, batchTheme, askedTitles || [], answers, preferredResponseType, dilemmaAnchor);
+  const systemContent =
+    getScenarioStep1SystemPromptWithDimension(primaryDimension)
+    + (tailoring ? '\n\n' + tailoring : '');
+  const userContent = buildScenarioStep1UserPrompt(askedTitles || [], answers, primaryDimension);
   const messages = [
     { role: 'system', content: systemContent },
     { role: 'user', content: userContent },
   ];
   let content = (await ollamaClient.chat(messages)).content;
   let parsed = parseResponse(content);
-  let q = parsed && parsed.nextQuestion;
-  let validation = q ? validateNextQuestionObject(q, true, null) : { valid: false, errors: ['Missing nextQuestion.'] };
-  if (!validation.valid) {
-    console.warn('[LLM] Step 1 scenario validation failed, requesting one correction:', validation.errors);
-    messages.push({ role: 'assistant', content });
-    messages.push({ role: 'user', content: buildCorrectionUserMessage(content, validation.errors) });
-    content = (await ollamaClient.chat(messages)).content;
-    parsed = parseResponse(content);
-    q = parsed && parsed.nextQuestion;
-    validation = q ? validateNextQuestionObject(q, true, null) : { valid: false, errors: ['Missing nextQuestion.'] };
-    if (!validation.valid) {
-      console.warn('[LLM] Step 1 correction still invalid:', validation.errors);
-      return null;
-    }
-  }
-  const forbiddenList = getForbiddenWordsList();
-  let forbiddenCheck = checkForbiddenWords(q, forbiddenList);
-  if (!forbiddenCheck.ok) {
-    console.warn('[LLM] Step 1 scenario contains forbidden words, requesting one revision:', forbiddenCheck.found);
+  let nextQuestions = Array.isArray(parsed && parsed.nextQuestions) ? parsed.nextQuestions : [];
+  if (nextQuestions.length !== 3) {
+    console.warn('[LLM] Step 1 expected 3 scenarios, got:', nextQuestions.length);
     messages.push({ role: 'assistant', content });
     messages.push({
       role: 'user',
-      content: `Your scenario or options contain words we must avoid: ${forbiddenCheck.found.join(', ')}. Reply with a revised scenario (same JSON format) that avoids these words.`,
+      content: 'You must reply with exactly 3 scenarios in the "nextQuestions" array. Reply with one JSON object: { "nextQuestions": [ scenario1, scenario2, scenario3 ] }. No markdown.',
     });
     content = (await ollamaClient.chat(messages)).content;
     parsed = parseResponse(content);
-    q = parsed && parsed.nextQuestion;
-    const revalidate = q ? validateNextQuestionObject(q, true, null) : { valid: false, errors: ['Missing nextQuestion.'] };
-    if (!revalidate.valid) {
-      console.warn('[LLM] Step 1 revision after forbidden-words check failed validation:', revalidate.errors);
-      return null;
-    }
-    forbiddenCheck = checkForbiddenWords(q, forbiddenList);
-    if (!forbiddenCheck.ok) {
-      console.warn('[LLM] Step 1 revision still contains forbidden words:', forbiddenCheck.found);
-      return null;
-    }
+    nextQuestions = Array.isArray(parsed && parsed.nextQuestions) ? parsed.nextQuestions : [];
+    if (nextQuestions.length !== 3) return null;
   }
-  const { id, ...rest } = q;
-  return { nextQuestion: rest, assessmentSummary: parsed.assessmentSummary || null };
+  const validated = [];
+  for (let i = 0; i < 3; i++) {
+    const q = nextQuestions[i];
+    const validation = q ? validateNextQuestionObject(q, true, null) : { valid: false, errors: ['Missing scenario.'] };
+    if (!validation.valid) {
+      console.warn('[LLM] Step 1 scenario', i, 'validation failed:', validation.errors);
+      return null;
+    }
+    const { id, ...rest } = q;
+    validated.push(rest);
+  }
+  return { nextQuestions: validated };
 }
 
 function validateOptionScoresResponse(optionScores, question, allowedDimensionIds, scoreMin, scoreMax) {
@@ -649,28 +651,89 @@ async function assignDimensionScores(question, dimensionSet) {
   return optionScores;
 }
 
+/**
+ * Step 2: one LLM call with all 3 scenarios. LLM chooses best and assigns optionScores for chosen scenario.
+ * Returns the chosen question with dimensionScores merged and dimensionSet (primary + any secondary from optionScores).
+ * @param {Array<object>} threeScenarios - 3 questions (title, description, type, options without dimensionScores)
+ * @param {object} primaryDimension - enriched primary dimension
+ * @returns {Promise<{ question: object, dimensionSet: Array<{ dimensionType: string, dimensionId: string }> } | null>}
+ */
+async function selectBestScenarioAndAssignScores(threeScenarios, primaryDimension) {
+  const systemContent = getScenarioStep2SystemPrompt(primaryDimension);
+  const userContent = buildStep2SelectAndScoreUserPrompt(threeScenarios, primaryDimension);
+  const messages = [
+    { role: 'system', content: systemContent },
+    { role: 'user', content: userContent },
+  ];
+  const content = (await ollamaClient.chat(messages)).content;
+  const parsed = parseResponse(content);
+  const chosenIndex = parsed && typeof parsed.chosenScenarioIndex === 'number' ? parsed.chosenScenarioIndex : null;
+  if (chosenIndex == null || chosenIndex < 0 || chosenIndex > 2) {
+    console.warn('[LLM] Step 2 invalid chosenScenarioIndex:', chosenIndex);
+    return null;
+  }
+  const chosen = threeScenarios[chosenIndex];
+  if (!chosen || !Array.isArray(chosen.options)) {
+    console.warn('[LLM] Step 2 chosen scenario missing or has no options');
+    return null;
+  }
+  const optionScores = Array.isArray(parsed.optionScores) ? parsed.optionScores : [];
+  if (optionScores.length !== chosen.options.length) {
+    console.warn('[LLM] Step 2 optionScores length', optionScores.length, 'does not match chosen scenario options', chosen.options.length);
+    return null;
+  }
+  const scoreMin = primaryDimension.score_scale && primaryDimension.score_scale.min != null ? primaryDimension.score_scale.min : 1;
+  const scoreMax = primaryDimension.score_scale && primaryDimension.score_scale.max != null ? primaryDimension.score_scale.max : 5;
+  const primaryId = primaryDimension.dimensionId;
+  const allDimensionIds = new Set([primaryId]);
+  for (const item of optionScores) {
+    if (item && item.dimensionScores && typeof item.dimensionScores === 'object') {
+      Object.keys(item.dimensionScores).forEach((id) => allDimensionIds.add(id));
+    }
+  }
+  for (const item of optionScores) {
+    if (!item || !item.dimensionScores || typeof item.dimensionScores[primaryId] !== 'number') {
+      console.warn('[LLM] Step 2 optionScores missing primary dimension', primaryId);
+      return null;
+    }
+    const n = Number(item.dimensionScores[primaryId]);
+    if (!Number.isInteger(n) || n < scoreMin || n > scoreMax) {
+      console.warn('[LLM] Step 2 primary score out of range:', item.dimensionScores[primaryId]);
+      return null;
+    }
+  }
+  const question = { ...chosen, options: chosen.options.map((opt, i) => ({ ...opt, dimensionScores: (optionScores[i] && optionScores[i].dimensionScores) || {} })) };
+  const dimensionSet = [{ dimensionType: primaryDimension.dimensionType, dimensionId: primaryDimension.dimensionId }];
+  for (const dimId of allDimensionIds) {
+    if (dimId === primaryId) continue;
+    const asTrait = assessmentModel.getDimension('trait', dimId);
+    const asValue = assessmentModel.getDimension('value', dimId);
+    if (asTrait) dimensionSet.push({ dimensionType: 'trait', dimensionId: dimId });
+    else if (asValue) dimensionSet.push({ dimensionType: 'value', dimensionId: dimId });
+  }
+  return { question, dimensionSet };
+}
+
 async function generateScenarioQuestionTwoStep(dimensionSet, askedTitles, answers, preSurveyProfile, preferredResponseType, batchTheme, dilemmaAnchor) {
   if (!dimensionSet || dimensionSet.length === 0) return { assessmentSummary: null, nextQuestion: null };
   const primary = dimensionSet[0];
-  const theme = batchTheme && typeof batchTheme === 'string' ? batchTheme.trim() : null;
-  const anchor = dilemmaAnchor && typeof dilemmaAnchor === 'string' ? dilemmaAnchor.trim() : null;
 
-  const step1Result = await generateScenarioOnly(primary, theme, askedTitles || [], answers, preSurveyProfile, preferredResponseType, anchor);
-  if (!step1Result || !step1Result.nextQuestion) return { assessmentSummary: step1Result?.assessmentSummary || null, nextQuestion: null };
-  const question = step1Result.nextQuestion;
+  const step1Result = await generateScenarioOnly(primary, askedTitles || [], answers, preSurveyProfile);
+  if (!step1Result || !step1Result.nextQuestions || step1Result.nextQuestions.length !== 3) return { assessmentSummary: null, nextQuestion: null };
 
-  const optionScores = await assignDimensionScores(question, dimensionSet);
-  if (!optionScores) return { assessmentSummary: step1Result.assessmentSummary || null, nextQuestion: null };
+  const step2Result = await selectBestScenarioAndAssignScores(step1Result.nextQuestions, primary);
+  if (!step2Result || !step2Result.question) return { assessmentSummary: null, nextQuestion: null };
 
-  for (let i = 0; i < question.options.length; i++) {
-    question.options[i].dimensionScores = optionScores[i] && optionScores[i].dimensionScores ? optionScores[i].dimensionScores : {};
-  }
-
-  const dimensionsWithScale = dimensionSet.filter((d) => d.score_scale && typeof d.score_scale === 'object');
+  const question = step2Result.question;
+  const dimensionSetForValidation = step2Result.dimensionSet || [primary];
+  const dimensionsWithScale = dimensionSetForValidation
+    .map((d) => assessmentModel.getDimension(d.dimensionType, d.dimensionId))
+    .filter(Boolean)
+    .filter((d) => d.score_scale && typeof d.score_scale === 'object');
   const scoringOptions =
     dimensionsWithScale.length > 0
       ? {
-          expectedDimensionIds: dimensionsWithScale.map((d) => d.dimensionId),
+          expectedDimensionIds: dimensionsWithScale.map((d) => d.id),
           scoreMin: dimensionsWithScale[0].score_scale.min != null ? dimensionsWithScale[0].score_scale.min : 1,
           scoreMax: dimensionsWithScale[0].score_scale.max != null ? dimensionsWithScale[0].score_scale.max : 5,
           allowPartialDimensionScores: true,
@@ -679,9 +742,9 @@ async function generateScenarioQuestionTwoStep(dimensionSet, askedTitles, answer
   const finalValidation = validateNextQuestionObject(question, true, scoringOptions);
   if (!finalValidation.valid) {
     console.warn('[LLM] Merged question validation failed:', finalValidation.errors);
-    return { assessmentSummary: step1Result.assessmentSummary || null, nextQuestion: null };
+    return { assessmentSummary: null, nextQuestion: null };
   }
-  return { assessmentSummary: step1Result.assessmentSummary || null, nextQuestion: question };
+  return { assessmentSummary: null, nextQuestion: question, dimensionSet: step2Result.dimensionSet };
 }
 
 const SCENARIO_SYSTEM_BASE = `You are the Built for Tomorrow interview assistant. Your task is to generate exactly ONE scenario-based interview question.
@@ -768,7 +831,8 @@ function buildScenarioUserPrompt(dimensionSet, askedTitles, answers, preferredRe
  * @returns {Promise<{ assessmentSummary?: string, nextQuestion: object | null }>}
  */
 async function generateScenarioQuestion(dimensionSet, askedQuestionTitles, answers, preSurveyProfile = null, preferredResponseType = null, batchTheme = null, dilemmaAnchor = null) {
-  return generateScenarioQuestionTwoStep(dimensionSet, askedQuestionTitles || [], answers, preSurveyProfile, preferredResponseType, batchTheme, dilemmaAnchor);
+  const result = await generateScenarioQuestionTwoStep(dimensionSet, askedQuestionTitles || [], answers, preSurveyProfile, preferredResponseType, batchTheme, dilemmaAnchor);
+  return result;
 }
 
 /**
@@ -846,10 +910,10 @@ module.exports = {
   generateScenarioQuestion,
   buildUserPrompt,
   buildScenarioUserPrompt,
-  buildScenarioOnlyUserPrompt,
+  buildScenarioStep1UserPrompt,
   buildTailoringBlock,
   validateNextQuestionObject,
-  checkForbiddenWords,
-  getForbiddenWordsList,
   getScenarioOnlySystemPrompt,
+  getScenarioStep1SystemPromptWithDimension,
+  getScenarioStep2SystemPrompt,
 };

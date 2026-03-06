@@ -33,7 +33,12 @@ async function generateScenarioQuestionWithTimeout(
       timeoutPromise,
     ]);
     return result;
-  } catch {
+  } catch (err) {
+    if (err && err.message === 'timeout') {
+      console.warn('[bft] question generation timed out after %dms', timeoutMs);
+    } else {
+      console.warn('[bft] question generation failed:', err && err.message ? err.message : err);
+    }
     return null;
   }
 }

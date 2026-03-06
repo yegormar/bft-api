@@ -77,10 +77,6 @@
         {
           "id": "ambiguity_resilience",
           "compatibilityRating": 5
-        },
-        {
-          "id": "motivation_drivers",
-          "compatibilityRating": 4
         }
       ],
       "valueMappings": [
@@ -213,10 +209,6 @@
         },
         {
           "id": "ambiguity_resilience",
-          "compatibilityRating": 4
-        },
-        {
-          "id": "motivation_drivers",
           "compatibilityRating": 4
         }
       ],
@@ -486,10 +478,6 @@
         {
           "id": "ambiguity_resilience",
           "compatibilityRating": 4
-        },
-        {
-          "id": "motivation_drivers",
-          "compatibilityRating": 4
         }
       ],
       "valueMappings": [
@@ -719,10 +707,6 @@
         },
         {
           "id": "ambiguity_resilience",
-          "compatibilityRating": 4
-        },
-        {
-          "id": "motivation_drivers",
           "compatibilityRating": 4
         }
       ],
@@ -1355,10 +1339,6 @@
         {
           "id": "ambiguity_resilience",
           "compatibilityRating": 4
-        },
-        {
-          "id": "motivation_drivers",
-          "compatibilityRating": 4
         }
       ],
       "valueMappings": [
@@ -1770,10 +1750,6 @@
       "traitMappings": [
         {
           "id": "adaptability_learning",
-          "compatibilityRating": 4
-        },
-        {
-          "id": "motivation_drivers",
           "compatibilityRating": 4
         }
       ],
@@ -3547,12 +3523,7 @@
           "compatibilityRating": 4
         }
       ],
-      "traitMappings": [
-        {
-          "id": "motivation_drivers",
-          "compatibilityRating": 4
-        }
-      ],
+      "traitMappings": [],
       "valueMappings": [
         {
           "id": "security_stability",
@@ -5018,12 +4989,7 @@
           "compatibilityRating": 4
         }
       ],
-      "traitMappings": [
-        {
-          "id": "motivation_drivers",
-          "compatibilityRating": 4
-        }
-      ],
+      "traitMappings": [],
       "valueMappings": [
         {
           "id": "security_stability",
@@ -5421,12 +5387,7 @@
           "compatibilityRating": 4
         }
       ],
-      "traitMappings": [
-        {
-          "id": "motivation_drivers",
-          "compatibilityRating": 4
-        }
-      ],
+      "traitMappings": [],
       "valueMappings": [
         {
           "id": "security_stability",
@@ -5510,12 +5471,7 @@
           "compatibilityRating": 4
         }
       ],
-      "traitMappings": [
-        {
-          "id": "motivation_drivers",
-          "compatibilityRating": 4
-        }
-      ],
+      "traitMappings": [],
       "valueMappings": [
         {
           "id": "security_stability",
@@ -9893,10 +9849,6 @@
         {
           "id": "adaptability_learning",
           "compatibilityRating": 5
-        },
-        {
-          "id": "motivation_drivers",
-          "compatibilityRating": 4
         }
       ],
       "valueMappings": [
@@ -11991,10 +11943,6 @@
         {
           "id": "ambiguity_resilience",
           "compatibilityRating": 4
-        },
-        {
-          "id": "motivation_drivers",
-          "compatibilityRating": 4
         }
       ],
       "valueMappings": [
@@ -12954,10 +12902,6 @@
         {
           "id": "adaptability_learning",
           "compatibilityRating": 5
-        },
-        {
-          "id": "motivation_drivers",
-          "compatibilityRating": 4
         }
       ],
       "valueMappings": [
@@ -15784,10 +15728,6 @@
         {
           "id": "ambiguity_resilience",
           "compatibilityRating": 4
-        },
-        {
-          "id": "motivation_drivers",
-          "compatibilityRating": 4
         }
       ],
       "valueMappings": [
@@ -16076,10 +16016,6 @@
         {
           "id": "social_collaboration",
           "compatibilityRating": 5
-        },
-        {
-          "id": "motivation_drivers",
-          "compatibilityRating": 4
         }
       ],
       "valueMappings": [
@@ -16167,10 +16103,6 @@
         {
           "id": "social_collaboration",
           "compatibilityRating": 5
-        },
-        {
-          "id": "motivation_drivers",
-          "compatibilityRating": 4
         }
       ],
       "valueMappings": [
@@ -16253,10 +16185,6 @@
         {
           "id": "ambiguity_resilience",
           "compatibilityRating": 5
-        },
-        {
-          "id": "motivation_drivers",
-          "compatibilityRating": 4
         }
       ],
       "valueMappings": [
@@ -17158,10 +17086,6 @@
         {
           "id": "ambiguity_resilience",
           "compatibilityRating": 5
-        },
-        {
-          "id": "motivation_drivers",
-          "compatibilityRating": 4
         }
       ],
       "valueMappings": [
@@ -17477,10 +17401,6 @@
         },
         {
           "id": "ambiguity_resilience",
-          "compatibilityRating": 4
-        },
-        {
-          "id": "motivation_drivers",
           "compatibilityRating": 4
         }
       ],
@@ -19455,10 +19375,6 @@
         {
           "id": "social_collaboration",
           "compatibilityRating": 5
-        },
-        {
-          "id": "motivation_drivers",
-          "compatibilityRating": 4
         }
       ],
       "valueMappings": [
@@ -19862,10 +19778,6 @@
         {
           "id": "ambiguity_resilience",
           "compatibilityRating": 5
-        },
-        {
-          "id": "motivation_drivers",
-          "compatibilityRating": 4
         }
       ],
       "valueMappings": [
@@ -20501,10 +20413,6 @@
         {
           "id": "social_collaboration",
           "compatibilityRating": 5
-        },
-        {
-          "id": "motivation_drivers",
-          "compatibilityRating": 4
         }
       ],
       "valueMappings": [
@@ -20687,10 +20595,6 @@
         {
           "id": "adaptability_learning",
           "compatibilityRating": 5
-        },
-        {
-          "id": "motivation_drivers",
-          "compatibilityRating": 4
         }
       ],
       "valueMappings": [
@@ -21443,10 +21347,6 @@
         {
           "id": "experimentation_risk_tolerance",
           "compatibilityRating": 5
-        },
-        {
-          "id": "motivation_drivers",
-          "compatibilityRating": 4
         }
       ],
       "valueMappings": [
@@ -21547,10 +21447,6 @@
         }
       ],
       "traitMappings": [
-        {
-          "id": "motivation_drivers",
-          "compatibilityRating": 5
-        },
         {
           "id": "social_collaboration",
           "compatibilityRating": 4
@@ -22487,10 +22383,6 @@
         {
           "id": "adaptability_learning",
           "compatibilityRating": 4
-        },
-        {
-          "id": "motivation_drivers",
-          "compatibilityRating": 4
         }
       ],
       "valueMappings": [
@@ -22911,10 +22803,6 @@
         {
           "id": "experimentation_risk_tolerance",
           "compatibilityRating": 5
-        },
-        {
-          "id": "motivation_drivers",
-          "compatibilityRating": 4
         }
       ],
       "valueMappings": [
@@ -23168,10 +23056,6 @@
         {
           "id": "experimentation_risk_tolerance",
           "compatibilityRating": 5
-        },
-        {
-          "id": "motivation_drivers",
-          "compatibilityRating": 4
         }
       ],
       "valueMappings": [
@@ -23363,10 +23247,6 @@
         {
           "id": "adaptability_learning",
           "compatibilityRating": 5
-        },
-        {
-          "id": "motivation_drivers",
-          "compatibilityRating": 5
         }
       ],
       "valueMappings": [
@@ -23461,10 +23341,6 @@
         {
           "id": "social_collaboration",
           "compatibilityRating": 5
-        },
-        {
-          "id": "motivation_drivers",
-          "compatibilityRating": 4
         }
       ],
       "valueMappings": [
@@ -23831,10 +23707,6 @@
         {
           "id": "social_collaboration",
           "compatibilityRating": 5
-        },
-        {
-          "id": "motivation_drivers",
-          "compatibilityRating": 4
         }
       ],
       "valueMappings": [
@@ -25183,10 +25055,6 @@
         {
           "id": "ambiguity_resilience",
           "compatibilityRating": 4
-        },
-        {
-          "id": "motivation_drivers",
-          "compatibilityRating": 5
         }
       ],
       "valueMappings": [
@@ -25280,10 +25148,6 @@
       "traitMappings": [
         {
           "id": "adaptability_learning",
-          "compatibilityRating": 4
-        },
-        {
-          "id": "motivation_drivers",
           "compatibilityRating": 4
         }
       ],
@@ -25500,10 +25364,6 @@
         {
           "id": "social_collaboration",
           "compatibilityRating": 5
-        },
-        {
-          "id": "motivation_drivers",
-          "compatibilityRating": 4
         }
       ],
       "valueMappings": [
@@ -25966,12 +25826,7 @@
           "compatibilityRating": 4
         }
       ],
-      "traitMappings": [
-        {
-          "id": "motivation_drivers",
-          "compatibilityRating": 4
-        }
-      ],
+      "traitMappings": [],
       "valueMappings": [
         {
           "id": "creativity_self_expression",
@@ -26461,10 +26316,6 @@
         }
       ],
       "traitMappings": [
-        {
-          "id": "motivation_drivers",
-          "compatibilityRating": 5
-        },
         {
           "id": "adaptability_learning",
           "compatibilityRating": 4
@@ -27703,12 +27554,7 @@
           "compatibilityRating": 4
         }
       ],
-      "traitMappings": [
-        {
-          "id": "motivation_drivers",
-          "compatibilityRating": 4
-        }
-      ],
+      "traitMappings": [],
       "valueMappings": [
         {
           "id": "security_stability",
@@ -28333,12 +28179,7 @@
           "compatibilityRating": 4
         }
       ],
-      "traitMappings": [
-        {
-          "id": "motivation_drivers",
-          "compatibilityRating": 5
-        }
-      ],
+      "traitMappings": [],
       "valueMappings": [
         {
           "id": "helping_others_impact",
@@ -28553,12 +28394,7 @@
           "compatibilityRating": 4
         }
       ],
-      "traitMappings": [
-        {
-          "id": "motivation_drivers",
-          "compatibilityRating": 4
-        }
-      ],
+      "traitMappings": [],
       "valueMappings": [
         {
           "id": "security_stability",
@@ -29687,10 +29523,6 @@
         {
           "id": "social_collaboration",
           "compatibilityRating": 5
-        },
-        {
-          "id": "motivation_drivers",
-          "compatibilityRating": 4
         }
       ],
       "valueMappings": [
@@ -30780,10 +30612,6 @@
         {
           "id": "adaptability_learning",
           "compatibilityRating": 4
-        },
-        {
-          "id": "motivation_drivers",
-          "compatibilityRating": 4
         }
       ],
       "valueMappings": [
@@ -31016,10 +30844,6 @@
       "traitMappings": [
         {
           "id": "adaptability_learning",
-          "compatibilityRating": 4
-        },
-        {
-          "id": "motivation_drivers",
           "compatibilityRating": 4
         }
       ],
@@ -32227,12 +32051,7 @@
           "compatibilityRating": 4
         }
       ],
-      "traitMappings": [
-        {
-          "id": "motivation_drivers",
-          "compatibilityRating": 4
-        }
-      ],
+      "traitMappings": [],
       "valueMappings": [
         {
           "id": "mastery_growth",
@@ -32629,10 +32448,6 @@
         {
           "id": "adaptability_learning",
           "compatibilityRating": 5
-        },
-        {
-          "id": "motivation_drivers",
-          "compatibilityRating": 4
         }
       ],
       "valueMappings": [
@@ -33544,10 +33359,6 @@
         {
           "id": "adaptability_learning",
           "compatibilityRating": 4
-        },
-        {
-          "id": "motivation_drivers",
-          "compatibilityRating": 4
         }
       ],
       "valueMappings": [
@@ -33616,10 +33427,6 @@
         {
           "id": "adaptability_learning",
           "compatibilityRating": 5
-        },
-        {
-          "id": "motivation_drivers",
-          "compatibilityRating": 4
         }
       ],
       "valueMappings": [
@@ -34262,10 +34069,6 @@
         {
           "id": "ambiguity_resilience",
           "compatibilityRating": 5
-        },
-        {
-          "id": "motivation_drivers",
-          "compatibilityRating": 4
         }
       ],
       "valueMappings": [
@@ -34511,12 +34314,7 @@
           "compatibilityRating": 4
         }
       ],
-      "traitMappings": [
-        {
-          "id": "motivation_drivers",
-          "compatibilityRating": 4
-        }
-      ],
+      "traitMappings": [],
       "valueMappings": [
         {
           "id": "mastery_growth",
@@ -35959,12 +35757,7 @@
           "compatibilityRating": 4
         }
       ],
-      "traitMappings": [
-        {
-          "id": "motivation_drivers",
-          "compatibilityRating": 4
-        }
-      ],
+      "traitMappings": [],
       "valueMappings": [
         {
           "id": "security_stability",
@@ -36004,12 +35797,7 @@
           "compatibilityRating": 4
         }
       ],
-      "traitMappings": [
-        {
-          "id": "motivation_drivers",
-          "compatibilityRating": 4
-        }
-      ],
+      "traitMappings": [],
       "valueMappings": [
         {
           "id": "security_stability",
@@ -36761,12 +36549,7 @@
           "compatibilityRating": 4
         }
       ],
-      "traitMappings": [
-        {
-          "id": "motivation_drivers",
-          "compatibilityRating": 4
-        }
-      ],
+      "traitMappings": [],
       "valueMappings": [
         {
           "id": "security_stability",
@@ -37485,12 +37268,7 @@
           "compatibilityRating": 4
         }
       ],
-      "traitMappings": [
-        {
-          "id": "motivation_drivers",
-          "compatibilityRating": 4
-        }
-      ],
+      "traitMappings": [],
       "valueMappings": [
         {
           "id": "security_stability",
@@ -39907,12 +39685,7 @@
           "compatibilityRating": 4
         }
       ],
-      "traitMappings": [
-        {
-          "id": "motivation_drivers",
-          "compatibilityRating": 4
-        }
-      ],
+      "traitMappings": [],
       "valueMappings": [
         {
           "id": "work_life_balance_wellbeing",
@@ -40028,10 +39801,6 @@
         },
         {
           "id": "ambiguity_resilience",
-          "compatibilityRating": 4
-        },
-        {
-          "id": "motivation_drivers",
           "compatibilityRating": 4
         }
       ],
@@ -41790,10 +41559,6 @@
         {
           "id": "ambiguity_resilience",
           "compatibilityRating": 4
-        },
-        {
-          "id": "motivation_drivers",
-          "compatibilityRating": 4
         }
       ],
       "valueMappings": [
@@ -43097,12 +42862,7 @@
           "compatibilityRating": 4
         }
       ],
-      "traitMappings": [
-        {
-          "id": "motivation_drivers",
-          "compatibilityRating": 4
-        }
-      ],
+      "traitMappings": [],
       "valueMappings": [
         {
           "id": "security_stability",
@@ -44898,12 +44658,7 @@
           "compatibilityRating": 4
         }
       ],
-      "traitMappings": [
-        {
-          "id": "motivation_drivers",
-          "compatibilityRating": 4
-        }
-      ],
+      "traitMappings": [],
       "valueMappings": [
         {
           "id": "security_stability",
@@ -46002,12 +45757,7 @@
           "compatibilityRating": 4
         }
       ],
-      "traitMappings": [
-        {
-          "id": "motivation_drivers",
-          "compatibilityRating": 4
-        }
-      ],
+      "traitMappings": [],
       "valueMappings": [
         {
           "id": "security_stability",
@@ -46145,12 +45895,7 @@
           "compatibilityRating": 4
         }
       ],
-      "traitMappings": [
-        {
-          "id": "motivation_drivers",
-          "compatibilityRating": 4
-        }
-      ],
+      "traitMappings": [],
       "valueMappings": [
         {
           "id": "security_stability",
@@ -46967,12 +46712,7 @@
           "compatibilityRating": 4
         }
       ],
-      "traitMappings": [
-        {
-          "id": "motivation_drivers",
-          "compatibilityRating": 4
-        }
-      ],
+      "traitMappings": [],
       "valueMappings": [
         {
           "id": "security_stability",
@@ -48802,12 +48542,7 @@
           "compatibilityRating": 4
         }
       ],
-      "traitMappings": [
-        {
-          "id": "motivation_drivers",
-          "compatibilityRating": 4
-        }
-      ],
+      "traitMappings": [],
       "valueMappings": [
         {
           "id": "security_stability",
@@ -50178,12 +49913,7 @@
           "compatibilityRating": 4
         }
       ],
-      "traitMappings": [
-        {
-          "id": "motivation_drivers",
-          "compatibilityRating": 4
-        }
-      ],
+      "traitMappings": [],
       "valueMappings": [
         {
           "id": "security_stability",
@@ -50655,12 +50385,7 @@
           "compatibilityRating": 4
         }
       ],
-      "traitMappings": [
-        {
-          "id": "motivation_drivers",
-          "compatibilityRating": 4
-        }
-      ],
+      "traitMappings": [],
       "valueMappings": [
         {
           "id": "security_stability",
@@ -50944,12 +50669,7 @@
           "compatibilityRating": 4
         }
       ],
-      "traitMappings": [
-        {
-          "id": "motivation_drivers",
-          "compatibilityRating": 4
-        }
-      ],
+      "traitMappings": [],
       "valueMappings": [
         {
           "id": "security_stability",

@@ -136,28 +136,6 @@
           "high": "Stays effective and motivated in shifting environments; strong foundation for roles in AI-era transformation, governance, and system design."
         }
       }
-    },
-    {
-      "id": "motivation_drivers",
-      "name": "Motivation drivers (meta-trait)",
-      "description": "Summary pattern of what energizes the person across values: goals, mastery, recognition, helping others, novelty, stability, etc. Informs fit for roles that remain human-centric vs those that are being automated.",
-      "ai_future_rationale": "Stays – understanding what truly motivates someone remains essential for matching them to AI-era skill stacks and roles where they will persist and grow, not just survive.",
-      "how_measured_or_observed": "Self-report on what makes work satisfying; choice of activities in free time; alignment with gaming/competition, social, creative, strategic, or neutral clusters. In practice, often derived from scores on specific values rather than assessed independently.",
-      "question_hints": [
-        "What kind of work or activities make you feel most engaged?",
-        "Do you prefer competition and goals or collaboration and helping others?"
-      ],
-      "derived_from_values": true,
-      "related_skill_clusters": [],
-      "score_scale": {
-        "min": 1,
-        "max": 5,
-        "interpretation": {
-          "low": "No single strong motivational driver identified; suggests broader exploration and careful use of values to guide path choices.",
-          "medium": "Some clearer motivational themes; can be used alongside values to steer toward or away from certain clusters.",
-          "high": "Very distinct motivational profile (e.g. impact-first, autonomy-first); should strongly inform which AI-era skill and role clusters are recommended."
-        }
-      }
     }
   ]
 }

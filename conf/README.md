@@ -1,14 +1,14 @@
 # LLM configuration and prompts
 
-Paths here are relative to the bft-api project root. Referenced from `config/llm.js` via env (e.g. `LLM_SYSTEM_PROMPT_FILE=conf/assessment_system_prompt.txt`).
+Paths here are relative to the bft-api project root. Referenced from `config/llm.js` via env.
 
-- **assessment_system_prompt.txt** – System prompt for the interview (assess answers, generate next question as JSON).
-- **scenario_design_instructions.txt** – Instructions for designing scenario questions that are hard to reverse-engineer: indirect probing, anti-telegraphing (no dimension names or obvious synonyms in scenario/options), good vs bad examples, 2–3 sentence descriptions, short options, single_choice / multi_choice / rank. Prepended into the step-1 scenario-generation system prompt when using the two-step flow.
-- **forbidden_scenario_words.txt** – Optional. One forbidden term per line (case-insensitive substring match). Empty lines and lines starting with `#` are ignored. If this file is missing or empty, the in-code default list in `ollamaInterview.js` is used. After step 1 generates a scenario, title, description, and option texts are checked; if any term appears, the LLM is asked once to revise. Used to reduce telegraphing and virtue-word leakage in generated scenarios.
-- Optional: **handoff** or **web_search** suffix files can be added and wired via `LLM_HANDOFF_SYSTEM_PROMPT_FILE` / similar.
+**Active prompts (required where noted):**
+- **scenario_step1.txt**, **scenario_step2.txt** – Two-step scenario generation (design 3 scenarios, then assign scores). Required; wired via `BFT_SCENARIO_STEP1_INSTRUCTIONS_FILE`, `BFT_SCENARIO_STEP2_INSTRUCTIONS_FILE`.
 - **report_profile_system_prompt.txt** – System prompt for report profile summary (LLM synthesis: full narrative from Q&A). Required; wired via `LLM_REPORT_PROFILE_SYSTEM_PROMPT_FILE`. Process exits if unset or file missing.
 - **report_hybrid_system_prompt.txt** – System prompt for report hybrid summary (short narrative from explored dimensions). Required; wired via `LLM_REPORT_HYBRID_SYSTEM_PROMPT_FILE`. Process exits if unset or file missing.
 - **report_recommendations_system_prompt.txt** – System prompt for profession/career recommendations (recommended directions with fit, directions to avoid). Required; wired via `LLM_REPORT_RECOMMENDATIONS_SYSTEM_PROMPT_FILE`. Process exits if unset or file missing.
+
+- **conf/legacy/** – Unused/legacy prompt files. Not used by the current flow: assessment_system_prompt.txt (only used by assessAndGetNextQuestion, which is never called), scenario_design_instructions.txt (only read by getScenarioSystemPrompt, which is never called), scenario_step1_instructions.txt, scenario_step2_instructions.txt. Kept for reference.
 
 # Assessment model: aptitudes, traits, values, skills (interview + recommendations)
 

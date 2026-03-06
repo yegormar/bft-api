@@ -1,7 +1,7 @@
 'use strict';
 
-process.env.BFT_SCENARIO_STEP1_INSTRUCTIONS_FILE = 'conf/scenario_step1_instructions.txt';
-process.env.BFT_SCENARIO_STEP2_INSTRUCTIONS_FILE = 'conf/scenario_step2_instructions.txt';
+process.env.BFT_SCENARIO_STEP1_INSTRUCTIONS_FILE = 'conf/scenario_step1.txt';
+process.env.BFT_SCENARIO_STEP2_INSTRUCTIONS_FILE = 'conf/scenario_step2.txt';
 
 const { describe, it, beforeEach, afterEach } = require('node:test');
 const assert = require('node:assert');
@@ -11,9 +11,9 @@ const {
   validateNextQuestionObject,
   generateScenarioQuestion,
   getScenarioOnlySystemPrompt,
-  buildScenarioOnlyUserPrompt,
-  checkForbiddenWords,
-  getForbiddenWordsList,
+  buildScenarioStep1UserPrompt,
+  getScenarioStep1SystemPromptWithDimension,
+  getScenarioStep2SystemPrompt,
 } = require('../src/lib/ollamaInterview');
 
 describe('ollamaInterview', () => {
@@ -28,21 +28,21 @@ describe('ollamaInterview', () => {
       ollamaClient.chat = originalChat;
     });
 
-    it('returns question when step 1 and step 2 LLM responses are valid (two-step flow)', async () => {
+    it('returns question when step 1 (3 scenarios) and step 2 (choose + score) are valid', async () => {
+      const scenario = {
+        title: 'Pick one',
+        description: 'A short scenario.',
+        type: 'single_choice',
+        options: [{ text: 'A', value: 'a' }, { text: 'B', value: 'b' }],
+      };
       const step1Response = JSON.stringify({
-        completed: false,
-        nextQuestion: {
-          title: 'Pick one',
-          description: 'A short scenario.',
-          type: 'single_choice',
-          options: [{ text: 'A', value: 'a' }, { text: 'B', value: 'b' }],
-        },
-        assessmentSummary: 'Summary.',
+        nextQuestions: [scenario, { ...scenario, title: 'Second' }, { ...scenario, title: 'Third' }],
       });
       const step2Response = JSON.stringify({
+        chosenScenarioIndex: 0,
         optionScores: [
-          { dimensionScores: {} },
-          { dimensionScores: {} },
+          { dimensionScores: { x: 1 } },
+          { dimensionScores: { x: 2 } },
         ],
       });
       let callCount = 0;
@@ -54,7 +54,7 @@ describe('ollamaInterview', () => {
       };
 
       const dimensionSet = [
-        { dimensionType: 'trait', dimensionId: 'x', name: 'X', question_hints: [], how_measured_or_observed: '' },
+        { dimensionType: 'trait', dimensionId: 'x', name: 'X', question_hints: [], how_measured_or_observed: '', score_scale: { min: 1, max: 5, interpretation: {} } },
       ];
       const result = await generateScenarioQuestion(dimensionSet, [], [], null, null);
 
@@ -64,9 +64,11 @@ describe('ollamaInterview', () => {
       assert.strictEqual(result.nextQuestion.options.length, 2);
       assert.ok(typeof result.nextQuestion.options[0].dimensionScores === 'object');
       assert.ok(typeof result.nextQuestion.options[1].dimensionScores === 'object');
+      assert.strictEqual(result.dimensionSet.length, 1);
+      assert.strictEqual(result.dimensionSet[0].dimensionId, 'x');
     });
 
-    it('sends step 2 validation errors back to LLM and returns corrected response when step 2 retry is valid', async () => {
+    it('returns question when step 1 returns 3 scenarios and step 2 returns chosen index and optionScores', async () => {
       const dimensionSetWithScale = [
         {
           dimensionType: 'trait',
@@ -77,17 +79,17 @@ describe('ollamaInterview', () => {
           score_scale: { min: 1, max: 5, interpretation: { low: 'L', medium: 'M', high: 'H' } },
         },
       ];
+      const scenario = {
+        title: 'Team?',
+        description: 'Your team has to present next week. You can prepare solo or with others.',
+        type: 'single_choice',
+        options: [{ text: 'Solo', value: 'solo' }, { text: 'Team', value: 'team' }],
+      };
       const step1Response = JSON.stringify({
-        completed: false,
-        nextQuestion: {
-          title: 'Team?',
-          description: 'Your team has to present next week. You can prepare solo or with others.',
-          type: 'single_choice',
-          options: [{ text: 'Solo', value: 'solo' }, { text: 'Team', value: 'team' }],
-        },
+        nextQuestions: [scenario, { ...scenario, title: 'Second' }, { ...scenario, title: 'Third' }],
       });
-      const step2Invalid = JSON.stringify({ optionScores: [] });
-      const step2Valid = JSON.stringify({
+      const step2Response = JSON.stringify({
+        chosenScenarioIndex: 0,
         optionScores: [
           { dimensionScores: { collab: 1 } },
           { dimensionScores: { collab: 5 } },
@@ -95,27 +97,21 @@ describe('ollamaInterview', () => {
       });
 
       let callCount = 0;
-      let thirdCallMessages = null;
       ollamaClient.chat = async (messages) => {
         callCount += 1;
         if (callCount === 1) return { content: step1Response };
-        if (callCount === 2) return { content: step2Invalid };
-        thirdCallMessages = messages;
-        return { content: step2Valid };
+        return { content: step2Response };
       };
 
       const result = await generateScenarioQuestion(dimensionSetWithScale, [], [], null, null);
 
-      assert.strictEqual(callCount, 3, 'step 1, step 2 invalid, step 2 correction');
-      assert.ok(thirdCallMessages, 'third call (step 2 correction) should have been made');
-      assert.strictEqual(thirdCallMessages.length, 4, 'system, user, assistant, correction user');
-      assert.ok(thirdCallMessages[3].content.includes('Validation errors') || thirdCallMessages[3].content.includes('optionScores'), 'correction message lists errors');
+      assert.strictEqual(callCount, 2, 'step 1 then step 2');
       assert.ok(result.nextQuestion);
       assert.strictEqual(result.nextQuestion.options[0].dimensionScores.collab, 1);
       assert.strictEqual(result.nextQuestion.options[1].dimensionScores.collab, 5);
     });
 
-    it('returns null when step 1 response invalid and step 1 retry still invalid', async () => {
+    it('returns null when step 1 returns fewer than 3 scenarios', async () => {
       const dimensionSetWithScale = [
         {
           dimensionType: 'trait',
@@ -126,26 +122,25 @@ describe('ollamaInterview', () => {
           score_scale: { min: 1, max: 5, interpretation: { low: 'L', medium: 'M', high: 'H' } },
         },
       ];
-      const invalidStep1EmptyOptions = JSON.stringify({
-        completed: false,
-        nextQuestion: {
-          title: 'Team?',
-          type: 'single_choice',
-          options: [],
-        },
+      const step1ResponseTwoOnly = JSON.stringify({
+        nextQuestions: [
+          { title: 'One', description: 'D', type: 'single_choice', options: [{ text: 'A', value: 'a' }] },
+          { title: 'Two', description: 'D', type: 'single_choice', options: [{ text: 'A', value: 'a' }] },
+        ],
       });
 
       let callCount = 0;
       ollamaClient.chat = async (messages) => {
         callCount += 1;
-        return { content: invalidStep1EmptyOptions };
+        return { content: step1ResponseTwoOnly };
       };
 
       const result = await generateScenarioQuestion(dimensionSetWithScale, [], [], null, null);
 
-      assert.strictEqual(callCount, 2, 'step 1 then step 1 correction');
+      assert.ok(callCount >= 1, 'at least step 1 called');
       assert.strictEqual(result.nextQuestion, null);
     });
+
   });
 
   describe('validateNextQuestionObject', () => {
@@ -270,16 +265,17 @@ describe('ollamaInterview', () => {
           score_scale: { min: 1, max: 10, interpretation: { low: 'L', medium: 'M', high: 'H' } },
         },
       ];
+      const scenario = {
+        title: 'Impact?',
+        description: 'You can help one person a lot or many a little.',
+        type: 'single_choice',
+        options: [{ text: 'One', value: 'one' }, { text: 'Many', value: 'many' }],
+      };
       const step1Response = JSON.stringify({
-        completed: false,
-        nextQuestion: {
-          title: 'Impact?',
-          description: 'You can help one person a lot or many a little.',
-          type: 'single_choice',
-          options: [{ text: 'One', value: 'one' }, { text: 'Many', value: 'many' }],
-        },
+        nextQuestions: [scenario, { ...scenario, title: 'Second' }, { ...scenario, title: 'Third' }],
       });
       const step2Response = JSON.stringify({
+        chosenScenarioIndex: 0,
         optionScores: [
           { dimensionScores: { impact: 9 } },
           { dimensionScores: { impact: 3 } },
@@ -302,91 +298,61 @@ describe('ollamaInterview', () => {
   });
 
   describe('getScenarioOnlySystemPrompt', () => {
-    it('includes design instructions when scenario_design_instructions.txt is present', () => {
+    it('includes step1 content and nextQuestions format', () => {
       const prompt = getScenarioOnlySystemPrompt();
-      assert.ok(prompt.includes('INDIRECT PROBING') || prompt.includes('CORE PRINCIPLE'), 'step-1 system prompt should include design instructions');
-      assert.ok(prompt.includes('NEVER USE THESE') || prompt.includes('TELEGRAPHING'), 'design instructions should include forbidden-words section');
-    });
-  });
-
-  describe('buildScenarioOnlyUserPrompt', () => {
-    it('with dilemmaAnchor omits theme, primary idea, and question_hints', () => {
-      const primaryDimension = {
-        name: 'Human-human collaboration',
-        description: 'Team vs solo.',
-        how_measured_or_observed: 'Preference for team.',
-        question_hints: ['Do you prefer working with others?'],
-      };
-      const batchTheme = 'Team, belonging, and ownership';
-      const prompt = buildScenarioOnlyUserPrompt(
-        primaryDimension,
-        batchTheme,
-        [],
-        [],
-        null,
-        'A situation where something is submitted and there is a choice about whose name is on it.'
+      assert.ok(
+        prompt.includes('DESIGN PRINCIPLES') || prompt.includes('Indirection') || prompt.includes('THE DIMENSION YOU ARE MEASURING'),
+        'step-1 system prompt should include design or dimension section'
       );
-      assert.ok(prompt.includes('Dilemma anchor'), 'should include dilemma anchor line');
-      assert.ok(prompt.includes('whose name is on it'), 'should include the anchor text');
-      assert.ok(!prompt.includes('Human-human collaboration'), 'should not include primary dimension name');
-      assert.ok(!prompt.includes('Theme for this scenario'), 'should not include theme');
-      assert.ok(!prompt.includes('Hints for the dilemma'), 'should not include hints');
-      assert.ok(!prompt.includes('Do you prefer working with others'), 'should not include question_hints');
-    });
-
-    it('without dilemmaAnchor uses generic instruction and omits theme/dimension', () => {
-      const primaryDimension = { name: 'Collaboration', question_hints: ['Team or solo?'] };
-      const prompt = buildScenarioOnlyUserPrompt(primaryDimension, 'Some theme', [], [], null, null);
-      assert.ok(prompt.includes('Design one concrete dilemma'), 'should include generic instruction');
-      assert.ok(!prompt.includes('Primary idea'), 'should not include primary idea');
-      assert.ok(!prompt.includes('Theme for this scenario'), 'should not include theme');
+      assert.ok(prompt.includes('nextQuestions'), 'step-1 should request 3 scenarios (nextQuestions)');
     });
   });
 
-  describe('checkForbiddenWords', () => {
-    it('returns ok: true when no forbidden term appears', () => {
-      const list = ['responsibility', 'balance'];
-      const question = {
-        title: 'The Last-Minute Demo',
-        description: 'Your team has a demo in two hours. One path is to prepare alone; another is to split prep with a teammate.',
-        options: [{ text: "I'd prepare alone and present." }, { text: "I'd coordinate with my teammate and present together." }],
-      };
-      const r = checkForbiddenWords(question, list);
-      assert.strictEqual(r.ok, true);
-      assert.strictEqual(r.found.length, 0);
+  describe('buildScenarioStep1UserPrompt', () => {
+    it('asks for 3 scenarios and includes asked titles and answers', () => {
+      const prompt = buildScenarioStep1UserPrompt(['Q1', 'Q2'], [{ value: 'a' }, { value: 'b' }]);
+      assert.ok(prompt.includes('nextQuestions'), 'should request nextQuestions');
+      assert.ok(prompt.includes('Q1') && prompt.includes('Q2'), 'should list asked titles');
+      assert.ok(prompt.includes('a') && prompt.includes('b'), 'should include answer values');
     });
 
-    it('returns ok: false and found when forbidden term appears in title', () => {
-      const list = ['responsibility', 'balance'];
-      const question = {
-        title: 'Taking full responsibility',
-        description: 'A scenario.',
-        options: [{ text: 'Option A', value: 'a' }],
-      };
-      const r = checkForbiddenWords(question, list);
-      assert.strictEqual(r.ok, false);
-      assert.ok(r.found.includes('responsibility'));
+    it('with empty askedTitles and answers still requests 3 scenarios', () => {
+      const prompt = buildScenarioStep1UserPrompt([], []);
+      assert.ok(prompt.includes('Generate exactly 3 scenarios'));
+      assert.ok(prompt.includes('nextQuestions'));
     });
 
-    it('returns ok: false when forbidden term appears in description or option text', () => {
-      const list = ['split the work'];
-      const question = {
-        title: 'Demo',
-        description: 'You can split the work with your teammate or do it alone.',
-        options: [{ text: 'Do it alone', value: 'a' }, { text: 'Split with teammate', value: 'b' }],
-      };
-      const r = checkForbiddenWords(question, list);
-      assert.strictEqual(r.ok, false);
-      assert.ok(r.found.includes('split the work'));
+    it('includes dimension name and id when primaryDimension is provided', () => {
+      const primary = { name: 'Mastery and growth', dimensionId: 'mastery_growth' };
+      const prompt = buildScenarioStep1UserPrompt([], [], primary);
+      assert.ok(prompt.includes('Mastery and growth'), 'user prompt must state the dimension name');
+      assert.ok(prompt.includes('mastery_growth'), 'user prompt must state the dimension ID');
     });
   });
 
-  describe('getForbiddenWordsList', () => {
-    it('returns a non-empty array (default or from file)', () => {
-      const list = getForbiddenWordsList();
-      assert.ok(Array.isArray(list));
-      assert.ok(list.length > 0);
-      assert.ok(list.some((t) => t.includes('responsibility') || t.includes('balance')));
+  describe('getScenarioStep1SystemPromptWithDimension', () => {
+    it('includes the dimension name and id so the LLM knows what trait/value to design for', () => {
+      const primary = {
+        name: 'Mastery and growth',
+        dimensionId: 'mastery_growth',
+        description: 'Wants to learn and improve.',
+        how_measured_or_observed: 'Choices that favor challenge and learning.',
+        score_scale: { min: 1, max: 5, interpretation: { low: 'stable', medium: 'mixed', high: 'growth' } },
+      };
+      const systemPrompt = getScenarioStep1SystemPromptWithDimension(primary);
+      assert.ok(systemPrompt.includes('Mastery and growth'), 'step1 system prompt must include dimension name');
+      assert.ok(systemPrompt.includes('mastery_growth') || systemPrompt.includes('Mastery and growth'), 'step1 must identify the dimension');
+    });
+
+  });
+
+  describe('getScenarioStep2SystemPrompt', () => {
+    it('includes the dimension name and id so the LLM knows what trait/value is being scored', () => {
+      const primary = { name: 'Mastery and growth', dimensionId: 'mastery_growth' };
+      const systemPrompt = getScenarioStep2SystemPrompt(primary);
+      assert.ok(systemPrompt.includes('Mastery and growth'), 'step2 system prompt must include dimension name');
+      assert.ok(systemPrompt.includes('mastery_growth'), 'step2 system prompt must include dimension ID');
     });
   });
+
 });

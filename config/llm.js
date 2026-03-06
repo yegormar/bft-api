@@ -85,15 +85,21 @@ if (Number.isNaN(numCtx) || numCtx < 1) {
   exit(`LLM_NUM_CTX (or OLLAMA_NUM_CTX) must be a positive integer. Got: ${numCtxRaw}`);
 }
 
-const systemPromptFile = process.env.LLM_SYSTEM_PROMPT_FILE || null;
-if (!systemPromptFile || systemPromptFile.trim() === '') {
-  exit('LLM_SYSTEM_PROMPT_FILE is required. Set it in .env (e.g. conf/assessment_system_prompt.txt).');
-}
-const systemPromptPath = path.isAbsolute(systemPromptFile)
-  ? systemPromptFile
-  : path.join(PROJECT_ROOT, systemPromptFile);
-if (!fs.existsSync(systemPromptPath)) {
-  exit(`LLM_SYSTEM_PROMPT_FILE does not exist: ${systemPromptPath}`);
+/** Optional. Used only by legacy assessAndGetNextQuestion flow (not called by current app). When set, must exist (or exist in conf/legacy/). */
+const systemPromptFileRaw = (process.env.LLM_SYSTEM_PROMPT_FILE || '').trim();
+let systemPromptFile = systemPromptFileRaw || null;
+if (systemPromptFile) {
+  let systemPromptPath = path.isAbsolute(systemPromptFile)
+    ? systemPromptFile
+    : path.join(PROJECT_ROOT, systemPromptFile);
+  if (!fs.existsSync(systemPromptPath)) {
+    const legacyPath = path.join(PROJECT_ROOT, 'conf', 'legacy', path.basename(systemPromptFile));
+    if (fs.existsSync(legacyPath)) {
+      systemPromptFile = path.join('conf', 'legacy', path.basename(systemPromptFile));
+    } else {
+      exit(`LLM_SYSTEM_PROMPT_FILE does not exist: ${systemPromptPath}`);
+    }
+  }
 }
 
 const handoffSystemPromptFile = (process.env.LLM_HANDOFF_SYSTEM_PROMPT_FILE || '').trim();
@@ -193,7 +199,7 @@ const llm = {
   thinkLevel,
   /** For other thinking models (Qwen, DeepSeek): true/false from LLM_THINK. Ignored when model is GPT-OSS. */
   think,
-  systemPromptFile,
+  systemPromptFile: systemPromptFile || null,
   handoffSystemPromptFile: handoffSystemPromptFile || null,
   reportProfileSystemPromptFile,
   reportHybridSystemPromptFile,
@@ -208,7 +214,7 @@ const llm = {
   },
 
   getSystemPrompt() {
-    return loadPromptFile(this.systemPromptFile);
+    return this.systemPromptFile ? loadPromptFile(this.systemPromptFile) : null;
   },
 
   getHandoffSystemPrompt() {

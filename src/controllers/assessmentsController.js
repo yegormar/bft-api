@@ -38,6 +38,15 @@ async function getNextQuestion(req, res, next) {
     }
     const bftUserId = req.bftUserId || '';
     const result = await assessmentService.getNextQuestion(sessionId, bftUserId);
+    if (result.serviceUnavailable) {
+      res.status(503).json({
+        error: 'llm_unavailable',
+        message: result.message,
+        retryAfterSeconds: result.retryAfterSeconds,
+        progress: result.progress,
+      });
+      return;
+    }
     res.json(result);
   } catch (err) {
     next(err);

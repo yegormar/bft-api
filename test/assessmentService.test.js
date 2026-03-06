@@ -1,5 +1,7 @@
 'use strict';
 
+// Use a dedicated test port so tests do not conflict with a running dev server (e.g. PORT=3000).
+process.env.PORT = process.env.PORT || '39391';
 // Set env before any app module is loaded so config and background pregen behave correctly.
 const path = require('path');
 const os = require('os');
@@ -9,8 +11,8 @@ fs.mkdirSync(tmpDir, { recursive: true });
 process.env.BFT_QUESTIONS_STORE_DIR = tmpDir;
 process.env.BFT_SKIP_BACKGROUND_PREGEN = '1';
 process.env.BFT_QUESTION_LLM_TIMEOUT_MS = '5000';
-process.env.BFT_SCENARIO_STEP1_INSTRUCTIONS_FILE = 'conf/scenario_step1_instructions.txt';
-process.env.BFT_SCENARIO_STEP2_INSTRUCTIONS_FILE = 'conf/scenario_step2_instructions.txt';
+process.env.BFT_SCENARIO_STEP1_INSTRUCTIONS_FILE = 'conf/scenario_step1.txt';
+process.env.BFT_SCENARIO_STEP2_INSTRUCTIONS_FILE = 'conf/scenario_step2.txt';
 process.env.LLM_NUM_CTX = '32768';
 process.env.LLM_THINK = 'false';
 process.env.LLM_CHECKUP_INTERVAL_SEC = '180';
@@ -99,30 +101,44 @@ describe('assessmentService', () => {
       }
     });
 
-    it('uses MAIN_QUESTIONS fallback when component returns null, or gets LLM question when LLM succeeds', async () => {
-      const profile = { dominant: ['main-fallback-only-' + Date.now()] };
+    it('returns serviceUnavailable when component returns null, or next question when LLM succeeds', async () => {
+      const profile = { dominant: ['service-unavailable-test-' + Date.now()] };
       const session = sessionService.create(profile);
-      const bftUserId = 'user-main-fallback-' + Date.now();
+      const bftUserId = 'user-service-unavailable-' + Date.now();
       const result = await assessmentService.getNextQuestion(session.id, bftUserId);
       assert.strictEqual(result.completed, false);
-      assert.ok(result.nextQuestion && result.nextQuestion.title);
-      const mainFallbackTitles = [
-        'When facing a new problem, what do you usually do first?',
-        'What kind of work environment do you prefer?',
-        'How do you feel about learning something completely new?',
-      ];
-      const fromFallback = mainFallbackTitles.includes(result.nextQuestion.title);
-      assert.ok(fromFallback || result.nextQuestion.title.length > 0, 'expected MAIN_QUESTIONS fallback or LLM question');
+      if (result.serviceUnavailable) {
+        assert.strictEqual(result.nextQuestion, undefined);
+        assert.ok(result.message && result.message.length > 0);
+        assert.ok(result.progress);
+        assert.strictEqual(typeof result.retryAfterSeconds, 'number');
+      } else {
+        assert.ok(result.nextQuestion && result.nextQuestion.title);
+      }
     });
 
-    it('when scenario batches are loaded, progress reports totalDimensions from batch constraints (20)', async () => {
-      const session = sessionService.create(null);
-      const result = await assessmentService.getNextQuestion(session.id, 'user-batch-progress-' + Date.now());
-      assert.ok(result.progress, 'progress should be returned');
-      assert.strictEqual(typeof result.progress.totalDimensions, 'number');
-      assert.strictEqual(result.progress.totalDimensions, 20, 'with scenarioBatches.json loaded, totalDimensions should be 20');
-      assert.strictEqual(result.progress.questionsAsked, 1);
-      assert.ok(result.progress.percentComplete >= 0 && result.progress.percentComplete <= 100);
+    it('when scenario batches are loaded, progress reports totalDimensions from batch constraints or config', async () => {
+      const prevMax = process.env.MAX_INTERVIEW_QUESTIONS;
+      const prevDev = process.env.BFT_DEV_MAX_QUESTIONS;
+      process.env.MAX_INTERVIEW_QUESTIONS = '20';
+      delete process.env.BFT_DEV_MAX_QUESTIONS;
+      try {
+        const session = sessionService.create(null);
+        const result = await assessmentService.getNextQuestion(session.id, 'user-batch-progress-' + Date.now());
+        assert.ok(result.progress, 'progress should be returned');
+        assert.strictEqual(typeof result.progress.totalDimensions, 'number');
+        assert.strictEqual(result.progress.totalDimensions, 20, 'with MAX_INTERVIEW_QUESTIONS=20 or batch constraints, totalDimensions should be 20');
+        assert.ok(result.progress.percentComplete >= 0 && result.progress.percentComplete <= 100);
+        if (result.serviceUnavailable) {
+          assert.strictEqual(result.progress.questionsAsked, 0, 'when service unavailable, no question was served');
+        } else {
+          assert.strictEqual(result.progress.questionsAsked, 1);
+        }
+      } finally {
+        if (prevMax !== undefined) process.env.MAX_INTERVIEW_QUESTIONS = prevMax;
+        else delete process.env.MAX_INTERVIEW_QUESTIONS;
+        if (prevDev !== undefined) process.env.BFT_DEV_MAX_QUESTIONS = prevDev;
+      }
     });
   });
 

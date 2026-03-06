@@ -7,8 +7,8 @@ const { spawnSync } = require('node:child_process');
 const tmpDir = path.join(os.tmpdir(), `bft-qgen-index-test-${Date.now()}`);
 fs.mkdirSync(tmpDir, { recursive: true });
 process.env.BFT_QUESTION_LLM_TIMEOUT_MS = '5000';
-process.env.BFT_SCENARIO_STEP1_INSTRUCTIONS_FILE = 'conf/scenario_step1_instructions.txt';
-process.env.BFT_SCENARIO_STEP2_INSTRUCTIONS_FILE = 'conf/scenario_step2_instructions.txt';
+process.env.BFT_SCENARIO_STEP1_INSTRUCTIONS_FILE = 'conf/scenario_step1.txt';
+process.env.BFT_SCENARIO_STEP2_INSTRUCTIONS_FILE = 'conf/scenario_step2.txt';
 
 const { describe, it } = require('node:test');
 const assert = require('node:assert');
@@ -64,8 +64,8 @@ describe('questionGeneration/index', () => {
         askedQuestionTitles: [],
         answers: [],
       });
-      if (result === null) {
-        assert.strictEqual(result, null);
+      if (!result || !result.question) {
+        assert.ok(!result || (result.question === null && typeof result.reason === 'string'), 'when no question, expect null or { question: null, reason }');
       } else {
         assert.strictEqual(result.source, 'llm');
         assert.ok(result.question && result.question.title);

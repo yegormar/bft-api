@@ -179,6 +179,55 @@ function enrichBatchDimensionSet(batch, model) {
 }
 
 /**
+ * Enrich a single dimension with name, description, question_hints, how_measured, score_scale.
+ * @param {{ dimensionType: string, dimensionId: string }} d
+ * @param {object} [model]
+ * @returns {object}
+ */
+function enrichOneDimension(d, model) {
+  const full = assessmentModel.getDimension(d.dimensionType, d.dimensionId);
+  const out = {
+    dimensionType: d.dimensionType,
+    dimensionId: d.dimensionId,
+    name: (full && full.name) || d.dimensionId,
+    description: (full && full.description) || '',
+    question_hints: (full && full.question_hints) || [],
+    how_measured_or_observed: (full && full.how_measured_or_observed) || '',
+  };
+  if (full && full.score_scale && typeof full.score_scale === 'object') {
+    out.score_scale = full.score_scale;
+  }
+  return out;
+}
+
+/**
+ * Select one trait or value at random for the next question. Prefers dimensions with minimum coverage so the interview spreads across dimensions.
+ * @param {object} coverage - state.coverage
+ * @param {object} [model] - loaded assessment model
+ * @returns {Array<object>} Array of one enriched dimension (for desiredDimensionSet)
+ */
+function selectOneDimensionRandom(coverage, model) {
+  const m = model || assessmentModel.load();
+  const traitsAndValues = [
+    ...m.traits.map((t) => ({ dimensionType: 'trait', dimensionId: t.id })),
+    ...m.values.map((v) => ({ dimensionType: 'value', dimensionId: v.id })),
+  ];
+  if (traitsAndValues.length === 0) return [];
+
+  const withCount = traitsAndValues.map((d) => {
+    const key = COVERAGE_KEY_BY_TYPE[d.dimensionType];
+    const cov = key ? (coverage[key] || {}) : {};
+    const c = cov[d.dimensionId];
+    const questionCount = c && typeof c.questionCount === 'number' ? c.questionCount : 0;
+    return { ...d, questionCount };
+  });
+  const minCount = Math.min(...withCount.map((x) => x.questionCount));
+  const withMinCount = withCount.filter((d) => d.questionCount === minCount);
+  const chosen = withMinCount[Math.floor(Math.random() * withMinCount.length)];
+  return [enrichOneDimension(chosen, m)];
+}
+
+/**
  * Select next batch for scenario: prefer least-used batches, then by least coverage of batch dimensions.
  * @returns {{ batchId: string, dimensionSet: Array<object>, preferredResponseType?: string } | null}
  */
@@ -370,44 +419,6 @@ function getOrInitPreGeneratedQueue(sessionId) {
   return q;
 }
 
-const MAIN_QUESTIONS = [
-  {
-    id: 'main_1',
-    title: 'When facing a new problem, what do you usually do first?',
-    description: 'Pick the option that fits you best.',
-    type: 'single_choice',
-    options: [
-      { text: 'Break it down into steps and plan', value: 'structured' },
-      { text: 'Try something quickly and see what happens', value: 'experimental' },
-      { text: 'Talk it through with others', value: 'social' },
-      { text: 'Research or look for similar examples', value: 'research' },
-    ],
-  },
-  {
-    id: 'main_2',
-    title: 'What kind of work environment do you prefer?',
-    description: 'Select up to two.',
-    type: 'multi_choice',
-    maxSelections: 2,
-    options: [
-      { text: 'Clear goals and deadlines', value: 'structured' },
-      { text: 'Freedom to explore and experiment', value: 'creative' },
-      { text: 'Working with a team', value: 'social' },
-      { text: 'Independent, focused work', value: 'independent' },
-    ],
-  },
-  {
-    id: 'main_3',
-    title: 'How do you feel about learning something completely new?',
-    type: 'single_choice',
-    options: [
-      { text: 'I enjoy it and look for new challenges', value: 'adventurous' },
-      { text: 'I prefer to build on what I already know', value: 'structured' },
-      { text: 'It depends on the topic and how useful it is', value: 'pragmatic' },
-    ],
-  },
-];
-
 function addDimensionScoresToAggregate(aggregate, dims, scoresByDimensionId) {
   if (!aggregate || !dims || !scoresByDimensionId) return;
   for (const dim of dims) {
@@ -505,6 +516,65 @@ function submitAnswers(sessionId, payload) {
   return existing;
 }
 
+/**
+ * True when we are in development, BFT_DEV_MAX_QUESTIONS is in effect, and the interview
+ * has reached that cap (so we should fill unmeasured traits/values with synthetic scores).
+ */
+function shouldFillUnmeasuredWithSynthetic(state, interviewConfig) {
+  if (!state || typeof state.questionIndex !== 'number') return false;
+  if (config.nodeEnv !== 'development') return false;
+  const devMaxRaw = process.env.BFT_DEV_MAX_QUESTIONS;
+  if (devMaxRaw === undefined || devMaxRaw === '') return false;
+  const devMax = parseInt(devMaxRaw, 10);
+  if (Number.isNaN(devMax) || devMax < 1) return false;
+  const effectiveMax = getEffectiveMaxQuestions(interviewConfig);
+  if (effectiveMax == null || effectiveMax !== devMax) return false;
+  return state.questionIndex >= effectiveMax;
+}
+
+/**
+ * Random value in [min, max] rounded to 2 decimals. Uses dimension score_scale when present.
+ */
+function randomScoreInScale(dimension) {
+  const scale = dimension && dimension.score_scale && typeof dimension.score_scale === 'object'
+    ? dimension.score_scale
+    : { min: 1, max: 5 };
+  const min = typeof scale.min === 'number' ? scale.min : 1;
+  const max = typeof scale.max === 'number' ? scale.max : 5;
+  const range = Math.max(0, max - min);
+  const value = min + Math.random() * range;
+  return Math.round(value * 100) / 100;
+}
+
+/**
+ * When in dev and BFT_DEV_MAX_QUESTIONS is reached, returns an aggregate that includes
+ * synthetic scores for all traits/values that have no measured data, so the assessment
+ * looks complete. Does not mutate the original aggregate.
+ */
+function enrichAggregateWithSyntheticUnmeasured(aggregate, state, model, interviewConfig) {
+  if (!shouldFillUnmeasuredWithSynthetic(state, interviewConfig)) return aggregate;
+  const m = model || assessmentModel.load();
+  const out = {
+    traits: aggregate && aggregate.traits && typeof aggregate.traits === 'object'
+      ? { ...aggregate.traits } : {},
+    values: aggregate && aggregate.values && typeof aggregate.values === 'object'
+      ? { ...aggregate.values } : {},
+  };
+  for (const type of ['traits', 'values']) {
+    const list = type === 'traits' ? m.traits : m.values;
+    const bucket = out[type];
+    for (const dim of list) {
+      const entry = bucket[dim.id];
+      const hasMeasured = entry && typeof entry.count === 'number' && entry.count >= 1;
+      if (!hasMeasured) {
+        const score = randomScoreInScale(dim);
+        bucket[dim.id] = { sum: score, count: 1 };
+      }
+    }
+  }
+  return out;
+}
+
 function buildDimensionScoresOutput(aggregate, model) {
   if (!aggregate) return { traits: [], values: [] };
   const m = model || assessmentModel.load();
@@ -548,8 +618,13 @@ function getAssessment(sessionId) {
         }))
       : undefined;
 
-  const dimensionScores = state && state.dimensionScoresAggregate
-    ? buildDimensionScoresOutput(state.dimensionScoresAggregate)
+  const interviewConfig = getInterviewConfig();
+  const model = assessmentModel.load();
+  const effectiveAggregate = state && state.dimensionScoresAggregate
+    ? enrichAggregateWithSyntheticUnmeasured(state.dimensionScoresAggregate, state, model, interviewConfig)
+    : null;
+  const dimensionScores = effectiveAggregate
+    ? buildDimensionScoresOutput(effectiveAggregate, model)
     : { traits: [], values: [] };
 
   let askedQuestionsWithAnswers = undefined;
@@ -648,7 +723,6 @@ function runBackgroundPregeneration(sessionId, lastQuestion, lastDimensionSet, b
       let currentAnswers = simulatedAnswers;
       let currentCoverage = simulatedCoverage;
       let simulatedUsedBatchIds = [...(state.usedBatchIds || [])];
-      const { batches } = getScenarioBatches();
 
       while (queue.length < PREGEN_QUEUE_CAP) {
         if (isInterviewComplete(currentCoverage, interviewConfig, model, simulatedQuestionIndex)) break;
@@ -657,12 +731,8 @@ function runBackgroundPregeneration(sessionId, lastQuestion, lastDimensionSet, b
           questionIndex: simulatedQuestionIndex,
           usedBatchIds: simulatedUsedBatchIds,
         };
-        const batchSelection = batches.length > 0 ? selectNextBatch(simulatedState, model) : null;
-        const dimensionSet = batchSelection
-          ? batchSelection.dimensionSet
-          : selectNextDimensionSet(currentCoverage, model, { maxDimensions: 3 });
-        const preferredResponseType = batchSelection ? batchSelection.preferredResponseType : null;
-        const batchId = batchSelection ? batchSelection.batchId : null;
+        const dimensionSet = selectOneDimensionRandom(simulatedState.coverage, model);
+        if (dimensionSet.length === 0) break;
 
         const result = await questionGenerator.requestQuestion({
           sessionId,
@@ -672,23 +742,19 @@ function runBackgroundPregeneration(sessionId, lastQuestion, lastDimensionSet, b
           desiredDimensionSet: dimensionSet,
           askedQuestionTitles: currentAskedTitles,
           answers: currentAnswers,
-          preferredResponseType,
-          batchTheme: batchSelection?.batchTheme ?? null,
-          dilemmaAnchor: batchSelection?.dilemmaAnchor ?? null,
         });
         const nextQuestion = result?.question;
         const assessmentSummary = result?.assessmentSummary ?? null;
         const dimensionSetForState = result?.dimensionSet ?? dimensionSet;
         if (!nextQuestion || typeof nextQuestion !== 'object' || !nextQuestion.title) break;
 
-        queue.push({ question: nextQuestion, dimensionSet: dimensionSetForState, assessmentSummary, batchId });
+        queue.push({ question: nextQuestion, dimensionSet: dimensionSetForState, assessmentSummary, batchId: null });
         if (storeDir && result.source === 'llm') {
           const profileKey = questionStore.getProfileKey(preSurveyProfile);
           questionStore.save(storeDir, profileKey, nextQuestion, dimensionSetForState, assessmentSummary);
         }
 
         simulatedQuestionIndex += 1;
-        if (batchId) simulatedUsedBatchIds.push(batchId);
         currentAskedTitles = [...currentAskedTitles, nextQuestion.title];
         const simValue =
           nextQuestion.type === 'rank' && Array.isArray(nextQuestion.options)
@@ -815,13 +881,16 @@ async function getNextQuestion(sessionId, bftUserId) {
     }
   }
 
-  const { batches } = getScenarioBatches();
-  const batchSelection = batches.length > 0 ? selectNextBatch(state, model) : null;
-  const dimensionSet = batchSelection
-    ? batchSelection.dimensionSet
-    : selectNextDimensionSet(state.coverage, model, { maxDimensions: 3 });
-  const preferredResponseType = batchSelection ? batchSelection.preferredResponseType : null;
-  const batchId = batchSelection ? batchSelection.batchId : null;
+  const dimensionSet = selectOneDimensionRandom(state.coverage, model);
+  if (dimensionSet.length === 0) {
+    const progress = getProgress(state, interviewConfig, model);
+    return {
+      completed: true,
+      nextQuestion: null,
+      assessmentSummary: null,
+      progress: { ...progress, percentComplete: 100 },
+    };
+  }
 
   const result = await questionGenerator.requestQuestion({
     sessionId,
@@ -831,16 +900,13 @@ async function getNextQuestion(sessionId, bftUserId) {
     desiredDimensionSet: dimensionSet,
     askedQuestionTitles: state.askedQuestionTitles,
     answers,
-    preferredResponseType,
-    batchTheme: batchSelection?.batchTheme ?? null,
-    dilemmaAnchor: batchSelection?.dilemmaAnchor ?? null,
   });
 
   let nextQuestion;
   let assessmentSummary = null;
   let dimensionSetForState = dimensionSet;
 
-  if (result) {
+  if (result && result.question) {
     nextQuestion = result.question;
     assessmentSummary = result.assessmentSummary ?? null;
     dimensionSetForState = result.dimensionSet;
@@ -850,7 +916,7 @@ async function getNextQuestion(sessionId, bftUserId) {
       dimensionSetForState,
       assessmentSummary,
       bftUserId,
-      batchId
+      null
     );
     console.log('[bft] question source=%s sessionId=%s questionId=%s', result.source, sessionId, assignedId);
     if (result.source === 'llm' && storeDir) {
@@ -867,34 +933,13 @@ async function getNextQuestion(sessionId, bftUserId) {
     };
   }
 
-  const fallbackIndex = state.questionIndex % MAIN_QUESTIONS.length;
-  const fallback = MAIN_QUESTIONS[fallbackIndex];
-  nextQuestion = {
-    title: fallback.title,
-    description: fallback.description,
-    type: fallback.type,
-    options: fallback.options,
-    maxSelections: fallback.maxSelections,
-  };
-  console.log('[bft] question source=fallback sessionId=%s (component returned null)', sessionId);
-  const { assignedId } = applyServedQuestionToState(
-    sessionId,
-    nextQuestion,
-    dimensionSetForState,
-    null,
-    bftUserId,
-    batchId
-  );
-  if (storeDir) {
-    const profileKey = questionStore.getProfileKey(preSurveyProfile);
-    questionStore.save(storeDir, profileKey, nextQuestion, dimensionSetForState, null);
-  }
-  runBackgroundPregeneration(sessionId, nextQuestion, dimensionSetForState, bftUserId);
+  const reason = result && result.reason ? result.reason : 'unknown';
+  console.log('[bft] question generator returned null sessionId=%s reason=%s returning serviceUnavailable', sessionId, reason);
   const progress = getProgress(getOrInitInterviewState(sessionId), interviewConfig, model);
   return {
-    completed: false,
-    nextQuestion: { ...nextQuestion, id: assignedId },
-    assessmentSummary: null,
+    serviceUnavailable: true,
+    message: 'The question service is temporarily unavailable. Your progress has been saved. Please try again in a minute.',
+    retryAfterSeconds: 60,
     progress,
   };
 }
@@ -938,7 +983,13 @@ function getSessionHealth(sessionId) {
     coverage[key] = state.coverage[key] || {};
   }
 
-  const dimensionScores = buildDimensionScoresOutput(state.dimensionScoresAggregate, model);
+  const effectiveAggregate = enrichAggregateWithSyntheticUnmeasured(
+    state.dimensionScoresAggregate,
+    state,
+    model,
+    interviewConfig
+  );
+  const dimensionScores = buildDimensionScoresOutput(effectiveAggregate, model);
 
   return {
     sessionId,

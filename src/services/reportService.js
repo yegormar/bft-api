@@ -16,6 +16,7 @@ function buildReportFromCache(sessionId, session, assessment, cached) {
   };
   if (assessment.coverageSummary) report.coverageSummary = assessment.coverageSummary;
   if (assessment.insights) report.insights = assessment.insights;
+  if (assessment.dimensionScores) report.dimensionScores = assessment.dimensionScores;
   report.strengthProfileSummaryLLM = cached.strengthProfileSummaryLLM ?? null;
   report.profileByDimensions = cached.profileByDimensions ?? null;
   report.strengthProfileSummaryHybrid = cached.strengthProfileSummaryHybrid ?? null;
@@ -46,6 +47,9 @@ async function getReport(sessionId) {
   }
   if (assessment.insights) {
     report.insights = assessment.insights;
+  }
+  if (assessment.dimensionScores) {
+    report.dimensionScores = assessment.dimensionScores;
   }
 
   const coverage = assessment.coverageSummary?.coverage ?? null;

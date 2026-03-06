@@ -8,17 +8,15 @@
  *
  * Run from bft-api project root or from src/scripts (e.g. node enrich-noc-with-mappings.js):
  *   node src/scripts/enrich-noc-with-mappings.js [--debug] [--input path] [--output path] [--limit N] [--noc CODE]
- * .env is loaded from ../../.env (bft-api/.env) relative to this script.
+ * Env: scripts load scripts/.env first (see scripts/scripts.env.example for NOC_* and script options),
+ * then bft-api/.env for LLM_* (LLM_PROVIDER, LLM_BASE_URL, LLM_MODEL, etc.). Production does not use NOC_*.
  *
  * If output file exists, occupations already present (by nocCode) are skipped (resume).
  * If an occupation fails after max retries (or any LLM error), it is skipped and not written; on the next run it will be reprocessed.
  * Use --limit N (or NOC_ENRICHMENT_LIMIT) to process only the first N occupations and exit (e.g. for testing).
  * Use --noc CODE (or NOC_ENRICHMENT_NOC) to process only the occupation with that nocCode (e.g. 00010).
  *
- * Uses .env for LLM config: LLM_PROVIDER, LLM_BASE_URL, LLM_MODEL, LLM_API_KEY (for cloud),
- * LLM_TEMPERATURE, LLM_MAX_TOKENS, LLM_TOP_P. Optional: NOC_JSON_INPUT, NOC_JSON_OUTPUT,
- * NOC_ENRICHMENT_SYSTEM_PROMPT_FILE, NOC_ENRICHMENT_LIMIT, NOC_LLM_DELAY_MS, NOC_LLM_REQUEST_TIMEOUT_MS, NOC_LLM_MAX_RETRIES, DEBUG.
- * See env.example.
+ * NOC_* and DEBUG: set in scripts/.env (see scripts/scripts.env.example). LLM_*: set in bft-api/.env.
  *
  * Local (e.g. RTX 3090 24GB): if a 27B+ model hangs or OOMs, use a smaller model
  * (e.g. qwen2.5-coder:14b, deepseek-r1:14b) or set LLM_NUM_CTX=8192 to reduce VRAM.
@@ -31,14 +29,17 @@ const path = require('path');
 const DEFAULT_LLM_TIMEOUT_MS = 300000; // 5 minutes
 
 const PROJECT_ROOT = path.resolve(__dirname, '..', '..');
-const envPath = path.resolve(__dirname, '..', '..', '.env');
-if (fs.existsSync(envPath)) {
-  const result = require('dotenv').config({ path: envPath, override: true });
+const SCRIPTS_DIR = __dirname;
+const scriptsEnvPath = path.join(SCRIPTS_DIR, '.env');
+const projectEnvPath = path.join(PROJECT_ROOT, '.env');
+if (fs.existsSync(projectEnvPath)) {
+  require('dotenv').config({ path: projectEnvPath });
+}
+if (fs.existsSync(scriptsEnvPath)) {
+  const result = require('dotenv').config({ path: scriptsEnvPath, override: true });
   if (result.error && process.env.DEBUG) {
-    console.error('[enrich-noc] .env load error:', result.error.message);
+    console.error('[enrich-noc] scripts/.env load error:', result.error.message);
   }
-} else {
-  require('dotenv').config({ override: true });
 }
 
 const DEFAULT_SYSTEM_PROMPT = `You are a mapping assistant. You will receive a JSON object with:
@@ -216,10 +217,11 @@ function getScriptConfig() {
     ? path.resolve(process.cwd(), args[outputIdx + 1])
     : (outputFromEnv ? path.resolve(PROJECT_ROOT, outputFromEnv) : path.join(PROJECT_ROOT, 'data', 'noc-2021-enriched.json'));
 
+  const defaultPromptPath = path.join(SCRIPTS_DIR, 'prompts', 'noc_enrichment_system_prompt.txt');
   const promptFile = (process.env.NOC_ENRICHMENT_SYSTEM_PROMPT_FILE || '').trim();
   const systemPromptPath = promptFile
     ? (path.isAbsolute(promptFile) ? promptFile : path.join(PROJECT_ROOT, promptFile))
-    : null;
+    : defaultPromptPath;
 
   const limitIdx = args.indexOf('--limit');
   const limitArg = limitIdx >= 0 && args[limitIdx + 1] ? parseInt(args[limitIdx + 1], 10) : NaN;
@@ -366,7 +368,7 @@ async function callOllama(llmConfig, messages, debug) {
           continue;
         }
         throw new Error(
-          `LLM request timed out after ${timeoutMs / 1000}s${useRetry ? ` (${maxRetries} attempts)` : ''}. Try a smaller model or increase NOC_LLM_REQUEST_TIMEOUT_MS / NOC_LLM_TIMEOUT_MS in .env.`
+          `LLM request timed out after ${timeoutMs / 1000}s${useRetry ? ` (${maxRetries} attempts)` : ''}. Try a smaller model or increase NOC_LLM_REQUEST_TIMEOUT_MS / NOC_LLM_TIMEOUT_MS in scripts/.env (see scripts/scripts.env.example).`
         );
       }
       throw err;
@@ -512,7 +514,8 @@ function writeOutput(noc, enriched, outputPath) {
 }
 
 async function main() {
-  logEnvHint(fs.existsSync(envPath) ? envPath : '(cwd or default)');
+  const envPathUsed = fs.existsSync(scriptsEnvPath) ? scriptsEnvPath : (fs.existsSync(projectEnvPath) ? projectEnvPath : '(cwd or default)');
+  logEnvHint(envPathUsed);
   const scriptConfig = getScriptConfig();
   const llmConfig = getLlmConfig();
   await validateCloudModel(llmConfig);

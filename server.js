@@ -1,12 +1,15 @@
+const http = require('http');
 const config = require('./config');
 const llmConfig = require('./config/llm'); // validate LLM config at startup (exits if invalid)
 const { createApp } = require('./app');
+const { runStartupChecks } = require('./src/lib/startupChecks');
 const { runLlmCheckup } = require('./src/lib/llmCheckup');
 
 async function main() {
-  await runLlmCheckup();
+  await runStartupChecks(config);
   const app = createApp(config);
-  const server = app.listen(config.port, () => {
+  const server = http.createServer(app);
+  server.listen({ port: config.port, reuseAddress: true }, () => {
     console.log(`bft-api listening on port ${config.port} (${config.nodeEnv})`);
   });
 
@@ -17,9 +20,20 @@ async function main() {
     });
   }, intervalMs);
   server.on('close', () => clearInterval(timer));
+
+  function shutdown(signal) {
+    console.log(`\n${signal}, closing server...`);
+    clearInterval(timer);
+    server.close(() => {
+      process.exit(0);
+    });
+    setTimeout(() => process.exit(1), 5000);
+  }
+  process.on('SIGINT', () => shutdown('SIGINT'));
+  process.on('SIGTERM', () => shutdown('SIGTERM'));
 }
 
 main().catch((err) => {
-  console.error('[startup] LLM checkup failed:', err.message);
+  console.error('[startup]', err.message);
   process.exit(1);
 });

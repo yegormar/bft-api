@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node server.js",
     "dev": "node --watch server.js",
-    "test": "node --test test/questionStore.test.js test/bftUserId.test.js test/assessmentService.test.js test/ollamaInterview.test.js test/questionGeneration/storeFallback.test.js test/questionGeneration/llmWithTimeout.test.js test/questionGeneration/queue.test.js test/config/questionGeneration.test.js test/questionGeneration/index.test.js"
+    "test": "PORT=39391 node --test test/questionStore.test.js test/bftUserId.test.js test/assessmentService.test.js test/ollamaInterview.test.js test/questionGeneration/storeFallback.test.js test/questionGeneration/llmWithTimeout.test.js test/questionGeneration/queue.test.js test/config/questionGeneration.test.js test/questionGeneration/index.test.js"
   },
   "engines": {
     "node": ">=18"

@@ -30,9 +30,9 @@ Routes are mounted under `/api`:
 The API uses a **unified LLM config** (aligned with the Python project): provider, prompt files, generation params. Secrets (API keys) go in `.env` only.
 
 - **Config:** `config/llm.js` — provider, base URL, model, temperature, max_tokens, top_p, request delay, prompt file paths.
-- **Prompt files:** `conf/` (paths relative to project root). Default system prompt: `conf/assessment_system_prompt.txt`. Override with `LLM_SYSTEM_PROMPT_FILE`.
+- **Prompt files:** `conf/` (paths relative to project root). Scenario steps: `scenario_step1.txt`, `scenario_step2.txt`. Report prompts and optional legacy in `conf/README.md`.
 - **Providers:** `ollama` (local/remote Ollama), `ollama_cloud` (Ollama Cloud + optional web search).
-- **Env:** See `env.example`. Set `LLM_PROVIDER`, `OLLAMA_API_KEY` (for cloud), `LLM_MODEL`, `LLM_TEMPERATURE`, `LLM_MAX_TOKENS`, `LLM_TOP_P`, `LLM_SYSTEM_PROMPT_FILE`. Never commit API keys.
+- **Env:** See `env.example`. Set `LLM_PROVIDER`, `OLLAMA_API_KEY` (for cloud), `LLM_MODEL`, `LLM_TEMPERATURE`, `LLM_MAX_TOKENS`, `LLM_TOP_P`, and report/scenario prompt paths (see `env.example`). Never commit API keys.
 
 When the LLM is enabled (Ollama or Ollama Cloud), `GET .../assessment/next` uses it to generate the next question; on failure or if disabled, the API falls back to static questions.
 
@@ -54,7 +54,7 @@ Each data file has version, sources, description, and items with id, name, descr
 
 ### NOC enrichment (preparation)
 
-**`src/scripts/enrich-noc-with-mappings.js`** – Enriches each NOC 2021 occupation with LLM-generated mappings to skills, traits, and values (high compatibility only, rating 1–5). Validates IDs against `src/data/skills.json`, `traits.json`, and `values.json`; on invalid IDs sends one correction request to the LLM. Writes `data/noc-2021-enriched.json` (or paths from env/CLI).
+**`src/scripts/enrich-noc-with-mappings.js`** – Enriches each NOC 2021 occupation with LLM-generated mappings to skills, traits, and values (high compatibility only, rating 1-5). Validates IDs against `src/data/skills.json`, `traits.json`, and `values.json`; on invalid IDs sends one correction request to the LLM. Writes `data/noc-2021-enriched.json` (or paths from env/CLI).
 
 Run from project root:
 
@@ -64,17 +64,18 @@ node src/scripts/enrich-noc-with-mappings.js [--debug] [--input path] [--output 
 
 If the output file already exists, occupations already present (by `nocCode`) are skipped (resume). Use `--limit N` or `NOC_ENRICHMENT_LIMIT` to process only the first N occupations and exit (e.g. for testing).
 
-Uses the same LLM `.env` vars as the API (`LLM_PROVIDER`, `LLM_BASE_URL`, `LLM_MODEL`, `LLM_API_KEY` for cloud, `LLM_TEMPERATURE`, `LLM_MAX_TOKENS`, `LLM_TOP_P`). Optional: `NOC_JSON_INPUT`, `NOC_JSON_OUTPUT`, `NOC_ENRICHMENT_SYSTEM_PROMPT_FILE`, `DEBUG=1` to print LLM prompt and response. See `env.example`.
+Script config (NOC_*, DEBUG, prompt path) lives in `src/scripts/`. Copy `src/scripts/scripts.env.example` to `src/scripts/.env` when running these scripts. LLM_* are still read from the main API `.env`. See `src/scripts/scripts.env.example`.
 
 ## Structure
 
 - `server.js` – entry point
 - `app.js` – Express app, middleware, routes
 - `config/` – env-based config (`index.js`, `llm.js`, `ollama.js` for backward compat)
-- `conf/` – LLM prompt files (e.g. `assessment_system_prompt.txt`), `personality_clusters.json`. See `conf/README.md`. Assessment model data is in `src/data/`.
-- `src/data/` – assessment model JSON (aptitudes, traits, values, skills, ai_relevance_ranking)
+- `conf/` – LLM prompt files (scenario steps, report synthesis). Legacy prompts in `conf/legacy/`. See `conf/README.md`. Assessment model data is in `src/data/`.
+- `src/data/` – assessment model JSON (aptitudes, traits, values, skills, ai_relevance_ranking, personality_clusters)
 - `src/routes` – route definitions
 - `src/controllers` – request/response handling
 - `src/services` – business logic (in-memory; Ollama for interview flow)
 - `src/middleware` – error handling, not found
 - `src/lib` – shared helpers, Ollama client, interview prompts
+- `src/scripts/` – preparation/experimentation scripts (NOC fetch, NOC enrichment). Config: `src/scripts/scripts.env.example`; prompts: `src/scripts/prompts/`. Not used by the running API.

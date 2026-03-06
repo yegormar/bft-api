@@ -5,6 +5,8 @@ node_modules/
 .env
 .env.local
 .env.*.local
+# Scripts-only config (not used by production)
+src/scripts/.env
 
 # IDE / editor
 .idea/

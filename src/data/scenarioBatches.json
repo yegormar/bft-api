@@ -1,42 +1,55 @@
 {
-  "version": "1.0",
-  "description": "Offline-prepared dimension batches for interview scenarios. Each batch defines 2–3 traits/values to probe in a single scenario. During the interview, select batches (e.g. by coverage) so total questions ≤ 20. Overlap of dimensions across batches is intentional for reliability.",
+  "version": "2.0",
+  "description": "Offline-prepared dimension batches for interview scenarios. Each batch defines 2 dimensions to probe in a single scenario. Batches are designed so that both dimensions are activated by a single coherent decision moment. Scoring is always per-dimension independently — never averaged. See dilemmaAnchor for the specific narrative tension that makes the pairing work.",
+  "changelog": "v2.0 — Regrouped from 20 batches to 9 based on narrative coherence analysis. Removed pairings where dimensions had no natural tension or shared decision surface. Traits and values are only paired when the trait is the mechanism by which the value is expressed. All batches include a coherencNote explaining why the pairing works and what profile divergence looks like.",
   "constraints": {
     "maxQuestionsPerInterview": 20,
     "maxDescriptionSentences": 3,
     "shortAnswers": true,
-    "allowedResponseTypes": ["single_choice", "multi_choice", "rank"]
+    "allowedResponseTypes": ["single_choice", "multi_choice", "rank"],
+    "scoringRule": "Score each answer option on both dimensions independently as a pair [dimensionA_score / dimensionB_score]. Never combine or average. If dimensions tension each other in this scenario, note it — that is a feature."
   },
   "batches": [
     {
       "id": "batch_01",
-      "theme": "Team, belonging, and ownership",
-      "dilemmaAnchor": "A situation where something is submitted or presented and there is a real choice about whose name is on it or who presents it, or how the group is represented.",
+      "theme": "Collaboration and belonging",
+      "dilemmaAnchor": "A situation where someone joins or re-enters a group dynamic — a new team, a shifted group, a culture that is already formed. The decision is how actively they engage with the people around them, and whether the relational environment matters to them beyond the task.",
+      "coherenceNote": "social_collaboration is the behavior — do they actively build connection? belonging_community is the motivation — do they need it to feel okay? These surface separately: someone can be relationally skilled but not emotionally dependent on community (high trait, low value), or crave belonging but lack the active behaviors to build it (low trait, high value). The scenario catches both.",
+      "profileDivergence": "High trait + low value = the connector who doesn't need connection. High value + low trait = the person who craves belonging but struggles to build it. Both are meaningfully different from high/high or low/low.",
       "dimensions": [
         { "dimensionType": "trait", "dimensionId": "social_collaboration" },
-        { "dimensionType": "value", "dimensionId": "belonging_community" },
-        { "dimensionType": "trait", "dimensionId": "comfort_ambiguous_ownership" }
+        { "dimensionType": "value", "dimensionId": "belonging_community" }
       ]
     },
     {
       "id": "batch_02",
-      "theme": "Autonomy and risk",
+      "theme": "Ownership and recognition",
+      "dilemmaAnchor": "A situation where a project or piece of work succeeded, but authorship is genuinely ambiguous — multiple contributors, heavy tool use, or significant editing of someone else's foundation. The person must decide how to present, attribute, or claim the work.",
+      "coherenceNote": "comfort_ambiguous_ownership is behavioral — are they at ease directing and signing off on work they didn't personally generate? recognition_visibility is motivational — do they need to be seen and credited? The tension is real: high recognition need + low ownership comfort creates someone who wants credit only for things they personally did. High on both signals a natural AI-era orchestrator who is comfortable owning outcomes at scale.",
+      "profileDivergence": "High recognition + low ownership comfort = wants credit but only for personal work; may resist delegation. High ownership comfort + low recognition = the quiet operator, happy to direct and deliver without needing to be seen. Both diverge sharply from each other and are practically important.",
       "dimensions": [
-        { "dimensionType": "value", "dimensionId": "autonomy_independence" },
-        { "dimensionType": "trait", "dimensionId": "experimentation_risk_tolerance" }
+        { "dimensionType": "trait", "dimensionId": "comfort_ambiguous_ownership" },
+        { "dimensionType": "value", "dimensionId": "recognition_visibility" }
       ]
     },
     {
       "id": "batch_03",
-      "theme": "Learning and growth",
+      "theme": "Risk and autonomy",
+      "dilemmaAnchor": "A situation presenting two paths: one uncertain and self-directed with no support structure, one safer with clear guidance and oversight. The decision is whether to take the unsupported bet — and what draws them toward or away from it.",
+      "coherenceNote": "experimentation_risk_tolerance is the behavioral capacity — can they start something before the picture is clear? autonomy_independence is the value — do they need to own the decision? These travel together in practice because autonomy is often the reason someone tolerates risk. But they diverge: someone can tolerate high risk when directed by others (high trait, low value) or crave autonomy on low-risk work (low trait, high value).",
+      "profileDivergence": "High risk tolerance + low autonomy need = the executor who can handle chaos but doesn't need to own it. High autonomy need + low risk tolerance = wants control but only within safe, defined boundaries. Both are different from the entrepreneurial high/high profile.",
+      "preferredResponseType": "single_choice",
       "dimensions": [
-        { "dimensionType": "trait", "dimensionId": "adaptability_learning" },
-        { "dimensionType": "value", "dimensionId": "mastery_growth" }
+        { "dimensionType": "trait", "dimensionId": "experimentation_risk_tolerance" },
+        { "dimensionType": "value", "dimensionId": "autonomy_independence" }
       ]
     },
     {
       "id": "batch_04",
-      "theme": "Ambiguity vs stability",
+      "theme": "Resilience and stability",
+      "dilemmaAnchor": "A situation where something the person relied on changes unexpectedly — a role shifts, a tool is replaced, a plan falls apart. The decision is how they respond internally and what they do next.",
+      "coherenceNote": "ambiguity_resilience is the internal state — do they stay composed and effective when the ground moves? security_stability is the value — do they need predictability to feel okay? These can diverge meaningfully: someone can score low on security need (willing to take risk) but still be rattled by unplanned change (low resilience). Or score high on security need but have developed genuine resilience through experience. The scenario catches the gap between what they value and how they actually respond.",
+      "profileDivergence": "Low resilience + high security need = avoids uncertainty and is destabilised when it arrives anyway. High resilience + low security need = thrives on flux and doesn't need the safety net. Low resilience + low security need = takes risks but struggles when they materialise. Each is a practically distinct profile.",
       "dimensions": [
         { "dimensionType": "trait", "dimensionId": "ambiguity_resilience" },
         { "dimensionType": "value", "dimensionId": "security_stability" }
@@ -44,135 +57,59 @@
     },
     {
       "id": "batch_05",
-      "theme": "Impact and recognition",
+      "theme": "Learning and mastery",
+      "dilemmaAnchor": "A situation where someone is competent at something and must decide whether to deepen that expertise further or switch to an adjacent domain where they would start from scratch. The cost of switching is real — they lose their current edge.",
+      "coherenceNote": "adaptability_learning is behavioral — how do they actually go about acquiring new skills when the environment shifts? mastery_growth is motivational — do they need to feel they are getting better at something? These are related but not identical. Someone can be highly adaptable (picks up new things easily) without caring about depth — a chameleon, not a craftsman. Or deeply mastery-motivated but rigid in how they pursue it, resisting domain switches even when they would benefit.",
+      "profileDivergence": "High adaptability + low mastery drive = fast learner who moves on before going deep; may accumulate breadth without expertise. High mastery + low adaptability = the craftsman who goes deep in one domain but struggles when that domain shifts. High on both = the compound learner, the most resilient AI-era profile.",
       "dimensions": [
-        { "dimensionType": "value", "dimensionId": "helping_others_impact" },
-        { "dimensionType": "value", "dimensionId": "recognition_visibility" }
+        { "dimensionType": "trait", "dimensionId": "adaptability_learning" },
+        { "dimensionType": "value", "dimensionId": "mastery_growth" }
       ]
     },
     {
       "id": "batch_06",
-      "theme": "Creativity and challenge",
+      "theme": "Pay vs meaning",
+      "dilemmaAnchor": "A forced choice between two concrete paths: one that pays significantly more with limited direct impact on people, one that pays less but with clear visible benefit to others. Neither option is obviously right. The cost on each side must be real.",
+      "coherenceNote": "The most fundamental career values tension. Neither financial_success nor helping_others_impact is morally superior, which is exactly what makes this a valid measurement scenario. The scenario should not let the respondent have both — the trade-off must be genuine. Works best as rank or forced-choice.",
+      "profileDivergence": "High financial + low impact = clear market-optimizer; path recommendations should emphasize structurally advantaged skill stacks with high earning potential. High impact + low financial = mission-driven; path recommendations should be honest about income trade-offs. Medium on both = the most common profile; needs a tie-breaker scenario.",
+      "preferredResponseType": "rank",
       "dimensions": [
-        { "dimensionType": "value", "dimensionId": "creativity_self_expression" },
-        { "dimensionType": "value", "dimensionId": "challenge_achievement" }
+        { "dimensionType": "value", "dimensionId": "financial_success" },
+        { "dimensionType": "value", "dimensionId": "helping_others_impact" }
       ]
     },
     {
       "id": "batch_07",
-      "theme": "Pay vs meaning",
+      "theme": "Intensity vs sustainability",
+      "dilemmaAnchor": "A concrete opportunity that would advance the person's goals significantly — a stretch role, a demanding project, a high-visibility position — but at clear personal cost: long hours, less time for other parts of life, sustained pressure for an extended period.",
+      "coherenceNote": "challenge_achievement and work_life_balance_wellbeing are in genuine tension here. The scenario should not let the person abstract away the cost. High achievers who also score high on balance are a specific and important profile — they want hard things, but on their own terms and timeline. The scenario surfaces whether the person will trade wellbeing for ambition when it is actually in front of them, not hypothetically.",
+      "profileDivergence": "High challenge + low balance need = willing to sacrifice for the goal; suited to high-intensity AI-era paths if other values align. High balance + low challenge drive = prefers sustainable pace; should avoid high-pressure transformation roles. High on both = seeks hard problems but will set limits; needs paths that allow intensity in bursts rather than sustained grind.",
+      "preferredResponseType": "rank",
       "dimensions": [
-        { "dimensionType": "value", "dimensionId": "financial_success" },
-        { "dimensionType": "value", "dimensionId": "helping_others_impact" }
-      ],
-      "preferredResponseType": "rank"
-    },
-    {
-      "id": "batch_08",
-      "theme": "Balance and stretch",
-      "dimensions": [
-        { "dimensionType": "value", "dimensionId": "work_life_balance_wellbeing" },
-        { "dimensionType": "value", "dimensionId": "challenge_achievement" }
-      ],
-      "preferredResponseType": "rank"
-    },
-    {
-      "id": "batch_09",
-      "theme": "Collaboration and credit",
-      "dilemmaAnchor": "A situation where something is submitted or presented and there is a real choice about whose name is on it or who presents it.",
-      "dimensions": [
-        { "dimensionType": "trait", "dimensionId": "social_collaboration" },
-        { "dimensionType": "value", "dimensionId": "recognition_visibility" }
-      ]
-    },
-    {
-      "id": "batch_10",
-      "theme": "Ownership and visibility",
-      "dilemmaAnchor": "A situation where something is submitted or presented and there is a real choice about whose name is on it or who presents it.",
-      "dimensions": [
-        { "dimensionType": "trait", "dimensionId": "comfort_ambiguous_ownership" },
-        { "dimensionType": "value", "dimensionId": "recognition_visibility" }
-      ]
-    },
-    {
-      "id": "batch_11",
-      "theme": "Experimentation and mastery",
-      "dimensions": [
-        { "dimensionType": "trait", "dimensionId": "experimentation_risk_tolerance" },
-        { "dimensionType": "value", "dimensionId": "mastery_growth" }
-      ]
-    },
-    {
-      "id": "batch_12",
-      "theme": "Resilience and autonomy",
-      "dimensions": [
-        { "dimensionType": "trait", "dimensionId": "ambiguity_resilience" },
-        { "dimensionType": "value", "dimensionId": "autonomy_independence" }
-      ]
-    },
-    {
-      "id": "batch_13",
-      "theme": "Community and balance",
-      "dimensions": [
-        { "dimensionType": "value", "dimensionId": "belonging_community" },
+        { "dimensionType": "value", "dimensionId": "challenge_achievement" },
         { "dimensionType": "value", "dimensionId": "work_life_balance_wellbeing" }
       ]
     },
     {
-      "id": "batch_14",
-      "theme": "Creativity and autonomy",
+      "id": "batch_08",
+      "theme": "Creative freedom vs directed work",
+      "dilemmaAnchor": "A situation where creative work is available but constrained — someone else sets the brief, the parameters, or the final approval. The person can contribute meaningfully but cannot fully own the creative direction. The question is whether that is satisfying or frustrating.",
+      "coherenceNote": "creativity_self_expression and autonomy_independence are related but meaningfully different. Someone can need creative work (high creativity value) but be fine with direction — they want to make things, not necessarily control the frame. Or they can need ownership and control (high autonomy) without particularly caring whether the work is creative. The scenario separates output-type preference from ownership preference.",
+      "profileDivergence": "High creativity + low autonomy = the creative executor; happy to make things within a given frame, fine being directed. High autonomy + low creativity = the independent operator; needs ownership but the work itself doesn't need to be expressive. High on both = needs to own creative work end to end; should be steered toward founding, directing, or independent creative paths.",
       "dimensions": [
         { "dimensionType": "value", "dimensionId": "creativity_self_expression" },
         { "dimensionType": "value", "dimensionId": "autonomy_independence" }
       ]
     },
     {
-      "id": "batch_15",
-      "theme": "Security and income",
+      "id": "batch_09",
+      "theme": "Hard problems and human stakes",
+      "dilemmaAnchor": "A high-stakes challenge that can only be solved by working closely with others — the relational friction is not optional, it is part of the problem. The person must decide how much energy to invest in the people side of the challenge vs the problem side.",
+      "coherenceNote": "social_collaboration and challenge_achievement surface an important AI-era profile split. Someone energised by hard problems AND by working with others to solve them is very different from the solo achiever who finds collaboration a tax on performance. The scenario should make the relational cost of the challenge visible — the people dynamics are difficult, not just the task.",
+      "profileDivergence": "High collaboration + high challenge = the high-stakes team player; most natural fit for complex coordination and leadership roles in AI era. High challenge + low collaboration = the solo achiever; performs best with technical depth and autonomy, finds people dynamics draining. Low challenge + high collaboration = the relationship maintainer; values the connection more than the difficulty of the goal.",
       "dimensions": [
-        { "dimensionType": "value", "dimensionId": "security_stability" },
-        { "dimensionType": "value", "dimensionId": "financial_success" }
-      ],
-      "preferredResponseType": "rank"
-    },
-    {
-      "id": "batch_16",
-      "theme": "Risk and adaptability",
-      "dimensions": [
-        { "dimensionType": "trait", "dimensionId": "experimentation_risk_tolerance" },
-        { "dimensionType": "trait", "dimensionId": "adaptability_learning" }
-      ]
-    },
-    {
-      "id": "batch_17",
-      "theme": "Impact and belonging",
-      "dimensions": [
-        { "dimensionType": "value", "dimensionId": "helping_others_impact" },
-        { "dimensionType": "value", "dimensionId": "belonging_community" }
-      ]
-    },
-    {
-      "id": "batch_18",
-      "theme": "Challenge and mastery",
-      "dimensions": [
-        { "dimensionType": "value", "dimensionId": "challenge_achievement" },
-        { "dimensionType": "value", "dimensionId": "mastery_growth" }
-      ]
-    },
-    {
-      "id": "batch_19",
-      "theme": "Recognition and expression",
-      "dimensions": [
-        { "dimensionType": "value", "dimensionId": "recognition_visibility" },
-        { "dimensionType": "value", "dimensionId": "creativity_self_expression" }
-      ]
-    },
-    {
-      "id": "batch_20",
-      "theme": "Ownership and balance",
-      "dimensions": [
-        { "dimensionType": "trait", "dimensionId": "comfort_ambiguous_ownership" },
-        { "dimensionType": "value", "dimensionId": "work_life_balance_wellbeing" }
+        { "dimensionType": "trait", "dimensionId": "social_collaboration" },
+        { "dimensionType": "value", "dimensionId": "challenge_achievement" }
       ]
     }
   ]
