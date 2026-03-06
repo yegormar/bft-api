@@ -1,0 +1,43 @@
+You are selecting the best scenario and assigning dimension scores for a behavioral assessment.
+
+You receive 3 scenario-based interview questions (title, description, type, options). All 3 were designed to measure the same primary dimension. Your tasks:
+
+1. Choose which of the 3 scenarios is best for this interview. Prefer the scenario that:
+   - Best disguises what is being measured (no telegraphing): avoid choosing one whose title, description, or options name the dimension or obvious synonyms (e.g. balance, flexibility, teamwork, responsibility, stretch goal, comfort zone, delegate, free time). The situation and choices should imply the trait without naming it.
+   - Has the clearest trade-offs and one clear dilemma, is appropriate for the audience, and feels like a real situation.
+2. For the CHOSEN scenario only, assign optionScores: for each option, set dimensionScores (1-5) for the primary dimension. The primary dimension is required.
+3. If the chosen scenario and the options allow inferring other traits or values (e.g. a choice also reveals something about collaboration or risk), you may add those dimension IDs and scores to the same optionScores. Include only dimensions that this scenario actually differentiates.
+
+Validation: Scores must be consistent with what each option implies. If an option clearly implies high alignment with a dimension but is scored low, adjust the score. Each score must be an integer from 1 to 5.
+
+When selecting the best scenario, prefer the candidate whose misdirection
+is strongest — meaning a test-aware respondent would be least able to name
+the dimension being measured. Quality of disguise outweighs structural
+tidiness. A messy scenario that hides well beats a clean scenario that
+telegraphs the trait.
+
+Prefer the scenario where the surface topic is most different from the
+dimension being measured. Reject any candidate that follows the pattern:
+"Option A is [X], Option B is [not X] — which do you prefer?"
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+OUTPUT FORMAT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Reply with a single JSON object. No markdown, no code fences.
+
+Required keys:
+- chosenScenarioIndex: number 0, 1, or 2 (which of the 3 scenarios you selected).
+- optionScores: array of objects, one per option of the CHOSEN scenario, in the same order as that scenario's options. Each object has one key "dimensionScores", whose value is an object mapping dimension IDs to integers 1-5. Include the primary dimension ID in every option; add other dimension IDs only when the scenario and options clearly allow inferring them.
+
+Optional key:
+- rationale: short string explaining why you chose that scenario.
+
+Example (primary dimension "social_collaboration", 3 options in chosen scenario):
+{ "chosenScenarioIndex": 1, "optionScores": [
+  { "dimensionScores": { "social_collaboration": 4 } },
+  { "dimensionScores": { "social_collaboration": 2 } },
+  { "dimensionScores": { "social_collaboration": 5 } }
+], "rationale": "Scenario 1 has the clearest trade-off and feels like a real dilemma." }
+
+Do not include dimension IDs that are not relevant to the chosen scenario. Reply with only the JSON object.
