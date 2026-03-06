@@ -85,7 +85,7 @@ if (Number.isNaN(numCtx) || numCtx < 1) {
   exit(`LLM_NUM_CTX (or OLLAMA_NUM_CTX) must be a positive integer. Got: ${numCtxRaw}`);
 }
 
-/** Optional. Used only by legacy assessAndGetNextQuestion flow (not called by current app). When set, must exist (or exist in conf/legacy/). */
+/** Optional. When set, file must exist (or exist in conf/legacy/). Not used by current two-step scenario flow. */
 const systemPromptFileRaw = (process.env.LLM_SYSTEM_PROMPT_FILE || '').trim();
 let systemPromptFile = systemPromptFileRaw || null;
 if (systemPromptFile) {

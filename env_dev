@@ -38,5 +38,9 @@ LLM_REPORT_RECOMMENDATIONS_SYSTEM_PROMPT_FILE=conf/report_recommendations_system
 BFT_SCENARIO_STEP1_INSTRUCTIONS_FILE=conf/scenario_step1.txt
 BFT_SCENARIO_STEP2_INSTRUCTIONS_FILE=conf/scenario_step2.txt
 
-# Dev: limit questions per session
+# Assessment (required)
+MIN_SIGNAL_PER_DIMENSION=1
+MAX_INTERVIEW_QUESTIONS=
+
+# Dev: limit questions per session (optional, development only)
 BFT_DEV_MAX_QUESTIONS=5

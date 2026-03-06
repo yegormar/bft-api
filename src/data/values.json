@@ -10,12 +10,13 @@
     {
       "id": "helping_others_impact",
       "name": "Helping others / impact on people",
+      "short_label": "Helping others",
       "description": "Wanting work to improve other people's lives, serve a community, or contribute to something larger than oneself. Non-negotiable for many in care, education, health, social impact, or mission-driven roles.",
-      "ai_future_rationale": "Stays – human-centric, impact-oriented work remains valuable even as AI scales; it steers people toward health, education, coaching, and advisory paths that are structurally needed.",
+      "ai_future_rationale": "Stays - human-centric, impact-oriented work remains valuable even as AI scales; it steers people toward health, education, coaching, and advisory paths that are structurally needed.",
       "how_measured_or_observed": "Self-report on what makes work meaningful; choices between 'high pay but little impact' vs 'lower pay but clear benefit to others'; examples of activities or roles they've found satisfying because of who they helped.",
       "question_hints": [
         "What would have to be true about your work for you to feel it was meaningful?",
-        "Would you rather earn more in a job that didn't help anyodone directly, or less in one where you could see the difference you make?"
+        "Would you rather earn more in a job that didn't help anyone directly, or less in one where you could see the difference you make?"
       ],
       "related_skill_clusters": [
         "ethical_reputational_risk_sensing",
@@ -35,8 +36,9 @@
     {
       "id": "mastery_growth",
       "name": "Mastery and growth",
+      "short_label": "Mastery & growth",
       "description": "Wanting to get better at something over time, build expertise, and feel a sense of progress. Non-negotiable for people who need to feel they're learning and improving, not just maintaining.",
-      "ai_future_rationale": "Grows – long-run resilience in an AI-shaped world favors people who want to keep deepening skills, rather than optimizing for comfort or purely static roles.",
+      "ai_future_rationale": "Grows - long-run resilience in an AI-shaped world favors people who want to keep deepening skills, rather than optimizing for comfort or purely static roles.",
       "how_measured_or_observed": "Whether they describe satisfaction in terms of 'getting better' or 'learning new things'; discomfort with roles that feel repetitive with no growth; preference for stretch over comfort.",
       "question_hints": [
         "How important is it to you that your work keeps challenging you to improve?",
@@ -46,7 +48,8 @@
         "ai_literacy",
         "systems_thinking",
         "cross_domain_synthesis",
-        "epistemic_calibration"
+        "epistemic_calibration",
+        "research_analysis"
       ],
       "score_scale": {
         "min": 1,
@@ -61,8 +64,9 @@
     {
       "id": "autonomy_independence",
       "name": "Autonomy and independence",
+      "short_label": "Autonomy",
       "description": "Wanting to decide how, when, or where you work; to be trusted with ownership and minimal micromanagement. Non-negotiable for people who feel stifled by heavy structure or supervision.",
-      "ai_future_rationale": "Stays – AI-era work can increase leverage for self-directed people (e.g. independent operators orchestrating agents), but also makes some highly structured roles more intense.",
+      "ai_future_rationale": "Stays - AI-era work can increase leverage for self-directed people (e.g. independent operators orchestrating agents), but also makes some highly structured roles more intense.",
       "how_measured_or_observed": "Reaction to 'how do you feel when someone else sets your schedule or process?'; preference for self-directed projects vs clearly defined tasks; examples of when they've sought or resisted more freedom.",
       "question_hints": [
         "How much do you need to feel you're in charge of your own work and schedule?",
@@ -87,8 +91,9 @@
     {
       "id": "security_stability",
       "name": "Security and stability",
+      "short_label": "Security",
       "description": "Wanting predictable income, job security, or a clear path so that the future feels safe. Non-negotiable for people who prioritize reducing financial or career risk over upside.",
-      "ai_future_rationale": "Stays – but the way to achieve it may shift toward infrastructure-coupled or governance roles rather than routine cognitive work that is highly exposed to automation.",
+      "ai_future_rationale": "Stays - but the way to achieve it may shift toward infrastructure-coupled or governance roles rather than routine cognitive work that is highly exposed to automation.",
       "how_measured_or_observed": "Reaction to uncertainty (e.g. gig work, startups, frequent change); importance of benefits, steady paycheck, or 'safe' industries; trade-offs they'd make for stability.",
       "question_hints": [
         "How important is it that your job and income feel predictable and secure?",
@@ -98,7 +103,9 @@
         "systems_thinking",
         "verification_epistemic_hygiene",
         "ethical_reputational_risk_sensing",
-        "routine_execution"
+        "routine_execution",
+        "structured_problem_solving",
+        "intermediation_friction"
       ],
       "score_scale": {
         "min": 1,
@@ -113,8 +120,9 @@
     {
       "id": "recognition_visibility",
       "name": "Recognition and visibility",
+      "short_label": "Recognition",
       "description": "Wanting to be known, respected, or seen for one's work; to have a reputation or influence. Non-negotiable for people who are motivated by status, awards, or being the go-to person.",
-      "ai_future_rationale": "Grows – as synthetic content and automated execution flood the world, distinctive human signal, reputation, and visible leadership become more valuable.",
+      "ai_future_rationale": "Grows - as synthetic content and automated execution flood the world, distinctive human signal, reputation, and visible leadership become more valuable.",
       "how_measured_or_observed": "Whether they describe satisfaction in terms of 'being known' or 'getting credit'; preference for visible vs behind-the-scenes roles; reaction to anonymous or supporting roles.",
       "question_hints": [
         "How much does it matter to you that others recognize your contribution or know your name?",
@@ -139,8 +147,9 @@
     {
       "id": "creativity_self_expression",
       "name": "Creativity and self-expression",
+      "short_label": "Creativity",
       "description": "Wanting work that lets you create something new, express yourself, or leave a personal mark. Non-negotiable for people who feel empty in purely execution or maintenance roles.",
-      "ai_future_rationale": "Grows – as routine execution is automated, original framing, taste, and expression become relatively scarcer and more valuable, especially when combined with AI tools.",
+      "ai_future_rationale": "Grows - as routine execution is automated, original framing, taste, and expression become relatively scarcer and more valuable, especially when combined with AI tools.",
       "how_measured_or_observed": "Importance of 'making something that's mine' or 'doing it my way'; discomfort with purely prescribed output; examples of when they've sought or sacrificed creative outlet.",
       "question_hints": [
         "How important is it that your work lets you create something or express your own ideas?",
@@ -164,8 +173,9 @@
     {
       "id": "financial_success",
       "name": "Financial success and earning",
+      "short_label": "Financial success",
       "description": "Wanting to earn well, build wealth, or use income as a clear measure of success. Non-negotiable for people who prioritize pay and financial upside when choosing paths.",
-      "ai_future_rationale": "Stays – income remains a key constraint and motivator, but the highest resilience in an AI-shaped world will come from skill stacks tied to authority, infrastructure, and complex coordination.",
+      "ai_future_rationale": "Stays - income remains a key constraint and motivator, but the highest resilience in an AI-shaped world will come from skill stacks tied to authority, infrastructure, and complex coordination.",
       "how_measured_or_observed": "How they rank pay vs other factors; reaction to 'would you take a pay cut for meaning or growth?'; importance of salary in past or hypothetical choices.",
       "question_hints": [
         "How important is earning a high income when you think about your future career?",
@@ -189,8 +199,9 @@
     {
       "id": "work_life_balance_wellbeing",
       "name": "Work-life balance and wellbeing",
-      "description": "Wanting time and energy for life outside work—family, health, hobbies, rest. Non-negotiable for people who are unwilling to sacrifice wellbeing or relationships for career intensity.",
-      "ai_future_rationale": "Stays – sustainable careers still require health and rest; some AI-augmented roles will allow more flexibility, others will be high-intensity and should be avoided if this value is high.",
+      "short_label": "Work-life balance",
+      "description": "Wanting time and energy for life outside work - family, health, hobbies, rest. Non-negotiable for people who are unwilling to sacrifice wellbeing or relationships for career intensity.",
+      "ai_future_rationale": "Stays - sustainable careers still require health and rest; some AI-augmented roles will allow more flexibility, others will be high-intensity and should be avoided if this value is high.",
       "how_measured_or_observed": "Importance of hours, flexibility, or boundaries; reaction to 'high-intensity career with little free time'; examples of when they've protected or sacrificed balance.",
       "question_hints": [
         "How important is it that your job leaves you time and energy for the rest of your life?",
@@ -213,8 +224,9 @@
     {
       "id": "challenge_achievement",
       "name": "Challenge and achievement",
+      "short_label": "Challenge",
       "description": "Wanting to tackle hard problems, hit ambitious goals, or prove oneself. Non-negotiable for people who are motivated by difficulty and the feeling of having overcome something.",
-      "ai_future_rationale": "Grows – the most durable AI-era work is often difficult: designing systems, governing risk, managing complexity, and owning high-stakes decisions.",
+      "ai_future_rationale": "Grows - the most durable AI-era work is often difficult: designing systems, governing risk, managing complexity, and owning high-stakes decisions.",
       "how_measured_or_observed": "Whether they seek or avoid 'stretch' goals; satisfaction from overcoming obstacles vs avoiding them; preference for easy wins vs hard victories.",
       "question_hints": [
         "Do you get more satisfaction from achieving something difficult or from doing something well that came easily?",
@@ -239,8 +251,9 @@
     {
       "id": "belonging_community",
       "name": "Belonging and community",
+      "short_label": "Belonging",
       "description": "Wanting to be part of a team, culture, or community where you fit. Non-negotiable for people who need to feel they belong and that their workplace or field shares their values.",
-      "ai_future_rationale": "Stays – human collaboration, culture, and community remain central even as tools change; this value helps distinguish solitary infrastructure paths from high-contact, community-oriented work.",
+      "ai_future_rationale": "Stays - human collaboration, culture, and community remain central even as tools change; this value helps distinguish solitary infrastructure paths from high-contact, community-oriented work.",
       "how_measured_or_observed": "Importance of 'fitting in' or 'people like me'; reaction to remote/solo vs in-person/team; examples of when culture or community made or broke a role for them.",
       "question_hints": [
         "How important is it that you feel part of a team or community at work?",

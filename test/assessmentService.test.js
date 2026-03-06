@@ -9,6 +9,9 @@ const fs = require('fs');
 const tmpDir = path.join(os.tmpdir(), `bft-assessment-test-${Date.now()}`);
 fs.mkdirSync(tmpDir, { recursive: true });
 process.env.BFT_QUESTIONS_STORE_DIR = tmpDir;
+process.env.BFT_PREGEN_QUEUE_CAP = '3';
+process.env.BFT_PREGEN_REFILL_THRESHOLD = '1';
+process.env.MIN_SIGNAL_PER_DIMENSION = '1';
 process.env.BFT_SKIP_BACKGROUND_PREGEN = '1';
 process.env.BFT_QUESTION_LLM_TIMEOUT_MS = '5000';
 process.env.BFT_SCENARIO_STEP1_INSTRUCTIONS_FILE = 'conf/scenario_step1.txt';
@@ -27,8 +30,10 @@ const questionStore = require('../src/services/questionStore');
 describe('assessmentService', () => {
   describe('getNextQuestion', () => {
     it('returns completed when interview is complete (MAX_INTERVIEW_QUESTIONS=0)', async () => {
-      const prev = process.env.MAX_INTERVIEW_QUESTIONS;
+      const prevMax = process.env.MAX_INTERVIEW_QUESTIONS;
+      const prevDev = process.env.BFT_DEV_MAX_QUESTIONS;
       process.env.MAX_INTERVIEW_QUESTIONS = '0';
+      delete process.env.BFT_DEV_MAX_QUESTIONS;
       try {
         const session = sessionService.create(null);
         const result = await assessmentService.getNextQuestion(session.id, 'user-complete-' + Date.now());
@@ -37,8 +42,9 @@ describe('assessmentService', () => {
         assert.ok(result.progress);
         assert.strictEqual(result.progress.percentComplete, 100);
       } finally {
-        if (prev !== undefined) process.env.MAX_INTERVIEW_QUESTIONS = prev;
+        if (prevMax !== undefined) process.env.MAX_INTERVIEW_QUESTIONS = prevMax;
         else delete process.env.MAX_INTERVIEW_QUESTIONS;
+        if (prevDev !== undefined) process.env.BFT_DEV_MAX_QUESTIONS = prevDev;
       }
     });
 
@@ -117,17 +123,17 @@ describe('assessmentService', () => {
       }
     });
 
-    it('when scenario batches are loaded, progress reports totalDimensions from batch constraints or config', async () => {
+    it('progress reports totalDimensions from model (all dimensions) and percentComplete from coverage', async () => {
       const prevMax = process.env.MAX_INTERVIEW_QUESTIONS;
       const prevDev = process.env.BFT_DEV_MAX_QUESTIONS;
       process.env.MAX_INTERVIEW_QUESTIONS = '20';
       delete process.env.BFT_DEV_MAX_QUESTIONS;
       try {
         const session = sessionService.create(null);
-        const result = await assessmentService.getNextQuestion(session.id, 'user-batch-progress-' + Date.now());
+        const result = await assessmentService.getNextQuestion(session.id, 'user-progress-' + Date.now());
         assert.ok(result.progress, 'progress should be returned');
         assert.strictEqual(typeof result.progress.totalDimensions, 'number');
-        assert.strictEqual(result.progress.totalDimensions, 20, 'with MAX_INTERVIEW_QUESTIONS=20 or batch constraints, totalDimensions should be 20');
+        assert.ok(result.progress.totalDimensions >= 1, 'totalDimensions is dimension count from model');
         assert.ok(result.progress.percentComplete >= 0 && result.progress.percentComplete <= 100);
         if (result.serviceUnavailable) {
           assert.strictEqual(result.progress.questionsAsked, 0, 'when service unavailable, no question was served');

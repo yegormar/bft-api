@@ -1,25 +1,9 @@
 const config = require('../../config');
+const assessmentConfig = require('../../config/assessment');
 const sessionService = require('./sessionService');
 const assessmentModel = require('../data/assessmentModel');
 const questionStore = require('./questionStore');
 const questionGenerator = require('./questionGeneration');
-
-/** Scenario batches (traits/values) for batch-based question selection. Loaded once. */
-let scenarioBatchesData = null;
-function getScenarioBatches() {
-  if (scenarioBatchesData) return scenarioBatchesData;
-  try {
-    const data = require('../data/scenarioBatches.json');
-    scenarioBatchesData = {
-      batches: Array.isArray(data.batches) ? data.batches : [],
-      constraints: data.constraints || {},
-    };
-    return scenarioBatchesData;
-  } catch {
-    scenarioBatchesData = { batches: [], constraints: {} };
-    return scenarioBatchesData;
-  }
-}
 
 const answersBySession = new Map();
 /** Accumulated assessment summaries from Ollama per session (for report). */
@@ -34,17 +18,7 @@ const preGeneratedQueueBySession = new Map();
 /** Per-session lock: only one background generator runs at a time. */
 const generatorBusyBySession = new Map();
 
-function getPregenConfig() {
-  const capRaw = process.env.BFT_PREGEN_QUEUE_CAP;
-  const cap = capRaw !== undefined && capRaw !== '' ? parseInt(capRaw, 10) : 5;
-  const refillRaw = process.env.BFT_PREGEN_REFILL_THRESHOLD;
-  const refill = refillRaw !== undefined && refillRaw !== '' ? parseInt(refillRaw, 10) : 1;
-  const queueCap = Number.isNaN(cap) || cap < 0 ? 5 : cap;
-  const refillThreshold = Number.isNaN(refill) || refill < 0 ? 1 : Math.min(refill, Math.max(0, queueCap - 1));
-  return { queueCap, refillThreshold };
-}
-
-const pregenConfig = getPregenConfig();
+const pregenConfig = assessmentConfig.getPregenConfig();
 const PREGEN_QUEUE_CAP = pregenConfig.queueCap;
 const PREGEN_REFILL_THRESHOLD = pregenConfig.refillThreshold;
 if (PREGEN_QUEUE_CAP === 0) {
@@ -72,37 +46,17 @@ let devMaxQuestionsLogged = false;
 const RANK_WEIGHTS = [1, 0.6, 0.3];
 
 function getInterviewConfig() {
-  const minRaw = process.env.MIN_SIGNAL_PER_DIMENSION;
-  const minSignal = minRaw !== undefined && minRaw !== '' ? parseInt(minRaw, 10) : 1;
-  let maxQuestions;
-  if (config.nodeEnv === 'development') {
-    const devMaxRaw = process.env.BFT_DEV_MAX_QUESTIONS;
-    if (devMaxRaw !== undefined && devMaxRaw !== '') {
-      const devMax = parseInt(devMaxRaw, 10);
-      if (!Number.isNaN(devMax) && devMax >= 1) {
-        maxQuestions = devMax;
-        if (!devMaxQuestionsLogged) {
-          devMaxQuestionsLogged = true;
-          console.log('[bft] dev max questions cap active: %s', maxQuestions);
-        }
-      }
-    }
+  const interviewConfig = assessmentConfig.getInterviewConfig();
+  if (interviewConfig.maxQuestions != null && !devMaxQuestionsLogged) {
+    devMaxQuestionsLogged = true;
+    console.log('[bft] max questions cap active: %s', interviewConfig.maxQuestions);
   }
-  if (maxQuestions == null) {
-    const maxRaw = process.env.MAX_INTERVIEW_QUESTIONS;
-    maxQuestions = maxRaw !== undefined && maxRaw !== '' ? parseInt(maxRaw, 10) : undefined;
-  }
-  return { minSignalPerDimension: minSignal, maxQuestions };
+  return interviewConfig;
 }
 
-/** Effective max questions: from config, or from scenario batch constraints when using batches. */
-function getEffectiveMaxQuestions(config) {
-  if (config.maxQuestions != null) return config.maxQuestions;
-  const { batches, constraints } = getScenarioBatches();
-  if (batches.length > 0 && typeof constraints.maxQuestionsPerInterview === 'number') {
-    return constraints.maxQuestionsPerInterview;
-  }
-  return undefined;
+/** Effective max questions from interview config. */
+function getEffectiveMaxQuestions(interviewConfig) {
+  return interviewConfig.maxQuestions ?? undefined;
 }
 
 function getOrInitInterviewState(sessionId) {
@@ -113,7 +67,6 @@ function getOrInitInterviewState(sessionId) {
       askedQuestionTitles: [],
       questionToDimension: {},
       questionIndex: 0,
-      usedBatchIds: [],
       coverage: {
         aptitudes: {},
         traits: {},
@@ -132,14 +85,10 @@ function getOrInitInterviewState(sessionId) {
   return state;
 }
 
-function isInterviewComplete(coverage, config, model, totalQuestionsAsked = 0) {
-  const effectiveMax = getEffectiveMaxQuestions(config);
+function isInterviewComplete(coverage, interviewConfig, model, totalQuestionsAsked = 0) {
+  const effectiveMax = getEffectiveMaxQuestions(interviewConfig);
   if (effectiveMax != null && totalQuestionsAsked >= effectiveMax) return true;
-  const { batches } = getScenarioBatches();
-  if (batches.length > 0) {
-    return false;
-  }
-  const { minSignalPerDimension } = config;
+  const { minSignalPerDimension } = interviewConfig;
   const m = model || assessmentModel.load();
   const types = [
     { key: 'aptitudes', list: m.aptitudes },
@@ -156,26 +105,6 @@ function isInterviewComplete(coverage, config, model, totalQuestionsAsked = 0) {
     }
   }
   return true;
-}
-
-/** Enrich a batch's dimensions with name, description, question_hints, how_measured, score_scale from assessment model. */
-function enrichBatchDimensionSet(batch, model) {
-  const m = model || assessmentModel.load();
-  return (batch.dimensions || []).map((d) => {
-    const full = assessmentModel.getDimension(d.dimensionType, d.dimensionId);
-    const out = {
-      dimensionType: d.dimensionType,
-      dimensionId: d.dimensionId,
-      name: (full && full.name) || d.dimensionId,
-      description: (full && full.description) || '',
-      question_hints: (full && full.question_hints) || [],
-      how_measured_or_observed: (full && full.how_measured_or_observed) || '',
-    };
-    if (full && full.score_scale && typeof full.score_scale === 'object') {
-      out.score_scale = full.score_scale;
-    }
-    return out;
-  });
 }
 
 /**
@@ -227,45 +156,6 @@ function selectOneDimensionRandom(coverage, model) {
   return [enrichOneDimension(chosen, m)];
 }
 
-/**
- * Select next batch for scenario: prefer least-used batches, then by least coverage of batch dimensions.
- * @returns {{ batchId: string, dimensionSet: Array<object>, preferredResponseType?: string } | null}
- */
-function selectNextBatch(state, model) {
-  const { batches } = getScenarioBatches();
-  if (!batches.length) return null;
-  const m = model || assessmentModel.load();
-  const usedCount = (id) => (state.usedBatchIds || []).filter((bid) => bid === id).length;
-  const coverageScore = (batch) => {
-    const dims = batch.dimensions || [];
-    let sum = 0;
-    for (const d of dims) {
-      const key = COVERAGE_KEY_BY_TYPE[d.dimensionType];
-      const cov = key ? (state.coverage[key] || {}) : {};
-      const c = cov[d.dimensionId];
-      sum += (c && c.questionCount) || 0;
-    }
-    return sum;
-  };
-  const sorted = [...batches].sort((a, b) => {
-    const useA = usedCount(a.id);
-    const useB = usedCount(b.id);
-    if (useA !== useB) return useA - useB;
-    return coverageScore(a) - coverageScore(b);
-  });
-  const batch = sorted[0];
-  if (!batch) return null;
-  const dimensionSet = enrichBatchDimensionSet(batch, m);
-  if (dimensionSet.length === 0) return null;
-  return {
-    batchId: batch.id,
-    dimensionSet,
-    preferredResponseType: batch.preferredResponseType,
-    batchTheme: batch.theme ?? null,
-    dilemmaAnchor: batch.dilemmaAnchor ?? null,
-  };
-}
-
 function selectNextDimensionSet(coverage, model, options = {}) {
   const m = model || assessmentModel.load();
   const allDimensions = assessmentModel.getAllDimensions();
@@ -305,28 +195,13 @@ function selectNextDimensionSet(coverage, model, options = {}) {
 
 /**
  * Compute approximate progress for the interview (for API response and UI).
- * When using scenario batches, totalDimensions = effective max questions and percentComplete is question-based.
- * @param {{ coverage, questionIndex, usedBatchIds }} state - Interview state
- * @param {{ maxQuestions }} config - Interview config
+ * @param {{ coverage, questionIndex }} state - Interview state
+ * @param {{ maxQuestions, minSignalPerDimension }} interviewConfig - From getInterviewConfig()
  * @param {object} model - Loaded assessment model
  * @returns {{ questionsAsked, coveredDimensions, totalDimensions, percentComplete }}
  */
-function getProgress(state, config, model) {
-  const effectiveMax = getEffectiveMaxQuestions(config);
-  const { batches } = getScenarioBatches();
-
-  if (batches.length > 0 && effectiveMax != null) {
-    const questionsAsked = state.questionIndex;
-    const totalDimensions = effectiveMax;
-    const percentComplete = totalDimensions > 0 ? Math.round((questionsAsked / totalDimensions) * 100) : 0;
-    return {
-      questionsAsked,
-      coveredDimensions: questionsAsked,
-      totalDimensions,
-      percentComplete: Math.min(100, percentComplete),
-    };
-  }
-
+function getProgress(state, interviewConfig, model) {
+  const effectiveMax = getEffectiveMaxQuestions(interviewConfig);
   const m = model || assessmentModel.load();
   const allDimensions = assessmentModel.getAllDimensions();
   const totalDimensions = allDimensions.length;
@@ -360,10 +235,9 @@ function getProgress(state, config, model) {
  * @param {Array<{ dimensionType: string, dimensionId: string }>} dimensionSet
  * @param {string | null} assessmentSummary
  * @param {string | null} bftUserId - if set, mark question as used for this user
- * @param {string | null} [batchId] - if set (batch-based flow), record batch as used
  * @returns {{ assignedId: string }}
  */
-function applyServedQuestionToState(sessionId, question, dimensionSet, assessmentSummary, bftUserId, batchId = null) {
+function applyServedQuestionToState(sessionId, question, dimensionSet, assessmentSummary, bftUserId) {
   const state = getOrInitInterviewState(sessionId);
   const assignedId = `scenario_${state.questionIndex}`;
   state.questionIndex += 1;
@@ -379,10 +253,6 @@ function applyServedQuestionToState(sessionId, question, dimensionSet, assessmen
     type: question.type || 'single_choice',
     options: question.options || [],
   };
-  if (batchId) {
-    if (!state.usedBatchIds) state.usedBatchIds = [];
-    state.usedBatchIds.push(batchId);
-  }
   const { coverage } = state;
   for (const dim of dimensionSet) {
     const key = COVERAGE_KEY_BY_TYPE[dim.dimensionType];
@@ -517,18 +387,13 @@ function submitAnswers(sessionId, payload) {
 }
 
 /**
- * True when we are in development, BFT_DEV_MAX_QUESTIONS is in effect, and the interview
- * has reached that cap (so we should fill unmeasured traits/values with synthetic scores).
+ * True when the interview has reached the configured question cap (maxQuestions). In that
+ * case we fill unmeasured traits/values with synthetic scores so the report is still usable.
  */
 function shouldFillUnmeasuredWithSynthetic(state, interviewConfig) {
   if (!state || typeof state.questionIndex !== 'number') return false;
-  if (config.nodeEnv !== 'development') return false;
-  const devMaxRaw = process.env.BFT_DEV_MAX_QUESTIONS;
-  if (devMaxRaw === undefined || devMaxRaw === '') return false;
-  const devMax = parseInt(devMaxRaw, 10);
-  if (Number.isNaN(devMax) || devMax < 1) return false;
   const effectiveMax = getEffectiveMaxQuestions(interviewConfig);
-  if (effectiveMax == null || effectiveMax !== devMax) return false;
+  if (effectiveMax == null) return false;
   return state.questionIndex >= effectiveMax;
 }
 
@@ -547,7 +412,7 @@ function randomScoreInScale(dimension) {
 }
 
 /**
- * When in dev and BFT_DEV_MAX_QUESTIONS is reached, returns an aggregate that includes
+ * When the interview has reached the question cap, returns an aggregate that includes
  * synthetic scores for all traits/values that have no measured data, so the assessment
  * looks complete. Does not mutate the original aggregate.
  */
@@ -722,15 +587,9 @@ function runBackgroundPregeneration(sessionId, lastQuestion, lastDimensionSet, b
       let currentAskedTitles = simulatedAskedTitles;
       let currentAnswers = simulatedAnswers;
       let currentCoverage = simulatedCoverage;
-      let simulatedUsedBatchIds = [...(state.usedBatchIds || [])];
 
       while (queue.length < PREGEN_QUEUE_CAP) {
         if (isInterviewComplete(currentCoverage, interviewConfig, model, simulatedQuestionIndex)) break;
-        const simulatedState = {
-          coverage: currentCoverage,
-          questionIndex: simulatedQuestionIndex,
-          usedBatchIds: simulatedUsedBatchIds,
-        };
         const dimensionSet = selectOneDimensionRandom(simulatedState.coverage, model);
         if (dimensionSet.length === 0) break;
 
@@ -748,7 +607,7 @@ function runBackgroundPregeneration(sessionId, lastQuestion, lastDimensionSet, b
         const dimensionSetForState = result?.dimensionSet ?? dimensionSet;
         if (!nextQuestion || typeof nextQuestion !== 'object' || !nextQuestion.title) break;
 
-        queue.push({ question: nextQuestion, dimensionSet: dimensionSetForState, assessmentSummary, batchId: null });
+        queue.push({ question: nextQuestion, dimensionSet: dimensionSetForState, assessmentSummary });
         if (storeDir && result.source === 'llm') {
           const profileKey = questionStore.getProfileKey(preSurveyProfile);
           questionStore.save(storeDir, profileKey, nextQuestion, dimensionSetForState, assessmentSummary);
@@ -827,14 +686,13 @@ async function getNextQuestion(sessionId, bftUserId) {
 
   if (queue.length > 0) {
     const item = queue.shift();
-    const { question, dimensionSet, assessmentSummary, batchId } = item;
+    const { question, dimensionSet, assessmentSummary } = item;
     const { assignedId } = applyServedQuestionToState(
       sessionId,
       question,
       dimensionSet,
       assessmentSummary,
-      bftUserId,
-      batchId || null
+      bftUserId
     );
     const progress = getProgress(state, interviewConfig, model);
     console.log('[bft] question source=session_queue sessionId=%s questionId=%s queueRemaining=%s', sessionId, assignedId, queue.length);
@@ -855,14 +713,13 @@ async function getNextQuestion(sessionId, bftUserId) {
     queue = getOrInitPreGeneratedQueue(sessionId);
     if (gotOne && queue.length > 0) {
       const item = queue.shift();
-      const { question, dimensionSet, assessmentSummary, batchId } = item;
+      const { question, dimensionSet, assessmentSummary } = item;
       const { assignedId } = applyServedQuestionToState(
         sessionId,
         question,
         dimensionSet,
         assessmentSummary,
-        bftUserId,
-        batchId || null
+        bftUserId
       );
       const progress = getProgress(state, interviewConfig, model);
       console.log('[bft] question source=session_queue sessionId=%s questionId=%s queueRemaining=%s (after wait)', sessionId, assignedId, queue.length);
@@ -915,8 +772,7 @@ async function getNextQuestion(sessionId, bftUserId) {
       nextQuestion,
       dimensionSetForState,
       assessmentSummary,
-      bftUserId,
-      null
+      bftUserId
     );
     console.log('[bft] question source=%s sessionId=%s questionId=%s', result.source, sessionId, assignedId);
     if (result.source === 'llm' && storeDir) {

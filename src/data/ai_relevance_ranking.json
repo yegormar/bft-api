@@ -53,5 +53,5 @@
     "decreasing": "Increasingly redundant or automated; de-emphasize or pair with complementary traits",
     "mixed": "Depends on how the trait is applied (e.g. routine vs high-level)"
   },
-  "relevance_score_note": "0–1 scale; higher = more important to emphasize for AI-resilient recommendations. Use with career clusters and skill roadmap logic."
+  "relevance_score_note": "0-1 scale; higher = more important to emphasize for AI-resilient recommendations. Use with career clusters and skill roadmap logic."
 }

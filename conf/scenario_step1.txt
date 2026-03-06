@@ -97,3 +97,5 @@ Scoring scale:
 - Low (1-2): {{LOW_INTERPRETATION}}
 - Medium (3): {{MEDIUM_INTERPRETATION}}
 - High (4-5): {{HIGH_INTERPRETATION}}
+
+Important! How it manifests behaviorally and Scoring scale are given only for the context!

@@ -4,49 +4,173 @@
     "Citrini Research (2028 GIC thought exercise)",
     "Microsoft New Future of Work Report 2025"
   ],
-  "description": "Aptitudes: natural affinity and raw potential (capacity). Largely stable; dictate ceiling and speed of learning in a field. Distinct from traits (how you behave) and skills (what you've learned).",
+  "description": "Aptitudes: natural affinity and raw potential (capacity). Largely stable; dictate ceiling and speed of learning in a field. Distinct from traits (how you behave), values (what you want), and skills (what you have learned). Used with traits and values to match users to skill stacks and paths where their capacity is an asset.",
   "aptitudes": [
     {
       "id": "logical_analytical_reasoning",
       "name": "Logical and analytical reasoning",
+      "short_label": "Logical reasoning",
       "description": "Capacity to follow and construct logical arguments, identify cause and effect, and reason systematically from premises to conclusions. Determines how quickly someone can learn formal systems, rules, and structured domains (e.g. law, logic, systems design).",
+      "ai_future_rationale": "Stable. Routine logical execution is automated; high-level reasoning, design of systems, and oversight of AI output still require human logical capacity. Aptitude underpins skills like problem_formulation and systems_thinking.",
       "how_measured_or_observed": "Ability to spot flaws in arguments or processes; comfort with 'if-then' and rule-based reasoning; performance on tasks that require following or designing a clear logical structure. Probe with scenarios that have a right answer derivable from rules.",
-      "question_hints": ["When someone gives a reason for something, do you often find yourself checking whether the logic holds?", "Do you find it easy or hard to break a complex rule or process into clear steps?"]
+      "question_hints": [
+        "When someone gives a reason for something, do you often find yourself checking whether the logic holds?",
+        "Do you find it easy or hard to break a complex rule or process into clear steps?"
+      ],
+      "related_skill_clusters": [
+        "structured_problem_solving",
+        "strategic_planning",
+        "problem_formulation",
+        "systems_thinking",
+        "verification_epistemic_hygiene",
+        "epistemic_calibration"
+      ],
+      "score_scale": {
+        "min": 1,
+        "max": 5,
+        "interpretation": {
+          "low": "Domains that rely heavily on formal logic or stepwise reasoning may feel slower to master; strengths may lie more in other capacities (e.g. verbal, pattern, creative). Fit for paths where structure is one of several demands, not the main one.",
+          "medium": "Can follow and use logical structure with practice; suitable for roles that combine reasoning with other skills. Able to develop problem_formulation and systems_thinking with support.",
+          "high": "Strong fit for roles that require structure and reasoning; higher ceiling and faster learning in logic-heavy domains. Good foundation for problem_formulation, systems_thinking, and oversight of AI output."
+        }
+      }
     },
     {
       "id": "quantitative_numerical",
       "name": "Quantitative and numerical facility",
+      "short_label": "Quantitative",
       "description": "Capacity to work comfortably with numbers, quantities, proportions, and data. Determines ceiling and learning speed in math-heavy fields, data analysis, finance, and technical domains that rely on numerical reasoning.",
+      "ai_future_rationale": "Mixed. Routine computation and data crunching are highly automated; interpretation, judgment on metrics, and strategic use of quantitative insight remain human. Ceiling in data-heavy fields still depends on this aptitude.",
       "how_measured_or_observed": "Comfort with numbers in everyday decisions (budgets, estimates, comparisons); ability to interpret charts or simple statistics; self-report and scenario questions about handling numerical or data-heavy tasks.",
-      "question_hints": ["When you see numbers or data, do you feel at ease making sense of them or do you prefer to avoid them?", "How do you approach a problem that involves comparing options using quantities or metrics?"]
+      "question_hints": [
+        "When you see numbers or data, do you feel at ease making sense of them or do you prefer to avoid them?",
+        "How do you approach a problem that involves comparing options using quantities or metrics?"
+      ],
+      "related_skill_clusters": [
+        "research_analysis",
+        "epistemic_calibration",
+        "verification_epistemic_hygiene",
+        "structured_problem_solving"
+      ],
+      "score_scale": {
+        "min": 1,
+        "max": 5,
+        "interpretation": {
+          "low": "Data-heavy or number-centric domains may require more effort; recommendations should steer toward roles where quantitative work is one input among others, not the core. Other aptitudes may be stronger levers.",
+          "medium": "Can work with data and numbers when needed; suitable for roles that use quantitative insight alongside judgment and communication. Able to develop research_analysis and epistemic_calibration with practice.",
+          "high": "Strong foundation for roles that use quantitative judgment and oversight (not routine number-crunching). Pair with epistemic_calibration and steer toward interpretation and decision-making over pure computation."
+        }
+      }
     },
     {
       "id": "verbal_linguistic",
       "name": "Verbal and linguistic facility",
+      "short_label": "Verbal & linguistic",
       "description": "Capacity to understand and use language with precision and nuance: reading, writing, and grasping subtle meaning. Determines ceiling in communication-heavy roles, persuasion, editing, and domains where wording and interpretation matter.",
+      "ai_future_rationale": "Grows. Nuance, persuasion, and precise communication remain human-centric. Agents take instructions literally; human verbal facility is needed to frame, edit, and judge output.",
       "how_measured_or_observed": "Ease with reading dense text or legal/technical language; ability to rephrase and clarify; sensitivity to tone and ambiguity in wording. Probe with scenarios about interpreting or drafting text.",
-      "question_hints": ["Do you find it easy to notice when two people mean different things by the same words?", "When you have to explain something in writing, do you enjoy getting the wording right or find it tedious?"]
+      "question_hints": [
+        "Do you find it easy to notice when two people mean different things by the same words?",
+        "When you have to explain something in writing, do you enjoy getting the wording right or find it tedious?"
+      ],
+      "related_skill_clusters": [
+        "instruction_clarity",
+        "feedback_refinement",
+        "ethical_reputational_risk_sensing"
+      ],
+      "score_scale": {
+        "min": 1,
+        "max": 5,
+        "interpretation": {
+          "low": "Roles that depend heavily on precise wording or dense text may feel more demanding; fit for paths where communication is supported by tools or where other strengths (e.g. technical, pattern) lead.",
+          "medium": "Can communicate clearly with attention; suitable for roles that combine verbal clarity with other skills. Able to develop instruction_clarity and feedback_refinement with practice.",
+          "high": "Strong fit for roles involving framing, editing, and judging output; critical for briefing agents and improving human or AI-generated content. Prioritize in recommendations for AI-augmented work."
+        }
+      }
     },
     {
       "id": "pattern_recognition",
       "name": "Pattern recognition and abstraction",
+      "short_label": "Pattern recognition",
       "description": "Capacity to spot similarities, analogies, and recurring structures across different contexts. Supports learning by transfer and cross-domain thinking; determines how quickly someone can see 'this is like that' and apply prior knowledge in new settings.",
+      "ai_future_rationale": "Grows. Cross-domain synthesis and 'seeing connections' favor humans; AI is strong within a domain. This aptitude supports learning by transfer and durable differentiation.",
       "how_measured_or_observed": "Tendency to draw analogies; ability to identify what two different problems have in common; performance on tasks that require seeing a general rule or pattern behind varied examples.",
-      "question_hints": ["When you learn something new, do you often connect it to something you already knew from a different area?", "If two problems look different on the surface, how easily can you tell whether they're really the same type of problem?"]
+      "question_hints": [
+        "When you learn something new, do you often connect it to something you already knew from a different area?",
+        "If two problems look different on the surface, how easily can you tell whether they're really the same type of problem?"
+      ],
+      "related_skill_clusters": [
+        "cross_domain_synthesis",
+        "systems_thinking",
+        "aesthetic_taste",
+        "problem_formulation",
+        "research_analysis"
+      ],
+      "score_scale": {
+        "min": 1,
+        "max": 5,
+        "interpretation": {
+          "low": "Cross-domain or analogy-heavy work may take more effort; fit for roles that stay within a clearer domain or where structure is provided. Other aptitudes may drive skill development more.",
+          "medium": "Can spot connections with some practice; suitable for roles that benefit from linking ideas across areas. Able to develop cross_domain_synthesis and systems_thinking over time.",
+          "high": "Strong fit for roles that benefit from analogies and cross-domain thinking; good foundation for cross_domain_synthesis and high-level problem_formulation. Align with skill development in these areas."
+        }
+      }
     },
     {
       "id": "technical_hands_on",
       "name": "Technical / hands-on orientation",
+      "short_label": "Technical / hands-on",
       "description": "Affinity for building, coding, debugging, or working with systems and tools. Includes both routine implementation (automation-prone) and design/architecture (complementary to AI). Capacity to learn and retain how systems work.",
+      "ai_future_rationale": "Mixed. Routine coding and implementation are heavily automated; design, architecture, and agent-boss technical oversight remain valuable. Position as designer of systems and manager of agents, not only executor.",
       "how_measured_or_observed": "Interest in building, coding, or technical projects; preference for practical step-by-step problem solving; self-reported technical hobbies or coursework.",
-      "question_hints": ["Do you enjoy building, coding, or technical projects?", "Do you prefer hands-on, logical tasks or more open-ended creative ones?"]
+      "question_hints": [
+        "Do you enjoy building, coding, or technical projects?",
+        "Do you prefer hands-on, logical tasks or more open-ended creative ones?"
+      ],
+      "related_skill_clusters": [
+        "ai_literacy",
+        "human_ai_coordination",
+        "workflow_orchestration",
+        "context_memory_management",
+        "instruction_clarity",
+        "delegation_oversight"
+      ],
+      "score_scale": {
+        "min": 1,
+        "max": 5,
+        "interpretation": {
+          "low": "Technical or systems-heavy paths may require more support; fit for roles where technology is one tool among others and other aptitudes (e.g. verbal, pattern) lead. Avoid framing as a deficit; different strengths suit different paths.",
+          "medium": "Can learn and use technical systems with practice; suitable for roles that combine technical oversight with communication or coordination. Pair with delegation_oversight and instruction_clarity for AI-era relevance.",
+          "high": "Strong foundation for designing systems and managing agents; steer toward architecture and oversight rather than routine implementation. Recommend development in ai_literacy, workflow_orchestration, and human_ai_coordination."
+        }
+      }
     },
     {
       "id": "creative_open_ended",
       "name": "Creative and open-ended thinking",
+      "short_label": "Creative thinking",
       "description": "Capacity for imagination, divergent thinking, and generating options when there is no single right answer. Valued where human taste, novelty, and judgment matter. Supports learning in arts, design, and strategy.",
+      "ai_future_rationale": "Grows. Judgment, novelty, and open-ended creation are harder to automate. Humans 'directing for taste' remain in the loop; higher-value tasks favor creativity.",
       "how_measured_or_observed": "Interest in arts, design, storytelling; preference for 'freedom to explore and experiment'; responses to open-ended scenarios; ability to generate multiple plausible approaches to a vague brief.",
-      "question_hints": ["Do you prefer clear instructions or freedom to explore?", "Do you enjoy imaginative or storytelling-style tasks?"]
+      "question_hints": [
+        "Do you prefer clear instructions or freedom to explore?",
+        "Do you enjoy imaginative or storytelling-style tasks?"
+      ],
+      "related_skill_clusters": [
+        "problem_formulation",
+        "aesthetic_taste",
+        "cross_domain_synthesis",
+        "feedback_refinement"
+      ],
+      "score_scale": {
+        "min": 1,
+        "max": 5,
+        "interpretation": {
+          "low": "Roles that demand constant novelty or open-ended judgment may feel less natural; fit for paths with more structure or where other aptitudes (e.g. logical, quantitative) are the main lever. No negative framing.",
+          "medium": "Can contribute ideas and iterate when given some scope; suitable for roles that mix creative input with structure. Able to develop problem_formulation and aesthetic_taste with practice.",
+          "high": "Strong fit for roles that emphasize ideation, design, and human taste over routine production. Good foundation for problem_formulation, aesthetic_taste, and cross-domain synthesis. Align with AI-era paths where directing and curating matter."
+        }
+      }
     }
   ]
 }

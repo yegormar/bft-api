@@ -17,7 +17,4 @@ function getReportTemplate() {
   return Object.fromEntries(REPORT_SECTIONS.map((key) => [key, null]));
 }
 
-module.exports = {
-  REPORT_SECTIONS,
-  getReportTemplate,
-};
+module.exports = { getReportTemplate };

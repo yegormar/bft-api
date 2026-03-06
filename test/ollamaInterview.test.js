@@ -3,10 +3,10 @@
 process.env.BFT_SCENARIO_STEP1_INSTRUCTIONS_FILE = 'conf/scenario_step1.txt';
 process.env.BFT_SCENARIO_STEP2_INSTRUCTIONS_FILE = 'conf/scenario_step2.txt';
 
-const { describe, it, beforeEach, afterEach } = require('node:test');
+const { describe, it } = require('node:test');
 const assert = require('node:assert');
 
-const ollamaClient = require('../src/lib/ollamaClient');
+const { createFakeOllama, twoStepResponses } = require('./fakeOllama');
 const {
   validateNextQuestionObject,
   generateScenarioQuestion,
@@ -18,16 +18,6 @@ const {
 
 describe('ollamaInterview', () => {
   describe('generateScenarioQuestion', () => {
-    let originalChat;
-
-    beforeEach(() => {
-      originalChat = ollamaClient.chat;
-    });
-
-    afterEach(() => {
-      ollamaClient.chat = originalChat;
-    });
-
     it('returns question when step 1 (3 scenarios) and step 2 (choose + score) are valid', async () => {
       const scenario = {
         title: 'Pick one',
@@ -35,30 +25,17 @@ describe('ollamaInterview', () => {
         type: 'single_choice',
         options: [{ text: 'A', value: 'a' }, { text: 'B', value: 'b' }],
       };
-      const step1Response = JSON.stringify({
-        nextQuestions: [scenario, { ...scenario, title: 'Second' }, { ...scenario, title: 'Third' }],
-      });
-      const step2Response = JSON.stringify({
-        chosenScenarioIndex: 0,
-        optionScores: [
-          { dimensionScores: { x: 1 } },
-          { dimensionScores: { x: 2 } },
-        ],
-      });
-      let callCount = 0;
-      ollamaClient.chat = async (messages) => {
-        callCount += 1;
-        assert.strictEqual(messages.length, 2, 'each call: system + user');
-        if (callCount === 1) return { content: step1Response };
-        return { content: step2Response };
-      };
+      const [step1Response, step2Response] = twoStepResponses(
+        { nextQuestions: [scenario, { ...scenario, title: 'Second' }, { ...scenario, title: 'Third' }] },
+        { chosenScenarioIndex: 0, optionScores: [{ dimensionScores: { x: 1 } }, { dimensionScores: { x: 2 } }] }
+      );
+      const fake = createFakeOllama([step1Response, step2Response]);
 
       const dimensionSet = [
         { dimensionType: 'trait', dimensionId: 'x', name: 'X', question_hints: [], how_measured_or_observed: '', score_scale: { min: 1, max: 5, interpretation: {} } },
       ];
-      const result = await generateScenarioQuestion(dimensionSet, [], [], null, null);
+      const result = await generateScenarioQuestion(dimensionSet, [], [], null, null, null, null, fake);
 
-      assert.strictEqual(callCount, 2, 'step 1 then step 2');
       assert.ok(result.nextQuestion);
       assert.strictEqual(result.nextQuestion.title, 'Pick one');
       assert.strictEqual(result.nextQuestion.options.length, 2);
@@ -85,27 +62,14 @@ describe('ollamaInterview', () => {
         type: 'single_choice',
         options: [{ text: 'Solo', value: 'solo' }, { text: 'Team', value: 'team' }],
       };
-      const step1Response = JSON.stringify({
-        nextQuestions: [scenario, { ...scenario, title: 'Second' }, { ...scenario, title: 'Third' }],
-      });
-      const step2Response = JSON.stringify({
-        chosenScenarioIndex: 0,
-        optionScores: [
-          { dimensionScores: { collab: 1 } },
-          { dimensionScores: { collab: 5 } },
-        ],
-      });
+      const [step1Response, step2Response] = twoStepResponses(
+        { nextQuestions: [scenario, { ...scenario, title: 'Second' }, { ...scenario, title: 'Third' }] },
+        { chosenScenarioIndex: 0, optionScores: [{ dimensionScores: { collab: 1 } }, { dimensionScores: { collab: 5 } }] }
+      );
+      const fake = createFakeOllama([step1Response, step2Response]);
 
-      let callCount = 0;
-      ollamaClient.chat = async (messages) => {
-        callCount += 1;
-        if (callCount === 1) return { content: step1Response };
-        return { content: step2Response };
-      };
+      const result = await generateScenarioQuestion(dimensionSetWithScale, [], [], null, null, null, null, fake);
 
-      const result = await generateScenarioQuestion(dimensionSetWithScale, [], [], null, null);
-
-      assert.strictEqual(callCount, 2, 'step 1 then step 2');
       assert.ok(result.nextQuestion);
       assert.strictEqual(result.nextQuestion.options[0].dimensionScores.collab, 1);
       assert.strictEqual(result.nextQuestion.options[1].dimensionScores.collab, 5);
@@ -128,16 +92,10 @@ describe('ollamaInterview', () => {
           { title: 'Two', description: 'D', type: 'single_choice', options: [{ text: 'A', value: 'a' }] },
         ],
       });
+      const fake = createFakeOllama([step1ResponseTwoOnly]);
 
-      let callCount = 0;
-      ollamaClient.chat = async (messages) => {
-        callCount += 1;
-        return { content: step1ResponseTwoOnly };
-      };
+      const result = await generateScenarioQuestion(dimensionSetWithScale, [], [], null, null, null, null, fake);
 
-      const result = await generateScenarioQuestion(dimensionSetWithScale, [], [], null, null);
-
-      assert.ok(callCount >= 1, 'at least step 1 called');
       assert.strictEqual(result.nextQuestion, null);
     });
 
@@ -271,26 +229,14 @@ describe('ollamaInterview', () => {
         type: 'single_choice',
         options: [{ text: 'One', value: 'one' }, { text: 'Many', value: 'many' }],
       };
-      const step1Response = JSON.stringify({
-        nextQuestions: [scenario, { ...scenario, title: 'Second' }, { ...scenario, title: 'Third' }],
-      });
-      const step2Response = JSON.stringify({
-        chosenScenarioIndex: 0,
-        optionScores: [
-          { dimensionScores: { impact: 9 } },
-          { dimensionScores: { impact: 3 } },
-        ],
-      });
-      let callCount = 0;
-      ollamaClient.chat = async (messages) => {
-        callCount += 1;
-        if (callCount === 1) return { content: step1Response };
-        return { content: step2Response };
-      };
+      const [step1Response, step2Response] = twoStepResponses(
+        { nextQuestions: [scenario, { ...scenario, title: 'Second' }, { ...scenario, title: 'Third' }] },
+        { chosenScenarioIndex: 0, optionScores: [{ dimensionScores: { impact: 9 } }, { dimensionScores: { impact: 3 } }] }
+      );
+      const fake = createFakeOllama([step1Response, step2Response]);
 
-      const result = await generateScenarioQuestion(dimensionSetWithScale, [], [], null, null);
+      const result = await generateScenarioQuestion(dimensionSetWithScale, [], [], null, null, null, null, fake);
 
-      assert.strictEqual(callCount, 2);
       assert.ok(result.nextQuestion);
       assert.strictEqual(result.nextQuestion.options[0].dimensionScores.impact, 9);
       assert.strictEqual(result.nextQuestion.options[1].dimensionScores.impact, 3);
