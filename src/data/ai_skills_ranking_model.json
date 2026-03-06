@@ -1,0 +1,73 @@
+{
+  "description": "Model for computing AI future relevance (0-1) from skill structural_scores. All dimensions scored 0-5; higher = more beneficial. Result is combined then clamped to 0-1. Every skill in skills.json must have full structural_scores (all six dimensions numeric); there is no fallback. Missing or incomplete data is a bug and the code fails fast. See bft-doc/AI_SKILLS_DECISION_MATRIX.md.",
+  "scale_max": 5,
+  "dimensions": [
+    {
+      "key": "ai_resistance",
+      "invert": false,
+      "label": "AI Resistance",
+      "core_question": "How resistant is this skill to being performed autonomously by AI at expert level within 10-15 years?",
+      "why_it_matters": "Higher resistance reduces long-term fragility.",
+      "scoring_scale": {
+        "0": "Easily replicated by AI",
+        "5": "AI-resistant"
+      }
+    },
+    {
+      "key": "leverage_multiplier",
+      "invert": false,
+      "label": "Leverage Multiplier",
+      "core_question": "Does this skill increase your ability to use AI or coordinate others?",
+      "why_it_matters": "Some skills amplify all other skills.",
+      "scoring_scale": {
+        "0": "Standalone execution skill",
+        "5": "Amplifies many other skills"
+      }
+    },
+    {
+      "key": "authority_pathway",
+      "invert": false,
+      "label": "Authority Pathway",
+      "core_question": "Does mastering this skill position you to own decisions later?",
+      "why_it_matters": "Long-term security comes from decision ownership.",
+      "scoring_scale": {
+        "0": "Execution-only",
+        "5": "Direct path to decision ownership"
+      }
+    },
+    {
+      "key": "scarcity_durability",
+      "invert": false,
+      "label": "Scarcity Durability",
+      "core_question": "Is this skill structurally scarce (legal, embodied, relational, physical)?",
+      "why_it_matters": "Scarcity drives premium over time.",
+      "scoring_scale": {
+        "0": "Abundant / easily automated",
+        "5": "Structurally scarce"
+      }
+    },
+    {
+      "key": "transferability",
+      "invert": false,
+      "label": "Cross-Domain Transferability",
+      "core_question": "Can this skill apply across industries?",
+      "why_it_matters": "Protects against sector disruption.",
+      "scoring_scale": {
+        "0": "Narrow application",
+        "5": "Universal applicability"
+      }
+    },
+    {
+      "key": "time_to_compound",
+      "invert": false,
+      "label": "Time-to-Compound",
+      "core_question": "Does early investment create exponential returns over 10+ years?",
+      "why_it_matters": "Some skills must start early to master deeply.",
+      "scoring_scale": {
+        "0": "Learnable quickly anytime",
+        "5": "Must start early to master"
+      }
+    }
+  ],
+  "combination": "average"
+}
