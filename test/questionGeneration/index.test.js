@@ -7,6 +7,7 @@ const { spawnSync } = require('node:child_process');
 const tmpDir = path.join(os.tmpdir(), `bft-qgen-index-test-${Date.now()}`);
 fs.mkdirSync(tmpDir, { recursive: true });
 process.env.BFT_QUESTION_LLM_TIMEOUT_MS = '5000';
+process.env.BFT_SCENARIO_STORE_FIRST = 'false';
 process.env.BFT_SCENARIO_STEP1_INSTRUCTIONS_FILE = 'conf/scenario_step1.txt';
 process.env.BFT_SCENARIO_STEP3_INSTRUCTIONS_FILE = 'conf/scenario_step3.txt';
 

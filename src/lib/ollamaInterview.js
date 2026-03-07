@@ -340,6 +340,9 @@ function buildDimensionBlockForStep1(primaryDimension) {
     `- High (4-5): ${interp.high || 'high'}`,
     '',
   ];
+  if (primaryDimension.scenario_constraint && primaryDimension.scenario_constraint.trim()) {
+    lines.push(primaryDimension.scenario_constraint.trim(), '');
+  }
   return lines.join('\n');
 }
 
@@ -362,6 +365,7 @@ function getScenarioStep1SystemPromptWithDimension(primaryDimension) {
     '{{LOW_INTERPRETATION}}': interp.low || 'low',
     '{{MEDIUM_INTERPRETATION}}': interp.medium || 'medium',
     '{{HIGH_INTERPRETATION}}': interp.high || 'high',
+    '{{DIMENSION_CONSTRAINT}}': (primaryDimension && primaryDimension.scenario_constraint) || '',
   };
   Object.keys(replacements).forEach((key) => {
     step1 = step1.split(key).join(replacements[key]);

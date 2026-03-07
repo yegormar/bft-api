@@ -16,9 +16,17 @@ function withDimensionIds(dimensionSet) {
   return (dimensionSet || []).map((d) => (d && (d.id != null)) ? d : { ...d, id: d.dimensionId });
 }
 
+function tryStore(storeDir, preSurveyProfile, bftUserId, desiredDimensionSet) {
+  if (!storeDir) return null;
+  const profileKey = questionStore.getProfileKey(preSurveyProfile);
+  const usedSet = questionStore.getUsedSet(storeDir, bftUserId);
+  const candidates = questionStore.listByProfile(storeDir, profileKey);
+  return selectBestFromStore(candidates, usedSet, desiredDimensionSet);
+}
+
 function createProcessor() {
   return async function processOne(context) {
-    const { timeoutMs } = getQuestionGenConfig();
+    const { timeoutMs, storeFirst } = getQuestionGenConfig();
     const {
       sessionId,
       desiredDimensionSet,
@@ -33,6 +41,20 @@ function createProcessor() {
     } = context;
 
     let nullReason = null;
+
+    const tryStoreFirst = storeFirst;
+
+    if (tryStoreFirst) {
+      const fallback = tryStore(storeDir, preSurveyProfile, bftUserId, desiredDimensionSet);
+      if (fallback) {
+        return {
+          question: fallback.question,
+          dimensionSet: withDimensionIds(fallback.dimensionSet),
+          assessmentSummary: fallback.assessmentSummary,
+          source: 'store',
+        };
+      }
+    }
 
     if (ollamaClient.config.enabled) {
       const llmResult = await generateScenarioQuestionWithTimeout(
@@ -63,15 +85,8 @@ function createProcessor() {
       nullReason = 'LLM disabled';
     }
 
-    if (storeDir) {
-      const profileKey = questionStore.getProfileKey(preSurveyProfile);
-      const usedSet = questionStore.getUsedSet(storeDir, bftUserId);
-      const candidates = questionStore.listByProfile(storeDir, profileKey);
-      const fallback = selectBestFromStore(
-        candidates,
-        usedSet,
-        desiredDimensionSet
-      );
+    if (!tryStoreFirst && storeDir) {
+      const fallback = tryStore(storeDir, preSurveyProfile, bftUserId, desiredDimensionSet);
       if (fallback) {
         return {
           question: fallback.question,
@@ -81,6 +96,8 @@ function createProcessor() {
         };
       }
       nullReason = (nullReason ? nullReason + '; ' : '') + 'store had no unused question for this profile';
+    } else if (tryStoreFirst) {
+      nullReason = (nullReason ? nullReason + '; ' : '') + (storeDir ? 'store had no unused question for this profile' : 'store not configured (no storeDir)');
     } else {
       nullReason = (nullReason ? nullReason + '; ' : '') + 'store not configured (no storeDir)';
     }

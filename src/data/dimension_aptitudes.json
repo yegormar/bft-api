@@ -1,10 +1,10 @@
 {
-  "version": "1.1",
+  "version": "1.3",
   "sources": [
     "Citrini Research (2028 GIC thought exercise)",
     "Microsoft New Future of Work Report 2025"
   ],
-  "description": "Aptitudes: natural affinity and raw potential (capacity). Largely stable; dictate ceiling and speed of learning in a field. Distinct from traits (how you behave), values (what you want), and skills (what you have learned). Used with traits and values to match users to skill stacks and paths where their capacity is an asset.",
+  "description": "Aptitudes: natural affinity and raw potential (capacity). Largely stable; dictate ceiling and speed of learning in a field. Distinct from traits (how you behave), values (what you want), and skills (what you have learned). Used with traits and values to match users to skill stacks and paths where their capacity is an asset. Note on measurement: aptitudes are assessed here through self-report and behavioral proxies, not direct performance tasks. Scores reflect expressed affinity and comfort rather than demonstrated capacity. Treat aptitude scores as directional indicators, not ceilings.",
   "aptitudes": [
     {
       "id": "aptitude_logical_analytical_reasoning",
@@ -13,6 +13,7 @@
       "description": "Capacity to follow and construct logical arguments, identify cause and effect, and reason systematically from premises to conclusions. Determines how quickly someone can learn formal systems, rules, and structured domains (e.g. law, logic, systems design).",
       "ai_future_rationale": "Stable. Routine logical execution is automated; high-level reasoning, design of systems, and oversight of AI output still require human logical capacity. Aptitude underpins skills like problem_formulation and systems_thinking.",
       "how_measured_or_observed": "Ability to spot flaws in arguments or processes; comfort with 'if-then' and rule-based reasoning; performance on tasks that require following or designing a clear logical structure. Probe with scenarios that have a right answer derivable from rules.",
+      "scenario_constraint": "Because scenario questions cannot test whether someone derives a correct answer, this aptitude must be measured as a proxy: present a situation where the person must decide how to approach a rule-based or structured problem, and observe whether they naturally reach for logical decomposition. The signal is whether they break the problem into steps, check for flaws, or apply if-then reasoning — not whether they get it right. A scenario that asks whether they enjoy logic or prefer structured work measures stated preference, not this aptitude.",
       "question_hints": [
         "When someone gives a reason for something, do you often find yourself checking whether the logic holds?",
         "Do you find it easy or hard to break a complex rule or process into clear steps?"
@@ -42,6 +43,7 @@
       "description": "Capacity to work comfortably with numbers, quantities, proportions, and data. Determines ceiling and learning speed in math-heavy fields, data analysis, finance, and technical domains that rely on numerical reasoning.",
       "ai_future_rationale": "Mixed. Routine computation and data crunching are highly automated; interpretation, judgment on metrics, and strategic use of quantitative insight remain human. Ceiling in data-heavy fields still depends on this aptitude.",
       "how_measured_or_observed": "Comfort with numbers in everyday decisions (budgets, estimates, comparisons); ability to interpret charts or simple statistics; self-report and scenario questions about handling numerical or data-heavy tasks.",
+      "scenario_constraint": "Because scenario questions cannot test numerical performance directly, this aptitude must be measured as a proxy: present a situation that contains numbers, quantities, or data as part of the context, and observe whether the person naturally engages with that numerical information to make their decision. The signal is whether they use the numbers rather than ignore them. Do not include numbers in every option equally — one option should require engaging with the quantitative detail, another should allow bypassing it. A scenario that asks whether they like math or prefer data-driven roles measures stated preference, not this aptitude.",
       "question_hints": [
         "When you see numbers or data, do you feel at ease making sense of them or do you prefer to avoid them?",
         "How do you approach a problem that involves comparing options using quantities or metrics?"
@@ -69,6 +71,7 @@
       "description": "Capacity to understand and use language with precision and nuance: reading, writing, and grasping subtle meaning. Determines ceiling in communication-heavy roles, persuasion, editing, and domains where wording and interpretation matter.",
       "ai_future_rationale": "Grows. Nuance, persuasion, and precise communication remain human-centric. Agents take instructions literally; human verbal facility is needed to frame, edit, and judge output.",
       "how_measured_or_observed": "Ease with reading dense text or legal/technical language; ability to rephrase and clarify; sensitivity to tone and ambiguity in wording. Probe with scenarios about interpreting or drafting text.",
+      "scenario_constraint": "Because scenario questions cannot directly test reading or writing quality, this aptitude must be measured as a proxy: present a situation where the precise meaning of words matters — a miscommunication to resolve, a message to reframe, or two people using the same word differently. The signal is whether the person notices the linguistic nuance and treats it as the crux of the decision, rather than treating all options as equivalent. A scenario about preferring writing tasks or enjoying communication measures interest, not this aptitude.",
       "question_hints": [
         "Do you find it easy to notice when two people mean different things by the same words?",
         "When you have to explain something in writing, do you enjoy getting the wording right or find it tedious?"
@@ -95,6 +98,7 @@
       "description": "Capacity to spot similarities, analogies, and recurring structures across different contexts. Supports learning by transfer and cross-domain thinking; determines how quickly someone can see 'this is like that' and apply prior knowledge in new settings.",
       "ai_future_rationale": "Grows. Cross-domain synthesis and 'seeing connections' favor humans; AI is strong within a domain. This aptitude supports learning by transfer and durable differentiation.",
       "how_measured_or_observed": "Tendency to draw analogies; ability to identify what two different problems have in common; performance on tasks that require seeing a general rule or pattern behind varied examples.",
+      "scenario_constraint": "Because scenario questions cannot directly test analogical reasoning, this aptitude must be measured as a proxy: present a situation that contains an embedded structural similarity to something from a different domain, and include one option that only makes sense if the person has noticed the pattern. The signal is whether they choose the option that applies the transferred insight. If both options are equally reasonable without recognising the pattern, the scenario does not measure this aptitude. A scenario that asks whether they enjoy finding connections or thinking abstractly measures stated preference, not demonstrated aptitude.",
       "question_hints": [
         "When you learn something new, do you often connect it to something you already knew from a different area?",
         "If two problems look different on the surface, how easily can you tell whether they're really the same type of problem?"
@@ -123,6 +127,7 @@
       "description": "Affinity for building, coding, debugging, or working with systems and tools. Includes both routine implementation (automation-prone) and design/architecture (complementary to AI). Capacity to learn and retain how systems work.",
       "ai_future_rationale": "Mixed. Routine coding and implementation are heavily automated; design, architecture, and agent-boss technical oversight remain valuable. Position as designer of systems and manager of agents, not only executor.",
       "how_measured_or_observed": "Interest in building, coding, or technical projects; preference for practical step-by-step problem solving; self-reported technical hobbies or coursework.",
+      "scenario_constraint": "Because scenario questions cannot directly test technical skill, this aptitude must be measured as a proxy: present a situation involving a technical system or tool where one option requires engaging with how the system works and another allows bypassing that layer entirely. The signal is whether the person is drawn toward understanding the technical detail rather than delegating or abstracting it away. Do not make the technical option obviously superior in outcome — both options must be defensible so the choice reveals affinity rather than pragmatism. A scenario that merely asks whether they prefer technical or non-technical paths measures interest rather than aptitude.",
       "question_hints": [
         "Do you enjoy building, coding, or technical projects?",
         "Do you prefer hands-on, logical tasks or more open-ended creative ones?"
@@ -152,6 +157,7 @@
       "description": "Capacity for imagination, divergent thinking, and generating options when there is no single right answer. Valued where human taste, novelty, and judgment matter. Supports learning in arts, design, and strategy.",
       "ai_future_rationale": "Grows. Judgment, novelty, and open-ended creation are harder to automate. Humans 'directing for taste' remain in the loop; higher-value tasks favor creativity.",
       "how_measured_or_observed": "Interest in arts, design, storytelling; preference for 'freedom to explore and experiment'; responses to open-ended scenarios; ability to generate multiple plausible approaches to a vague brief.",
+      "scenario_constraint": "Because scenario questions cannot directly observe the range or originality of ideas generated, this aptitude must be measured as a proxy: present an open-ended situation with no defined correct answer and observe whether the person chooses the option that requires generating something new versus the option that applies an existing template or known approach. The signal is whether they are drawn toward the open-ended, generative path when a structured alternative exists. Do not make the creative option obviously riskier or the structured option obviously safer — the choice should reveal aptitude affinity, not risk tolerance. A scenario that asks whether they prefer open-ended or structured tasks measures stated preference rather than this aptitude.",
       "question_hints": [
         "Do you prefer clear instructions or freedom to explore?",
         "Do you enjoy imaginative or storytelling-style tasks?"

@@ -14,6 +14,7 @@ process.env.BFT_PREGEN_REFILL_THRESHOLD = '1';
 process.env.MIN_SIGNAL_PER_DIMENSION = '1';
 process.env.BFT_SKIP_BACKGROUND_PREGEN = '1';
 process.env.BFT_QUESTION_LLM_TIMEOUT_MS = '5000';
+process.env.BFT_SCENARIO_STORE_FIRST = 'false';
 process.env.BFT_SCENARIO_STEP1_INSTRUCTIONS_FILE = 'conf/scenario_step1.txt';
 process.env.BFT_SCENARIO_STEP3_INSTRUCTIONS_FILE = 'conf/scenario_step3.txt';
 process.env.LLM_NUM_CTX = '32768';
