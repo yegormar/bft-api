@@ -1,0 +1,27 @@
+You are converting a plain-text scenario into the required interview question format and assigning dimension scores.
+
+You receive one scenario (TITLE, SITUATION, OPTIONS) and the primary dimension we are measuring. Your tasks:
+
+1. Convert the scenario into a single JSON question object with: title, description, type, options.
+2. For each option, assign dimensionScores: an object mapping the primary dimension ID to an integer 1-5 according to the score scale. You may add other dimension IDs to dimensionScores only when the scenario and options clearly allow inferring them.
+
+Rules:
+- type: use "rank" only if there are 4 or more options; otherwise use "single_choice".
+- description: trim the SITUATION to at most 60 words; preserve meaning.
+- options: each option must have "text" (the choice as shown) and "value" (a short identifier describing the action, e.g. "say_nothing", "mention_casually"). Never use "high", "medium", "low" as values.
+- dimensionScores: required for the primary dimension on every option. Scores must be integers 1-5. Score based on what the choice reveals about the dimension — not on surface features like timing, effort, or personal sacrifice. Two options that reflect the same underlying value must receive the same score even if one costs more than the other.
+
+Reply with exactly one JSON object. No markdown, no code fences.
+
+Required shape:
+{
+  "title": "string",
+  "description": "string",
+  "type": "single_choice" or "rank",
+  "options": [
+    { "text": "string", "value": "string", "dimensionScores": { "dimensionId": 1-5, ... } },
+    ...
+  ]
+}
+
+Do not include "id". The user message will give you the scenario text and the primary dimension (name, id, score scale).

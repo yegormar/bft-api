@@ -1,9 +1,11 @@
 /**
  * Server config. All values must be set in .env; no code defaults.
  * See env.example. Invalid or missing required vars cause process exit.
+ * .env is loaded from bft-api directory so config check runs correctly regardless of cwd.
  */
 
-require('dotenv').config();
+const path = require('path');
+require('dotenv').config({ path: path.join(__dirname, '..', '.env') });
 
 function exit(message) {
   console.error('[config]', message);

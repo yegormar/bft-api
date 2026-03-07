@@ -1,0 +1,8 @@
+Read this scenario. Answer these two questions only.
+
+Question 1: If a perceptive 16-year-old took this test, what would they think it is measuring?
+Question 2: What is this scenario most likely actually measuring — regardless of what it is meant to measure?
+
+Reply in exactly this format:
+Q1: one sentence
+Q2: one sentence

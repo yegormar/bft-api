@@ -28,16 +28,24 @@ function createFakeOllama(responses = [], options = {}) {
 }
 
 /**
- * Build step 1 response (3 scenarios) and step 2 response (chosen index + optionScores) for two-step flow.
- * @param {object} step1 - { nextQuestions: [ scenario1, scenario2, scenario3 ] }
- * @param {object} step2 - { chosenScenarioIndex: number, optionScores: Array<{ dimensionScores: object }> }
- * @returns {Array<string>} [step1Json, step2Json]
+ * Build response sequence for three-step flow (one attempt that passes critique).
+ * Order: Step 1 (plain text), critique (one sentence), judge (PASS or FAIL), Step 3 (JSON question with dimensionScores).
+ * @param {string} step1PlainText - Step 1 response with TITLE:, SITUATION:, OPTIONS:
+ * @param {string} critiqueSentence - What would a 16yo think it measures (one sentence)
+ * @param {string} judgeAnswer - "PASS" or "FAIL"
+ * @param {object} step3Question - Full question: { title, description, type, options: [{ text, value, dimensionScores }] }
+ * @returns {Array<string>} [step1, critique, judge, step3]
  */
-function twoStepResponses(step1, step2) {
-  return [JSON.stringify(step1), JSON.stringify(step2)];
+function threeStepResponses(step1PlainText, critiqueSentence, judgeAnswer, step3Question) {
+  return [
+    step1PlainText,
+    critiqueSentence,
+    judgeAnswer,
+    JSON.stringify(step3Question),
+  ];
 }
 
 module.exports = {
   createFakeOllama,
-  twoStepResponses,
+  threeStepResponses,
 };

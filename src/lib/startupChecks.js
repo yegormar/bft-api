@@ -84,23 +84,23 @@ function runFileAndDirChecks(config) {
   }
 
   const scenarioStep1 = process.env.BFT_SCENARIO_STEP1_INSTRUCTIONS_FILE;
-  const scenarioStep2 = process.env.BFT_SCENARIO_STEP2_INSTRUCTIONS_FILE;
+  const scenarioStep3 = process.env.BFT_SCENARIO_STEP3_INSTRUCTIONS_FILE;
   if (!scenarioStep1 || scenarioStep1.trim() === '') {
     exit('BFT_SCENARIO_STEP1_INSTRUCTIONS_FILE is required. Set it in .env (e.g. conf/scenario_step1.txt).');
   }
-  if (!scenarioStep2 || scenarioStep2.trim() === '') {
-    exit('BFT_SCENARIO_STEP2_INSTRUCTIONS_FILE is required. Set it in .env (e.g. conf/scenario_step2.txt).');
+  if (!scenarioStep3 || scenarioStep3.trim() === '') {
+    exit('BFT_SCENARIO_STEP3_INSTRUCTIONS_FILE is required. Set it in .env (e.g. conf/scenario_step3.txt).');
   }
-  let step1Path = resolvePath(scenarioStep1);
-  if (!step1Path || !fs.existsSync(step1Path)) {
-    step1Path = path.join(PROJECT_ROOT, 'conf', 'legacy', path.basename(scenarioStep1));
+  const step1Path = resolvePath(scenarioStep1);
+  const step3Path = resolvePath(scenarioStep3);
+  if (!step1Path) {
+    exit('BFT_SCENARIO_STEP1_INSTRUCTIONS_FILE must be a valid path. Set it in .env (e.g. conf/scenario_step1.txt).');
   }
-  let step2Path = resolvePath(scenarioStep2);
-  if (!step2Path || !fs.existsSync(step2Path)) {
-    step2Path = path.join(PROJECT_ROOT, 'conf', 'legacy', path.basename(scenarioStep2));
+  if (!step3Path) {
+    exit('BFT_SCENARIO_STEP3_INSTRUCTIONS_FILE must be a valid path. Set it in .env (e.g. conf/scenario_step3.txt).');
   }
   requireFile(step1Path, 'Scenario step 1 instructions');
-  requireFile(step2Path, 'Scenario step 2 instructions');
+  requireFile(step3Path, 'Scenario step 3 instructions');
 }
 
 /** Default timeout (ms) for startup LLM check when BFT_STARTUP_LLM_CHECK_TIMEOUT_MS is unset. Documented in env.example. */

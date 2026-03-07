@@ -1,0 +1,12 @@
+A test-taker analysis produced these two readings of a scenario:
+
+Q1 (what a teenager would think it measures): "{{CRITIQUE_Q1}}"
+Q2 (what it actually measures most strongly): "{{CRITIQUE_Q2}}"
+
+The dimension we intend to measure is: {{DIMENSION_NAME}}
+
+Fail if either condition is true:
+- Q1 names or strongly implies {{DIMENSION_NAME}}
+- Q2 names a dimension other than {{DIMENSION_NAME}}
+
+Reply only PASS or FAIL.

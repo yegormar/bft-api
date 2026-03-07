@@ -4,8 +4,8 @@
  * Invalid or missing required vars cause process exit when this module is loaded.
  */
 
-require('dotenv').config();
 const path = require('path');
+require('dotenv').config({ path: path.join(__dirname, '..', '.env') });
 const fs = require('fs');
 
 const PROJECT_ROOT = path.resolve(__dirname, '..');
@@ -85,20 +85,15 @@ if (Number.isNaN(numCtx) || numCtx < 1) {
   exit(`LLM_NUM_CTX (or OLLAMA_NUM_CTX) must be a positive integer. Got: ${numCtxRaw}`);
 }
 
-/** Optional. When set, file must exist (or exist in conf/legacy/). Not used by current two-step scenario flow. */
+/** Optional. When set, file must exist at that path. No fallback. Not used by current two-step scenario flow. */
 const systemPromptFileRaw = (process.env.LLM_SYSTEM_PROMPT_FILE || '').trim();
 let systemPromptFile = systemPromptFileRaw || null;
 if (systemPromptFile) {
-  let systemPromptPath = path.isAbsolute(systemPromptFile)
+  const systemPromptPath = path.isAbsolute(systemPromptFile)
     ? systemPromptFile
     : path.join(PROJECT_ROOT, systemPromptFile);
   if (!fs.existsSync(systemPromptPath)) {
-    const legacyPath = path.join(PROJECT_ROOT, 'conf', 'legacy', path.basename(systemPromptFile));
-    if (fs.existsSync(legacyPath)) {
-      systemPromptFile = path.join('conf', 'legacy', path.basename(systemPromptFile));
-    } else {
-      exit(`LLM_SYSTEM_PROMPT_FILE does not exist: ${systemPromptPath}`);
-    }
+    exit(`LLM_SYSTEM_PROMPT_FILE does not exist: ${systemPromptPath}`);
   }
 }
 

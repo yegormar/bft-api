@@ -3,7 +3,7 @@
 Paths here are relative to the bft-api project root. Referenced from `config/llm.js` via env.
 
 **Active prompts (required where noted):**
-- **scenario_step1.txt**, **scenario_step2.txt** – Two-step scenario generation (design 3 scenarios, then assign scores). Required; wired via `BFT_SCENARIO_STEP1_INSTRUCTIONS_FILE`, `BFT_SCENARIO_STEP2_INSTRUCTIONS_FILE`.
+- **scenario_step1.txt** (Step 1), **scenario_step2_critique.txt**, **scenario_step2_judge.txt** (Step 2), **scenario_step3.txt** (Step 3). Three-step scenario generation: Step 1 creative; Step 2 critique then judge (two LLM calls); Step 3 format and score. Required: `BFT_SCENARIO_STEP1_INSTRUCTIONS_FILE`, `BFT_SCENARIO_STEP3_INSTRUCTIONS_FILE`. Step 2 prompts loaded from conf/ when present (fallback to in-code). Step 3: placeholders in judge file `{{CRITIQUE_SENTENCE}}`, `{{DIMENSION_NAME}}`.
 - **report_profile_system_prompt.txt** – System prompt for report profile summary (LLM synthesis: full narrative from Q&A). Required; wired via `LLM_REPORT_PROFILE_SYSTEM_PROMPT_FILE`. Process exits if unset or file missing.
 - **report_hybrid_system_prompt.txt** – System prompt for report hybrid summary (short narrative from explored dimensions). Required; wired via `LLM_REPORT_HYBRID_SYSTEM_PROMPT_FILE`. Process exits if unset or file missing.
 - **report_recommendations_system_prompt.txt** – System prompt for profession/career recommendations (recommended directions with fit, directions to avoid). Required; wired via `LLM_REPORT_RECOMMENDATIONS_SYSTEM_PROMPT_FILE`. Process exits if unset or file missing.
