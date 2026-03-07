@@ -114,11 +114,13 @@ function isInterviewComplete(coverage, interviewConfig, model, totalQuestionsAsk
  * @returns {object}
  */
 function enrichOneDimension(d, model) {
-  const full = assessmentModel.getDimension(d.dimensionType, d.dimensionId);
+  const id = d.id;
+  const full = assessmentModel.getDimension(d.dimensionType, id);
   const out = {
     dimensionType: d.dimensionType,
-    dimensionId: d.dimensionId,
-    name: (full && full.name) || d.dimensionId,
+    dimensionId: id,
+    id,
+    name: (full && full.name) || id,
     description: (full && full.description) || '',
     question_hints: (full && full.question_hints) || [],
     how_measured_or_observed: (full && full.how_measured_or_observed) || '',
@@ -138,15 +140,15 @@ function enrichOneDimension(d, model) {
 function selectOneDimensionRandom(coverage, model) {
   const m = model || assessmentModel.load();
   const traitsAndValues = [
-    ...m.traits.map((t) => ({ dimensionType: 'trait', dimensionId: t.id })),
-    ...m.values.map((v) => ({ dimensionType: 'value', dimensionId: v.id })),
+    ...m.traits.map((t) => ({ dimensionType: 'trait', dimensionId: t.id, id: t.id })),
+    ...m.values.map((v) => ({ dimensionType: 'value', dimensionId: v.id, id: v.id })),
   ];
   if (traitsAndValues.length === 0) return [];
 
   const withCount = traitsAndValues.map((d) => {
     const key = COVERAGE_KEY_BY_TYPE[d.dimensionType];
     const cov = key ? (coverage[key] || {}) : {};
-    const c = cov[d.dimensionId];
+    const c = cov[d.id];
     const questionCount = c && typeof c.questionCount === 'number' ? c.questionCount : 0;
     return { ...d, questionCount };
   });
@@ -164,7 +166,7 @@ function selectNextDimensionSet(coverage, model, options = {}) {
   const withScore = allDimensions.map((d) => {
     const key = COVERAGE_KEY_BY_TYPE[d.dimensionType];
     const cov = key ? (coverage[key] || {}) : {};
-    const c = cov[d.dimensionId];
+    const c = cov[d.id];
     const questionCount = c && typeof c.questionCount === 'number' ? c.questionCount : 0;
     return { ...d, questionCount };
   });
@@ -181,7 +183,8 @@ function selectNextDimensionSet(coverage, model, options = {}) {
   return selected.map((d) => {
     const out = {
       dimensionType: d.dimensionType,
-      dimensionId: d.dimensionId,
+      dimensionId: d.id,
+      id: d.id,
       name: d.name,
       question_hints: d.question_hints || [],
       how_measured_or_observed: d.how_measured_or_observed || '',
@@ -245,7 +248,8 @@ function applyServedQuestionToState(sessionId, question, dimensionSet, assessmen
   state.askedQuestionTitles.push(question.title || '');
   state.questionToDimension[assignedId] = dimensionSet.map((d) => ({
     dimensionType: d.dimensionType,
-    dimensionId: d.dimensionId,
+    dimensionId: d.dimensionId ?? d.id,
+    id: d.id ?? d.dimensionId,
   }));
   state.servedQuestions[assignedId] = {
     title: question.title,
@@ -257,7 +261,7 @@ function applyServedQuestionToState(sessionId, question, dimensionSet, assessmen
   for (const dim of dimensionSet) {
     const key = COVERAGE_KEY_BY_TYPE[dim.dimensionType];
     if (!key) continue;
-    const id = dim.dimensionId;
+    const id = dim.id;
     if (!coverage[key]) coverage[key] = {};
     if (!coverage[key][id]) coverage[key][id] = { questionCount: 0, lastQuestionId: null };
     coverage[key][id].questionCount += 1;
@@ -293,14 +297,15 @@ function addDimensionScoresToAggregate(aggregate, dims, scoresByDimensionId) {
   if (!aggregate || !dims || !scoresByDimensionId) return;
   for (const dim of dims) {
     if (dim.dimensionType !== 'trait' && dim.dimensionType !== 'value') continue;
-    const score = scoresByDimensionId[dim.dimensionId];
+    const id = dim.id;
+    const score = scoresByDimensionId[id];
     if (score == null || typeof score !== 'number') continue;
     const bucketKey = COVERAGE_KEY_BY_TYPE[dim.dimensionType];
     const bucket = bucketKey ? aggregate[bucketKey] : undefined;
     if (!bucket || typeof bucket !== 'object') continue;
-    if (!bucket[dim.dimensionId]) bucket[dim.dimensionId] = { sum: 0, count: 0 };
-    bucket[dim.dimensionId].sum += score;
-    bucket[dim.dimensionId].count += 1;
+    if (!bucket[id]) bucket[id] = { sum: 0, count: 0 };
+    bucket[id].sum += score;
+    bucket[id].count += 1;
   }
 }
 
@@ -321,7 +326,7 @@ function submitAnswers(sessionId, payload) {
     for (const dim of dims) {
       const key = COVERAGE_KEY_BY_TYPE[dim.dimensionType];
       if (!key) continue;
-      const id = dim.dimensionId;
+      const id = dim.id;
       if (!coverage[key]) coverage[key] = {};
       if (!coverage[key][id]) coverage[key][id] = { questionCount: 0, lastQuestionId: null };
       coverage[key][id].questionCount += 1;
@@ -355,7 +360,7 @@ function submitAnswers(sessionId, payload) {
       let weightSum = 0;
       const weightedByDim = {};
       dims.forEach((d) => {
-        if (d.dimensionType === 'trait' || d.dimensionType === 'value') weightedByDim[d.dimensionId] = { sum: 0, w: 0 };
+        if (d.dimensionType === 'trait' || d.dimensionType === 'value') weightedByDim[d.id] = { sum: 0, w: 0 };
       });
       rawValue.forEach((v, i) => {
         const w = RANK_WEIGHTS[i] ?? 0;
@@ -429,11 +434,12 @@ function enrichAggregateWithSyntheticUnmeasured(aggregate, state, model, intervi
     const list = type === 'traits' ? m.traits : m.values;
     const bucket = out[type];
     for (const dim of list) {
-      const entry = bucket[dim.id];
+      const key = dim.id;
+      const entry = bucket[key];
       const hasMeasured = entry && typeof entry.count === 'number' && entry.count >= 1;
       if (!hasMeasured) {
         const score = randomScoreInScale(dim);
-        bucket[dim.id] = { sum: score, count: 1 };
+        bucket[key] = { sum: score, count: 1 };
       }
     }
   }
@@ -448,16 +454,16 @@ function buildDimensionScoresOutput(aggregate, model) {
     const bucket = aggregate[type];
     if (!bucket || typeof bucket !== 'object') continue;
     const list = type === 'traits' ? m.traits : m.values;
-    const byId = type === 'traits' ? m.traitsById : m.valuesById;
-    for (const dimensionId of Object.keys(bucket)) {
-      const entry = bucket[dimensionId];
+    const dimensionsById = m.dimensionsById;
+    for (const id of Object.keys(bucket)) {
+      const entry = bucket[id];
       if (!entry || typeof entry.count !== 'number' || entry.count < 1) continue;
       const mean = entry.sum / entry.count;
       const band = mean <= 2 ? 'low' : mean >= 4 ? 'high' : 'medium';
-      const dim = byId.get(dimensionId);
+      const dim = dimensionsById.get(id);
       out[type].push({
-        id: dimensionId,
-        name: (dim && dim.name) || dimensionId,
+        id,
+        name: (dim && dim.name) || id,
         mean: Math.round(mean * 100) / 100,
         band,
         count: entry.count,
@@ -623,7 +629,7 @@ function runBackgroundPregeneration(sessionId, lastQuestion, lastDimensionSet, b
         for (const dim of dimensionSetForState) {
           const key = COVERAGE_KEY_BY_TYPE[dim.dimensionType];
           if (!key) continue;
-          const id = dim.dimensionId;
+          const id = dim.id;
           if (!currentCoverage[key]) currentCoverage[key] = {};
           if (!currentCoverage[key][id]) currentCoverage[key][id] = { questionCount: 0, lastQuestionId: null };
           currentCoverage[key][id].questionCount += 1;

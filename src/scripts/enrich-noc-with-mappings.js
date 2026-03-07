@@ -276,8 +276,8 @@ function loadData(inputPath) {
   if (!noc.occupations || !Array.isArray(noc.occupations)) exit('NOC JSON must have an "occupations" array.');
 
   const skillsPath = path.join(PROJECT_ROOT, 'src', 'data', 'skills.json');
-  const traitsPath = path.join(PROJECT_ROOT, 'src', 'data', 'traits.json');
-  const valuesPath = path.join(PROJECT_ROOT, 'src', 'data', 'values.json');
+  const traitsPath = path.join(PROJECT_ROOT, 'src', 'data', 'dimension_traits.json');
+  const valuesPath = path.join(PROJECT_ROOT, 'src', 'data', 'dimension_values.json');
   for (const p of [skillsPath, traitsPath, valuesPath]) {
     if (!fs.existsSync(p)) exit(`Data file not found: ${p}`);
   }

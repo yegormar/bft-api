@@ -29,7 +29,7 @@ function applyCoverage(coverage, dimensionSet) {
   for (const dim of dimensionSet) {
     const key = COVERAGE_KEY_BY_TYPE[dim.dimensionType];
     if (!key) continue;
-    const id = dim.dimensionId;
+    const id = dim.id ?? dim.dimensionId;
     if (!coverage[key]) coverage[key] = {};
     if (!coverage[key][id]) coverage[key][id] = { questionCount: 0, lastQuestionId: null };
     coverage[key][id].questionCount += 1;

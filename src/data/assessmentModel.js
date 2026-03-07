@@ -1,7 +1,8 @@
 /**
  * Loads assessment model JSON files from src/data (fixed path relative to this module).
- * Exposes lists and by-id lookups for aptitudes, traits, values, skills.
- * No defaults in code: paths are fixed to this directory.
+ * Dimension data: dimension_aptitudes.json, dimension_traits.json, dimension_values.json
+ * (each element has a single id that is the unique dimension id, e.g. aptitude_*, trait_*, value_*).
+ * Skills use skills.json (id only). Exposes lists and by-id lookups.
  */
 
 const fs = require('fs');
@@ -19,9 +20,9 @@ let cached = null;
 
 function load() {
   if (cached) return cached;
-  const aptitudesData = loadJson('aptitudes.json');
-  const traitsData = loadJson('traits.json');
-  const valuesData = loadJson('values.json');
+  const aptitudesData = loadJson('dimension_aptitudes.json');
+  const traitsData = loadJson('dimension_traits.json');
+  const valuesData = loadJson('dimension_values.json');
   const skillsData = loadJson('skills.json');
 
   const aptitudes = aptitudesData.aptitudes || [];
@@ -35,6 +36,15 @@ function load() {
     return map;
   };
 
+  const allDimensionItems = [
+    ...aptitudes.map((a) => ({ ...a, _type: 'aptitude' })),
+    ...traits.map((t) => ({ ...t, _type: 'trait' })),
+    ...values.map((v) => ({ ...v, _type: 'value' })),
+    ...skills.map((s) => ({ ...s, _type: 'skill' })),
+  ];
+  const dimensionsById = new Map();
+  allDimensionItems.forEach((item) => dimensionsById.set(item.id, item));
+
   cached = {
     aptitudes,
     traits,
@@ -44,37 +54,29 @@ function load() {
     traitsById: byId(traits),
     valuesById: byId(values),
     skillsById: byId(skills),
+    dimensionsById,
   };
   return cached;
 }
 
 /**
  * All dimensions as a flat list with type: { dimensionType, dimensionId, ...fields }.
+ * dimensionId is the same as id (single id per dimension).
  */
 function getAllDimensions() {
   const m = load();
   const list = [];
-  m.aptitudes.forEach((a) => list.push({ dimensionType: 'aptitude', dimensionId: a.id, ...a }));
-  m.traits.forEach((t) => list.push({ dimensionType: 'trait', dimensionId: t.id, ...t }));
-  m.values.forEach((v) => list.push({ dimensionType: 'value', dimensionId: v.id, ...v }));
-  m.skills.forEach((s) => list.push({ dimensionType: 'skill', dimensionId: s.id, ...s }));
+  const withType = (item, type) => ({ dimensionType: type, dimensionId: item.id, ...item });
+  m.aptitudes.forEach((a) => list.push(withType(a, 'aptitude')));
+  m.traits.forEach((t) => list.push(withType(t, 'trait')));
+  m.values.forEach((v) => list.push(withType(v, 'value')));
+  m.skills.forEach((s) => list.push(withType(s, 'skill')));
   return list;
 }
 
-function getDimension(dimensionType, dimensionId) {
+function getDimension(dimensionType, id) {
   const m = load();
-  switch (dimensionType) {
-    case 'aptitude':
-      return m.aptitudesById.get(dimensionId) ?? null;
-    case 'trait':
-      return m.traitsById.get(dimensionId) ?? null;
-    case 'value':
-      return m.valuesById.get(dimensionId) ?? null;
-    case 'skill':
-      return m.skillsById.get(dimensionId) ?? null;
-    default:
-      return null;
-  }
+  return m.dimensionsById.get(id) ?? null;
 }
 
 module.exports = {

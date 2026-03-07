@@ -70,9 +70,9 @@ function runFileAndDirChecks(config) {
   ensureDirWritable(questionsStoreDir, 'Questions store directory');
 
   const requiredDataFiles = [
-    'src/data/aptitudes.json',
-    'src/data/traits.json',
-    'src/data/values.json',
+    'src/data/dimension_aptitudes.json',
+    'src/data/dimension_traits.json',
+    'src/data/dimension_values.json',
     'src/data/skills.json',
     'src/data/personality_clusters.json',
     'src/data/scenarioBatches.json',

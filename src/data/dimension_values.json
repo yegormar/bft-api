@@ -8,7 +8,7 @@
   "description": "Values: non-negotiables and what you're working toward (destination). The fuel that keeps you going when work gets hard. Used with aptitudes and traits to match users to career clusters and study directions where their values are satisfied.",
   "values": [
     {
-      "id": "helping_others_impact",
+      "id": "value_helping_others_impact",
       "name": "Helping others / impact on people",
       "short_label": "Helping others",
       "description": "Wanting work to improve other people's lives, serve a community, or contribute to something larger than oneself. Non-negotiable for many in care, education, health, social impact, or mission-driven roles.",
@@ -34,7 +34,7 @@
       }
     },
     {
-      "id": "mastery_growth",
+      "id": "value_mastery_growth",
       "name": "Mastery and growth",
       "short_label": "Mastery & growth",
       "description": "Wanting to get better at something over time, build expertise, and feel a sense of progress. Non-negotiable for people who need to feel they're learning and improving, not just maintaining.",
@@ -62,7 +62,7 @@
       }
     },
     {
-      "id": "autonomy_independence",
+      "id": "value_autonomy_independence",
       "name": "Autonomy and independence",
       "short_label": "Autonomy",
       "description": "Wanting to decide how, when, or where you work; to be trusted with ownership and minimal micromanagement. Non-negotiable for people who feel stifled by heavy structure or supervision.",
@@ -89,7 +89,7 @@
       }
     },
     {
-      "id": "security_stability",
+      "id": "value_security_stability",
       "name": "Security and stability",
       "short_label": "Security",
       "description": "Wanting predictable income, job security, or a clear path so that the future feels safe. Non-negotiable for people who prioritize reducing financial or career risk over upside.",
@@ -118,7 +118,7 @@
       }
     },
     {
-      "id": "recognition_visibility",
+      "id": "value_recognition_visibility",
       "name": "Recognition and visibility",
       "short_label": "Recognition",
       "description": "Wanting to be known, respected, or seen for one's work; to have a reputation or influence. Non-negotiable for people who are motivated by status, awards, or being the go-to person.",
@@ -145,7 +145,7 @@
       }
     },
     {
-      "id": "creativity_self_expression",
+      "id": "value_creativity_self_expression",
       "name": "Creativity and self-expression",
       "short_label": "Creativity",
       "description": "Wanting work that lets you create something new, express yourself, or leave a personal mark. Non-negotiable for people who feel empty in purely execution or maintenance roles.",
@@ -171,7 +171,7 @@
       }
     },
     {
-      "id": "financial_success",
+      "id": "value_financial_success",
       "name": "Financial success and earning",
       "short_label": "Financial success",
       "description": "Wanting to earn well, build wealth, or use income as a clear measure of success. Non-negotiable for people who prioritize pay and financial upside when choosing paths.",
@@ -197,7 +197,7 @@
       }
     },
     {
-      "id": "work_life_balance_wellbeing",
+      "id": "value_work_life_balance_wellbeing",
       "name": "Work-life balance and wellbeing",
       "short_label": "Work-life balance",
       "description": "Wanting time and energy for life outside work - family, health, hobbies, rest. Non-negotiable for people who are unwilling to sacrifice wellbeing or relationships for career intensity.",
@@ -222,7 +222,7 @@
       }
     },
     {
-      "id": "challenge_achievement",
+      "id": "value_challenge_achievement",
       "name": "Challenge and achievement",
       "short_label": "Challenge",
       "description": "Wanting to tackle hard problems, hit ambitious goals, or prove oneself. Non-negotiable for people who are motivated by difficulty and the feeling of having overcome something.",
@@ -249,7 +249,7 @@
       }
     },
     {
-      "id": "belonging_community",
+      "id": "value_belonging_community",
       "name": "Belonging and community",
       "short_label": "Belonging",
       "description": "Wanting to be part of a team, culture, or community where you fit. Non-negotiable for people who need to feel they belong and that their workplace or field shares their values.",

@@ -7,7 +7,7 @@
   "description": "Traits: personality and behavioral tendencies. How you behave; stable 'handling' that shapes fit for environments. Used with values and skills to understand AI-era potential.",
   "traits": [
     {
-      "id": "experimentation_risk_tolerance",
+      "id": "trait_experimentation_risk_tolerance",
       "name": "Experimentation and risk tolerance",
       "short_label": "Risk tolerance",
       "description": "Comfort with starting something new and uncertain before all information is in; willingness to try and iterate despite ambiguity. About the act of beginning and tolerating uncertainty, not the process of learning over time (see adaptability_learning).",
@@ -35,7 +35,7 @@
       }
     },
     {
-      "id": "adaptability_learning",
+      "id": "trait_adaptability_learning",
       "name": "Adaptability and learning capacity",
       "short_label": "Adaptability",
       "description": "Willingness and ability to learn new tools, domains, and ways of working as the environment changes - the process of learning and changing over time. Distinct from experimentation_risk_tolerance (which is about starting something uncertain); this is about how they respond when things shift and they must acquire new skills.",
@@ -64,7 +64,7 @@
       }
     },
     {
-      "id": "social_collaboration",
+      "id": "trait_social_collaboration",
       "name": "Human-human collaboration and influence",
       "short_label": "Collaboration",
       "description": "Genuine coordination with other people: relationship trust, emotional attunement, influence, and teamwork. Distinct from intermediation (friction with a friendly face) and from human-AI coordination (see human_ai_coordination). Remains deeply human and hard to automate.",
@@ -91,7 +91,7 @@
       }
     },
     {
-      "id": "comfort_ambiguous_ownership",
+      "id": "trait_comfort_ambiguous_ownership",
       "name": "Comfort with ambiguous ownership",
       "short_label": "Ambiguous ownership",
       "description": "In agentic workflows, it is often unclear who 'did' the work. Comfort directing, editing, and taking responsibility for output one didn't personally generate; those who need to feel personal authorship may resist adoption or struggle.",
@@ -119,7 +119,7 @@
       }
     },
     {
-      "id": "ambiguity_resilience",
+      "id": "trait_ambiguity_resilience",
       "name": "Resilience to ambiguity and change",
       "short_label": "Ambiguity resilience",
       "description": "Capacity to remain composed, motivated, and effective amid constant change, unclear futures, and evolving job demands. Psychological foundation for continuous learning and adaptation; mental models that treat flux as the default. Distinct from adaptability_learning (which is the behavior of learning); this is the internal state that enables it.",

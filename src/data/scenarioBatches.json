@@ -17,8 +17,8 @@
       "coherenceNote": "social_collaboration is the behavior — do they actively build connection? belonging_community is the motivation — do they need it to feel okay? These surface separately: someone can be relationally skilled but not emotionally dependent on community (high trait, low value), or crave belonging but lack the active behaviors to build it (low trait, high value). The scenario catches both.",
       "profileDivergence": "High trait + low value = the connector who doesn't need connection. High value + low trait = the person who craves belonging but struggles to build it. Both are meaningfully different from high/high or low/low.",
       "dimensions": [
-        { "dimensionType": "trait", "dimensionId": "social_collaboration" },
-        { "dimensionType": "value", "dimensionId": "belonging_community" }
+        { "dimensionType": "trait", "dimensionId": "trait_social_collaboration" },
+        { "dimensionType": "value", "dimensionId": "value_belonging_community" }
       ]
     },
     {
@@ -28,8 +28,8 @@
       "coherenceNote": "comfort_ambiguous_ownership is behavioral — are they at ease directing and signing off on work they didn't personally generate? recognition_visibility is motivational — do they need to be seen and credited? The tension is real: high recognition need + low ownership comfort creates someone who wants credit only for things they personally did. High on both signals a natural AI-era orchestrator who is comfortable owning outcomes at scale.",
       "profileDivergence": "High recognition + low ownership comfort = wants credit but only for personal work; may resist delegation. High ownership comfort + low recognition = the quiet operator, happy to direct and deliver without needing to be seen. Both diverge sharply from each other and are practically important.",
       "dimensions": [
-        { "dimensionType": "trait", "dimensionId": "comfort_ambiguous_ownership" },
-        { "dimensionType": "value", "dimensionId": "recognition_visibility" }
+        { "dimensionType": "trait", "dimensionId": "trait_comfort_ambiguous_ownership" },
+        { "dimensionType": "value", "dimensionId": "value_recognition_visibility" }
       ]
     },
     {
@@ -40,8 +40,8 @@
       "profileDivergence": "High risk tolerance + low autonomy need = the executor who can handle chaos but doesn't need to own it. High autonomy need + low risk tolerance = wants control but only within safe, defined boundaries. Both are different from the entrepreneurial high/high profile.",
       "preferredResponseType": "single_choice",
       "dimensions": [
-        { "dimensionType": "trait", "dimensionId": "experimentation_risk_tolerance" },
-        { "dimensionType": "value", "dimensionId": "autonomy_independence" }
+        { "dimensionType": "trait", "dimensionId": "trait_experimentation_risk_tolerance" },
+        { "dimensionType": "value", "dimensionId": "value_autonomy_independence" }
       ]
     },
     {
@@ -51,8 +51,8 @@
       "coherenceNote": "ambiguity_resilience is the internal state — do they stay composed and effective when the ground moves? security_stability is the value — do they need predictability to feel okay? These can diverge meaningfully: someone can score low on security need (willing to take risk) but still be rattled by unplanned change (low resilience). Or score high on security need but have developed genuine resilience through experience. The scenario catches the gap between what they value and how they actually respond.",
       "profileDivergence": "Low resilience + high security need = avoids uncertainty and is destabilised when it arrives anyway. High resilience + low security need = thrives on flux and doesn't need the safety net. Low resilience + low security need = takes risks but struggles when they materialise. Each is a practically distinct profile.",
       "dimensions": [
-        { "dimensionType": "trait", "dimensionId": "ambiguity_resilience" },
-        { "dimensionType": "value", "dimensionId": "security_stability" }
+        { "dimensionType": "trait", "dimensionId": "trait_ambiguity_resilience" },
+        { "dimensionType": "value", "dimensionId": "value_security_stability" }
       ]
     },
     {
@@ -62,8 +62,8 @@
       "coherenceNote": "adaptability_learning is behavioral — how do they actually go about acquiring new skills when the environment shifts? mastery_growth is motivational — do they need to feel they are getting better at something? These are related but not identical. Someone can be highly adaptable (picks up new things easily) without caring about depth — a chameleon, not a craftsman. Or deeply mastery-motivated but rigid in how they pursue it, resisting domain switches even when they would benefit.",
       "profileDivergence": "High adaptability + low mastery drive = fast learner who moves on before going deep; may accumulate breadth without expertise. High mastery + low adaptability = the craftsman who goes deep in one domain but struggles when that domain shifts. High on both = the compound learner, the most resilient AI-era profile.",
       "dimensions": [
-        { "dimensionType": "trait", "dimensionId": "adaptability_learning" },
-        { "dimensionType": "value", "dimensionId": "mastery_growth" }
+        { "dimensionType": "trait", "dimensionId": "trait_adaptability_learning" },
+        { "dimensionType": "value", "dimensionId": "value_mastery_growth" }
       ]
     },
     {
@@ -74,8 +74,8 @@
       "profileDivergence": "High financial + low impact = clear market-optimizer; path recommendations should emphasize structurally advantaged skill stacks with high earning potential. High impact + low financial = mission-driven; path recommendations should be honest about income trade-offs. Medium on both = the most common profile; needs a tie-breaker scenario.",
       "preferredResponseType": "rank",
       "dimensions": [
-        { "dimensionType": "value", "dimensionId": "financial_success" },
-        { "dimensionType": "value", "dimensionId": "helping_others_impact" }
+        { "dimensionType": "value", "dimensionId": "value_financial_success" },
+        { "dimensionType": "value", "dimensionId": "value_helping_others_impact" }
       ]
     },
     {
@@ -86,8 +86,8 @@
       "profileDivergence": "High challenge + low balance need = willing to sacrifice for the goal; suited to high-intensity AI-era paths if other values align. High balance + low challenge drive = prefers sustainable pace; should avoid high-pressure transformation roles. High on both = seeks hard problems but will set limits; needs paths that allow intensity in bursts rather than sustained grind.",
       "preferredResponseType": "rank",
       "dimensions": [
-        { "dimensionType": "value", "dimensionId": "challenge_achievement" },
-        { "dimensionType": "value", "dimensionId": "work_life_balance_wellbeing" }
+        { "dimensionType": "value", "dimensionId": "value_challenge_achievement" },
+        { "dimensionType": "value", "dimensionId": "value_work_life_balance_wellbeing" }
       ]
     },
     {
@@ -97,8 +97,8 @@
       "coherenceNote": "creativity_self_expression and autonomy_independence are related but meaningfully different. Someone can need creative work (high creativity value) but be fine with direction — they want to make things, not necessarily control the frame. Or they can need ownership and control (high autonomy) without particularly caring whether the work is creative. The scenario separates output-type preference from ownership preference.",
       "profileDivergence": "High creativity + low autonomy = the creative executor; happy to make things within a given frame, fine being directed. High autonomy + low creativity = the independent operator; needs ownership but the work itself doesn't need to be expressive. High on both = needs to own creative work end to end; should be steered toward founding, directing, or independent creative paths.",
       "dimensions": [
-        { "dimensionType": "value", "dimensionId": "creativity_self_expression" },
-        { "dimensionType": "value", "dimensionId": "autonomy_independence" }
+        { "dimensionType": "value", "dimensionId": "value_creativity_self_expression" },
+        { "dimensionType": "value", "dimensionId": "value_autonomy_independence" }
       ]
     },
     {
@@ -108,8 +108,8 @@
       "coherenceNote": "social_collaboration and challenge_achievement surface an important AI-era profile split. Someone energised by hard problems AND by working with others to solve them is very different from the solo achiever who finds collaboration a tax on performance. The scenario should make the relational cost of the challenge visible — the people dynamics are difficult, not just the task.",
       "profileDivergence": "High collaboration + high challenge = the high-stakes team player; most natural fit for complex coordination and leadership roles in AI era. High challenge + low collaboration = the solo achiever; performs best with technical depth and autonomy, finds people dynamics draining. Low challenge + high collaboration = the relationship maintainer; values the connection more than the difficulty of the goal.",
       "dimensions": [
-        { "dimensionType": "trait", "dimensionId": "social_collaboration" },
-        { "dimensionType": "value", "dimensionId": "challenge_achievement" }
+        { "dimensionType": "trait", "dimensionId": "trait_social_collaboration" },
+        { "dimensionType": "value", "dimensionId": "value_challenge_achievement" }
       ]
     }
   ]

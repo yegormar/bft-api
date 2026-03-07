@@ -11,6 +11,11 @@ const { selectBestFromStore } = require('./storeFallback');
 const { generateScenarioQuestionWithTimeout } = require('./llmWithTimeout');
 const { createQueue } = require('./queue');
 
+/** Ensure each dimension has id (same as dimensionId). Use when returning dimensionSet. */
+function withDimensionIds(dimensionSet) {
+  return (dimensionSet || []).map((d) => (d && (d.id != null)) ? d : { ...d, id: d.dimensionId });
+}
+
 function createProcessor() {
   return async function processOne(context) {
     const { timeoutMs } = getQuestionGenConfig();
@@ -44,7 +49,7 @@ function createProcessor() {
       if (llmResult && llmResult.nextQuestion && typeof llmResult.nextQuestion === 'object' && llmResult.nextQuestion.title) {
         return {
           question: llmResult.nextQuestion,
-          dimensionSet: Array.isArray(llmResult.dimensionSet) && llmResult.dimensionSet.length > 0 ? llmResult.dimensionSet : desiredDimensionSet,
+          dimensionSet: withDimensionIds(Array.isArray(llmResult.dimensionSet) && llmResult.dimensionSet.length > 0 ? llmResult.dimensionSet : desiredDimensionSet),
           assessmentSummary: llmResult.assessmentSummary ?? null,
           source: 'llm',
         };
@@ -70,7 +75,7 @@ function createProcessor() {
       if (fallback) {
         return {
           question: fallback.question,
-          dimensionSet: fallback.dimensionSet,
+          dimensionSet: withDimensionIds(fallback.dimensionSet),
           assessmentSummary: fallback.assessmentSummary,
           source: 'store',
         };

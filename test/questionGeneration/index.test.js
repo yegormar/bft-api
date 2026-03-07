@@ -46,7 +46,9 @@ describe('questionGeneration/index', () => {
       assert.ok(result.question && result.question.title);
       if (result.source === 'store') {
         assert.strictEqual(result.question.title, question.title);
-        assert.deepStrictEqual(result.dimensionSet, dimensionSet);
+        assert.deepStrictEqual(result.dimensionSet, [
+          { dimensionType: 'aptitude', dimensionId: 'logical_analytical_reasoning', id: 'logical_analytical_reasoning' },
+        ]);
         assert.strictEqual(result.assessmentSummary, 'Summary');
       }
     });

@@ -7,7 +7,7 @@
   "description": "Aptitudes: natural affinity and raw potential (capacity). Largely stable; dictate ceiling and speed of learning in a field. Distinct from traits (how you behave), values (what you want), and skills (what you have learned). Used with traits and values to match users to skill stacks and paths where their capacity is an asset.",
   "aptitudes": [
     {
-      "id": "logical_analytical_reasoning",
+      "id": "aptitude_logical_analytical_reasoning",
       "name": "Logical and analytical reasoning",
       "short_label": "Logical reasoning",
       "description": "Capacity to follow and construct logical arguments, identify cause and effect, and reason systematically from premises to conclusions. Determines how quickly someone can learn formal systems, rules, and structured domains (e.g. law, logic, systems design).",
@@ -36,7 +36,7 @@
       }
     },
     {
-      "id": "quantitative_numerical",
+      "id": "aptitude_quantitative_numerical",
       "name": "Quantitative and numerical facility",
       "short_label": "Quantitative",
       "description": "Capacity to work comfortably with numbers, quantities, proportions, and data. Determines ceiling and learning speed in math-heavy fields, data analysis, finance, and technical domains that rely on numerical reasoning.",
@@ -63,7 +63,7 @@
       }
     },
     {
-      "id": "verbal_linguistic",
+      "id": "aptitude_verbal_linguistic",
       "name": "Verbal and linguistic facility",
       "short_label": "Verbal & linguistic",
       "description": "Capacity to understand and use language with precision and nuance: reading, writing, and grasping subtle meaning. Determines ceiling in communication-heavy roles, persuasion, editing, and domains where wording and interpretation matter.",
@@ -89,7 +89,7 @@
       }
     },
     {
-      "id": "pattern_recognition",
+      "id": "aptitude_pattern_recognition",
       "name": "Pattern recognition and abstraction",
       "short_label": "Pattern recognition",
       "description": "Capacity to spot similarities, analogies, and recurring structures across different contexts. Supports learning by transfer and cross-domain thinking; determines how quickly someone can see 'this is like that' and apply prior knowledge in new settings.",
@@ -117,7 +117,7 @@
       }
     },
     {
-      "id": "technical_hands_on",
+      "id": "aptitude_technical_hands_on",
       "name": "Technical / hands-on orientation",
       "short_label": "Technical / hands-on",
       "description": "Affinity for building, coding, debugging, or working with systems and tools. Includes both routine implementation (automation-prone) and design/architecture (complementary to AI). Capacity to learn and retain how systems work.",
@@ -146,7 +146,7 @@
       }
     },
     {
-      "id": "creative_open_ended",
+      "id": "aptitude_creative_open_ended",
       "name": "Creative and open-ended thinking",
       "short_label": "Creative thinking",
       "description": "Capacity for imagination, divergent thinking, and generating options when there is no single right answer. Valued where human taste, novelty, and judgment matter. Supports learning in arts, design, and strategy.",

@@ -1,6 +1,6 @@
 /**
  * Skill applicability from traits/values dimension scores.
- * Uses related_skill_clusters in traits.json and values.json plus AI relevance ranking.
+ * Uses related_skill_clusters in dimension_traits.json and dimension_values.json plus AI relevance ranking.
  * AI future relevance uses ai_skills_ranking_model.json (see bft-doc/AI_SKILLS_DECISION_MATRIX.md).
  */
 
@@ -110,7 +110,7 @@ function getSkillsWithApplicability(dimensionScores) {
   for (const list of [traits, values]) {
     for (const d of list) {
       if (!d || !d.id) continue;
-      const def = list === traits ? model.traitsById.get(d.id) : model.valuesById.get(d.id);
+      const def = model.dimensionsById.get(d.id);
       const clusters = (def && def.related_skill_clusters) || [];
       if (clusters.length === 0) continue;
 
