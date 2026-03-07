@@ -1,3 +1,4 @@
+const path = require('path');
 const express = require('express');
 const cors = require('cors');
 const routes = require('./src/routes');
@@ -13,8 +14,19 @@ function createApp(config) {
   app.use(express.json());
   app.use(requestLogger);
 
+  app.get('/', (req, res) => {
+    res.json({ ok: true, message: 'bft-api. Use /api/sessions, /api/admin/scenarios/stats (when BFT_ADMIN_ENABLED=1), etc.' });
+  });
+
   app.use('/api', bftUserIdMiddleware(config));
   app.use('/api', routes);
+
+  if (process.env.BFT_ADMIN_ENABLED === '1') {
+    app.use('/api/admin', require('./src/routes/admin'));
+    app.get('/admin', (req, res) => {
+      res.sendFile(path.join(__dirname, '..', 'bft-doc', 'admin', 'scenario-admin.html'));
+    });
+  }
 
   app.use(notFound);
   app.use(errorHandler);

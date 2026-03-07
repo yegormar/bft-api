@@ -590,7 +590,7 @@ function runBackgroundPregeneration(sessionId, lastQuestion, lastDimensionSet, b
 
       while (queue.length < PREGEN_QUEUE_CAP) {
         if (isInterviewComplete(currentCoverage, interviewConfig, model, simulatedQuestionIndex)) break;
-        const dimensionSet = selectOneDimensionRandom(simulatedState.coverage, model);
+        const dimensionSet = selectOneDimensionRandom(currentCoverage, model);
         if (dimensionSet.length === 0) break;
 
         const result = await questionGenerator.requestQuestion({
