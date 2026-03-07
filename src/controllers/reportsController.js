@@ -8,7 +8,8 @@ async function getReport(req, res, next) {
       res.status(404).json({ error: 'Session not found' });
       return;
     }
-    const report = await reportService.getReport(sessionId);
+    const includeLlm = req.query.include === 'full';
+    const report = await reportService.getReport(sessionId, { includeLlm });
     res.json(report);
   } catch (err) {
     next(err);
