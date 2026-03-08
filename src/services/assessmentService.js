@@ -309,6 +309,81 @@ function addDimensionScoresToAggregate(aggregate, dims, scoresByDimensionId) {
   }
 }
 
+/**
+ * Apply a single answer to interview state (coverage + dimensionScoresAggregate).
+ * Used by submitAnswers and replaceAnswers.
+ */
+function applyOneAnswerToState(state, answer, sessionId) {
+  const { coverage, questionToDimension, servedQuestions, dimensionScoresAggregate } = state;
+  const qid = answer.questionId || answer.question_id;
+  if (!qid) return;
+  const dims = questionToDimension[qid];
+  if (!Array.isArray(dims)) return;
+  for (const dim of dims) {
+    const key = COVERAGE_KEY_BY_TYPE[dim.dimensionType];
+    if (!key) continue;
+    const id = dim.id;
+    if (!coverage[key]) coverage[key] = {};
+    if (!coverage[key][id]) coverage[key][id] = { questionCount: 0, lastQuestionId: null };
+    coverage[key][id].questionCount += 1;
+    coverage[key][id].lastQuestionId = qid;
+  }
+
+  const served = servedQuestions[qid];
+  if (!served || !Array.isArray(served.options)) return;
+  const options = served.options;
+  const qType = served.type || 'single_choice';
+  const rawValue = answer.value ?? answer.selected ?? answer.answer ?? answer.text;
+
+  if (qType === 'single_choice' && typeof rawValue === 'string') {
+    const option = options.find((o) => o && o.value === rawValue);
+    if (option && option.dimensionScores && typeof option.dimensionScores === 'object') {
+      console.log('[bft] answer sessionId=%s questionId=%s value=%s optionText=%s scoresApplied=%s', sessionId, qid, rawValue, (option.text || '').slice(0, 60), JSON.stringify(option.dimensionScores));
+      addDimensionScoresToAggregate(dimensionScoresAggregate, dims, option.dimensionScores);
+    } else if (option && (!option.dimensionScores || typeof option.dimensionScores !== 'object')) {
+      console.log('[bft] answer sessionId=%s questionId=%s value=%s optionText=%s (no dimensionScores, coverage only)', sessionId, qid, rawValue, (option.text || '').slice(0, 60));
+    }
+  } else if (qType === 'multi_choice' && Array.isArray(rawValue)) {
+    for (const v of rawValue) {
+      const option = options.find((o) => o && o.value === v);
+      if (option && option.dimensionScores && typeof option.dimensionScores === 'object') {
+        console.log('[bft] answer sessionId=%s questionId=%s value=%s optionText=%s scoresApplied=%s', sessionId, qid, v, (option.text || '').slice(0, 60), JSON.stringify(option.dimensionScores));
+        addDimensionScoresToAggregate(dimensionScoresAggregate, dims, option.dimensionScores);
+      }
+    }
+  } else if (qType === 'rank' && Array.isArray(rawValue)) {
+    const valueToOption = new Map(options.filter((o) => o && o.value).map((o) => [o.value, o]));
+    let weightSum = 0;
+    const weightedByDim = {};
+    dims.forEach((d) => {
+      if (d.dimensionType === 'trait' || d.dimensionType === 'value') weightedByDim[d.id] = { sum: 0, w: 0 };
+    });
+    rawValue.forEach((v, i) => {
+      const w = RANK_WEIGHTS[i] ?? 0;
+      if (w <= 0) return;
+      const option = valueToOption.get(v);
+      if (!option || !option.dimensionScores) return;
+      weightSum += w;
+      Object.keys(weightedByDim).forEach((dimId) => {
+        const s = option.dimensionScores[dimId];
+        if (typeof s === 'number') {
+          weightedByDim[dimId].sum += w * s;
+          weightedByDim[dimId].w += w;
+        }
+      });
+    });
+    if (weightSum > 0) {
+      const scoresByDimensionId = {};
+      Object.keys(weightedByDim).forEach((dimId) => {
+        const { sum, w } = weightedByDim[dimId];
+        if (w > 0) scoresByDimensionId[dimId] = sum / w;
+      });
+      console.log('[bft] answer sessionId=%s questionId=%s type=rank order=%s scoresApplied=%s', sessionId, qid, JSON.stringify(rawValue), JSON.stringify(scoresByDimensionId));
+      addDimensionScoresToAggregate(dimensionScoresAggregate, dims, scoresByDimensionId);
+    }
+  }
+}
+
 function submitAnswers(sessionId, payload) {
   const existing = answersBySession.get(sessionId) || [];
   const answers = Array.isArray(payload.answers) ? payload.answers : [payload];
@@ -317,78 +392,57 @@ function submitAnswers(sessionId, payload) {
   console.log('[bft] answers submitted sessionId=%s count=%s total=%s', sessionId, answers.length, existing.length);
 
   const state = getOrInitInterviewState(sessionId);
-  const { coverage, questionToDimension, servedQuestions, dimensionScoresAggregate } = state;
   for (const a of answers) {
-    const qid = a.questionId || a.question_id;
-    if (!qid) continue;
-    const dims = questionToDimension[qid];
-    if (!Array.isArray(dims)) continue;
-    for (const dim of dims) {
-      const key = COVERAGE_KEY_BY_TYPE[dim.dimensionType];
-      if (!key) continue;
-      const id = dim.id;
-      if (!coverage[key]) coverage[key] = {};
-      if (!coverage[key][id]) coverage[key][id] = { questionCount: 0, lastQuestionId: null };
-      coverage[key][id].questionCount += 1;
-      coverage[key][id].lastQuestionId = qid;
-    }
-
-    const served = servedQuestions[qid];
-    if (!served || !Array.isArray(served.options)) continue;
-    const options = served.options;
-    const qType = served.type || 'single_choice';
-    const rawValue = a.value ?? a.selected ?? a.answer ?? a.text;
-
-    if (qType === 'single_choice' && typeof rawValue === 'string') {
-      const option = options.find((o) => o && o.value === rawValue);
-      if (option && option.dimensionScores && typeof option.dimensionScores === 'object') {
-        console.log('[bft] answer sessionId=%s questionId=%s value=%s optionText=%s scoresApplied=%s', sessionId, qid, rawValue, (option.text || '').slice(0, 60), JSON.stringify(option.dimensionScores));
-        addDimensionScoresToAggregate(dimensionScoresAggregate, dims, option.dimensionScores);
-      } else if (option && (!option.dimensionScores || typeof option.dimensionScores !== 'object')) {
-        console.log('[bft] answer sessionId=%s questionId=%s value=%s optionText=%s (no dimensionScores, coverage only)', sessionId, qid, rawValue, (option.text || '').slice(0, 60));
-      }
-    } else if (qType === 'multi_choice' && Array.isArray(rawValue)) {
-      for (const v of rawValue) {
-        const option = options.find((o) => o && o.value === v);
-        if (option && option.dimensionScores && typeof option.dimensionScores === 'object') {
-          console.log('[bft] answer sessionId=%s questionId=%s value=%s optionText=%s scoresApplied=%s', sessionId, qid, v, (option.text || '').slice(0, 60), JSON.stringify(option.dimensionScores));
-          addDimensionScoresToAggregate(dimensionScoresAggregate, dims, option.dimensionScores);
-        }
-      }
-    } else if (qType === 'rank' && Array.isArray(rawValue)) {
-      const valueToOption = new Map(options.filter((o) => o && o.value).map((o) => [o.value, o]));
-      let weightSum = 0;
-      const weightedByDim = {};
-      dims.forEach((d) => {
-        if (d.dimensionType === 'trait' || d.dimensionType === 'value') weightedByDim[d.id] = { sum: 0, w: 0 };
-      });
-      rawValue.forEach((v, i) => {
-        const w = RANK_WEIGHTS[i] ?? 0;
-        if (w <= 0) return;
-        const option = valueToOption.get(v);
-        if (!option || !option.dimensionScores) return;
-        weightSum += w;
-        Object.keys(weightedByDim).forEach((dimId) => {
-          const s = option.dimensionScores[dimId];
-          if (typeof s === 'number') {
-            weightedByDim[dimId].sum += w * s;
-            weightedByDim[dimId].w += w;
-          }
-        });
-      });
-      if (weightSum > 0) {
-        const scoresByDimensionId = {};
-        Object.keys(weightedByDim).forEach((dimId) => {
-          const { sum, w } = weightedByDim[dimId];
-          if (w > 0) scoresByDimensionId[dimId] = sum / w;
-        });
-        console.log('[bft] answer sessionId=%s questionId=%s type=rank order=%s scoresApplied=%s', sessionId, qid, JSON.stringify(rawValue), JSON.stringify(scoresByDimensionId));
-        addDimensionScoresToAggregate(dimensionScoresAggregate, dims, scoresByDimensionId);
-      }
-    }
+    applyOneAnswerToState(state, a, sessionId);
   }
 
   return existing;
+}
+
+/**
+ * Replace all answers for a session and rebuild coverage/dimension scores.
+ * Used when the user changes one or more answers on the "Your answers" page and recalculates.
+ * Uses the same scoring logic as submitAnswers (applyOneAnswerToState) so reports and assessment
+ * stay consistent. Does NOT advance the interview or trigger question generation (no getNextQuestion,
+ * no LLM, no pregen). Only allowed when the session already has the same number of answers (edit
+ * after completion).
+ * Payload: { answers: [ { questionId, value }, ... ] }
+ */
+function replaceAnswers(sessionId, payload) {
+  const existing = answersBySession.get(sessionId) || [];
+  const answers = Array.isArray(payload.answers) ? payload.answers : [];
+
+  if (answers.length === 0) {
+    const err = new Error('replaceAnswers requires at least one answer');
+    err.status = 400;
+    throw err;
+  }
+  if (existing.length !== answers.length) {
+    const err = new Error(
+      'replaceAnswers only allowed when payload length matches current answers (edit after completion). ' +
+      `Expected ${existing.length}, got ${answers.length}.`
+    );
+    err.status = 400;
+    throw err;
+  }
+
+  const state = getOrInitInterviewState(sessionId);
+  answersBySession.set(sessionId, answers);
+  console.log('[bft] answers replaced sessionId=%s count=%s (no question generation)', sessionId, answers.length);
+
+  state.coverage = {
+    aptitudes: {},
+    traits: {},
+    values: {},
+    skills: {},
+  };
+  state.dimensionScoresAggregate = { traits: {}, values: {} };
+
+  for (const a of answers) {
+    applyOneAnswerToState(state, a, sessionId);
+  }
+
+  return answers;
 }
 
 /**
@@ -873,6 +927,7 @@ function getSessionHealth(sessionId) {
 
 module.exports = {
   submitAnswers,
+  replaceAnswers,
   getAssessment,
   getNextQuestion,
   getSessionHealth,

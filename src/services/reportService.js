@@ -200,6 +200,11 @@ async function getReport(sessionId, options = {}) {
   return report;
 }
 
+function invalidateReportCache(sessionId) {
+  if (sessionId) reportCacheBySession.delete(sessionId);
+}
+
 module.exports = {
   getReport,
+  invalidateReportCache,
 };

@@ -1,5 +1,6 @@
 const sessionService = require('../services/sessionService');
 const assessmentService = require('../services/assessmentService');
+const reportService = require('../services/reportService');
 
 function submitAnswers(req, res, next) {
   try {
@@ -10,6 +11,21 @@ function submitAnswers(req, res, next) {
     }
     const answers = assessmentService.submitAnswers(sessionId, req.body);
     res.status(201).json({ sessionId, answers });
+  } catch (err) {
+    next(err);
+  }
+}
+
+function replaceAnswers(req, res, next) {
+  try {
+    const { sessionId } = req.params;
+    if (!sessionService.getById(sessionId)) {
+      res.status(404).json({ error: 'Session not found' });
+      return;
+    }
+    const answers = assessmentService.replaceAnswers(sessionId, req.body);
+    reportService.invalidateReportCache(sessionId);
+    res.json({ sessionId, answers });
   } catch (err) {
     next(err);
   }
@@ -55,6 +71,7 @@ async function getNextQuestion(req, res, next) {
 
 module.exports = {
   submitAnswers,
+  replaceAnswers,
   getAssessment,
   getNextQuestion,
 };
