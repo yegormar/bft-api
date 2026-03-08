@@ -124,29 +124,28 @@
       "id": "aptitude_technical_hands_on",
       "name": "Technical / hands-on orientation",
       "short_label": "Technical / hands-on",
-      "description": "Affinity for building, coding, debugging, or working with systems and tools. Includes both routine implementation (automation-prone) and design/architecture (complementary to AI). Capacity to learn and retain how systems work.",
-      "ai_future_rationale": "Mixed. Routine coding and implementation are heavily automated; design, architecture, and agent-boss technical oversight remain valuable. Position as designer of systems and manager of agents, not only executor.",
-      "how_measured_or_observed": "Interest in building, coding, or technical projects; preference for practical step-by-step problem solving; self-reported technical hobbies or coursework.",
-      "scenario_constraint": "Because scenario questions cannot directly test technical skill, this aptitude must be measured as a proxy: present a situation involving a technical system or tool where one option requires engaging with how the system works and another allows bypassing that layer entirely. The signal is whether the person is drawn toward understanding the technical detail rather than delegating or abstracting it away. Do not make the technical option obviously superior in outcome — both options must be defensible so the choice reveals affinity rather than pragmatism. A scenario that merely asks whether they prefer technical or non-technical paths measures interest rather than aptitude.",
+      "description": "Natural inclination to understand how tools, machines, or software systems function internally by reasoning about their components and cause-and-effect relationships.",
+      "ai_future_rationale": "Mixed. Routine coding, configuration, and implementation are increasingly automated. However, the ability to understand system behavior, diagnose problems, and design or supervise technical systems remains valuable. In an AI-rich environment, this aptitude is best positioned toward system design, architecture thinking, and supervising AI agents rather than routine execution.",
+      "how_measured_or_observed": "Tendency to investigate how a system works when encountering unfamiliar tools or software; comfort thinking about mechanisms, components, and process flows; inclination to trace cause-and-effect relationships within systems; noticing when a tool behaves incorrectly and forming hypotheses about why.",
+      "scenario_constraint": "Scenario questions cannot directly test technical skill or knowledge. Instead, they must measure orientation toward engaging with the system itself. Present a situation involving a tool, device, or software system where one option involves investigating how the system works and another option bypasses that layer (for example delegating, using a workaround, or treating the system as a black box). Both options must be equally reasonable and lead to acceptable outcomes so the choice reflects the respondent's natural inclination rather than strategic optimization. Avoid scenarios that simply ask whether the respondent enjoys technical work, as that measures interest rather than this aptitude.",
       "question_hints": [
-        "Do you enjoy building, coding, or technical projects?",
-        "Do you prefer hands-on, logical tasks or more open-ended creative ones?"
+        "When a tool or system behaves unexpectedly, do you usually try to understand why it is happening or simply work around the issue to continue the task?",
+        "When encountering unfamiliar software, devices, or workflows, do you tend to explore how the underlying components interact or focus only on using the surface features needed for the task?"
       ],
       "related_skill_clusters": [
         "ai_literacy",
         "human_ai_coordination",
         "workflow_orchestration",
         "context_memory_management",
-        "instruction_clarity",
         "delegation_oversight"
       ],
       "score_scale": {
         "min": 1,
         "max": 5,
         "interpretation": {
-          "low": "Technical or systems-heavy paths may require more support; fit for roles where technology is one tool among others and other aptitudes (e.g. verbal, pattern) lead. Avoid framing as a deficit; different strengths suit different paths.",
-          "medium": "Can learn and use technical systems with practice; suitable for roles that combine technical oversight with communication or coordination. Pair with delegation_oversight and instruction_clarity for AI-era relevance.",
-          "high": "Strong foundation for designing systems and managing agents; steer toward architecture and oversight rather than routine implementation. Recommend development in ai_literacy, workflow_orchestration, and human_ai_coordination."
+          "low": "Prefers to use tools without engaging deeply with how they function internally. Often effective in roles where technology supports the work but does not require diagnosing or designing systems.",
+          "medium": "Comfortable engaging with technical systems when necessary and capable of reasoning about system behavior with some effort. Well suited to roles that combine technology use with coordination, communication, or management responsibilities.",
+          "high": "Strong inclination to analyze and understand system behavior. Well suited to designing, troubleshooting, and supervising complex technical systems, including AI-driven workflows and agent orchestration."
         }
       }
     },

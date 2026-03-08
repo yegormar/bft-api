@@ -69,6 +69,20 @@ function runFileAndDirChecks(config) {
   }
   ensureDirWritable(questionsStoreDir, 'Questions store directory');
 
+  const feedbackFile = resolvePath(config.feedbackFile);
+  if (!feedbackFile) {
+    exit('BFT_FEEDBACK_FILE is required. Set it in .env (e.g. ./data/feedback.jsonl).');
+  }
+  const feedbackDir = path.dirname(feedbackFile);
+  ensureDirWritable(feedbackDir, 'Feedback file directory');
+  if (fs.existsSync(feedbackFile)) {
+    try {
+      fs.accessSync(feedbackFile, fs.constants.W_OK);
+    } catch (err) {
+      exit(`Feedback file is not writable: ${feedbackFile}. ${err.message}`);
+    }
+  }
+
   const requiredDataFiles = [
     'src/data/dimension_aptitudes.json',
     'src/data/dimension_traits.json',

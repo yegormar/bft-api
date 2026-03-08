@@ -44,9 +44,19 @@ if (questionsStoreDir === '') {
   exit('BFT_QUESTIONS_STORE_DIR must be non-empty. Set it in .env (e.g. ./data/questions-store).');
 }
 
+const feedbackFileRaw = process.env.BFT_FEEDBACK_FILE;
+if (feedbackFileRaw === undefined || feedbackFileRaw === '') {
+  exit('BFT_FEEDBACK_FILE is required. Set it in .env (see env.example).');
+}
+const feedbackFile = feedbackFileRaw.trim();
+if (feedbackFile === '') {
+  exit('BFT_FEEDBACK_FILE must be non-empty. Set it in .env (e.g. ./data/feedback.jsonl).');
+}
+
 module.exports = {
   port,
   nodeEnv,
   corsOrigin,
   questionsStoreDir,
+  feedbackFile,
 };

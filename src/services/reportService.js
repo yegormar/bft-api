@@ -119,7 +119,7 @@ function buildReportFromCache(sessionId, session, assessment, cached) {
   report.strengthProfileSummaryLLM = cached.strengthProfileSummaryLLM ?? null;
   report.profileByDimensions = ensureDevAptitudesInProfile(cached.profileByDimensions ?? {});
   report.strengthProfileSummaryHybrid = cached.strengthProfileSummaryHybrid ?? null;
-  report.careerClusterAlignment = cached.careerClusterAlignment ?? null;
+  report.careerClusterAlignment = null;
   report.skillDevelopmentRoadmap = cached.skillDevelopmentRoadmap ?? null;
   report.structuralDimensionMeta = skillRecommendation.getStructuralDimensionMeta();
   return report;
@@ -185,13 +185,7 @@ async function getReport(sessionId, options = {}) {
   report.profileByDimensions = ensureDevAptitudesInProfile(hybridResult.profileByDimensions ?? {});
   report.strengthProfileSummaryHybrid = hybridResult.strengthProfileSummaryHybrid ?? null;
 
-  const profileSummaryForRec = strengthProfileSummaryLLM || report.strengthProfileSummaryHybrid || null;
-  const recommendations = await reportSynthesis.generateProfessionRecommendations(
-    profileSummaryForRec,
-    report.profileByDimensions,
-    session.preSurveyProfile
-  );
-  report.careerClusterAlignment = recommendations ?? null;
+  report.careerClusterAlignment = null;
   report.skillDevelopmentRoadmap = skillRecommendation.getSkillsWithApplicability(assessment.dimensionScores || {});
 
   reportCacheBySession.set(sessionId, {
@@ -200,7 +194,6 @@ async function getReport(sessionId, options = {}) {
     strengthProfileSummaryLLM: report.strengthProfileSummaryLLM,
     strengthProfileSummaryHybrid: report.strengthProfileSummaryHybrid,
     profileByDimensions: report.profileByDimensions,
-    careerClusterAlignment: report.careerClusterAlignment,
     skillDevelopmentRoadmap: report.skillDevelopmentRoadmap,
   });
 
