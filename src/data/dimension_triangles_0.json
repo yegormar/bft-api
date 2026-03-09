@@ -1,0 +1,208 @@
+{
+  "version": "1.0",
+  "description": "Triangle assessments for values and traits. Each triangle presents three vertices representing different dimensions. The user positions a ball on the triangle surface, closer to the vertices that resonate most. Position is captured as barycentric coordinates (a, b, c) where a+b+c=1.0. Each coordinate maps directly to a dimension score contribution for the corresponding vertex dimension. Triangles are designed so that moving toward one vertex implies reduced affinity for the others.",
+  "scoring_note": "For each vertex, multiply its barycentric coordinate by 4 and add 1 to map [0,1] range to [1,5] score scale. Example: coordinate 0.7 → score 3.8. Aggregate scores across triangles by averaging all score contributions per dimension.",
+  "framing_variants": {
+    "note": "Each triangle has a primary framing (gain) and where noted a secondary framing (loss or negative). Alternate framings increase measurement reliability by surfacing the dimension from a different emotional angle.",
+    "gain": "What pulls you toward something",
+    "loss": "What pushes you away or what you would sacrifice to protect"
+  },
+  "triangles": [
+    {
+      "id": "triangle_01",
+      "title": "After a big win",
+      "prompt": "You just finished something you're proud of. Drag the ball toward what matters most to you about that moment.",
+      "framing": "gain",
+      "vertices": {
+        "a": {
+          "label": "People's lives are genuinely better because of what we built",
+          "dimensionType": "value",
+          "dimensionId": "value_helping_others_impact"
+        },
+        "b": {
+          "label": "I'm significantly better at this than I was before",
+          "dimensionType": "value",
+          "dimensionId": "value_mastery_growth"
+        },
+        "c": {
+          "label": "The right people know it was me who made it happen",
+          "dimensionType": "value",
+          "dimensionId": "value_recognition_visibility"
+        }
+      },
+      "tension_note": "Three distinct sources of satisfaction after achievement: impact on others, personal growth, and external recognition. Mutually exclusive at extremes — a pure helper cares nothing for fame or self-improvement from the work; a pure recognition-seeker doesn't need others to benefit or to have grown themselves."
+    },
+    {
+      "id": "triangle_02",
+      "title": "Three job offers",
+      "prompt": "Three job offers land on the same day. They're equal in every way except one thing each. Drag the ball toward what pulls you most.",
+      "framing": "gain",
+      "vertices": {
+        "a": {
+          "label": "The salary is the best I've seen at this level",
+          "dimensionType": "value",
+          "dimensionId": "value_financial_success"
+        },
+        "b": {
+          "label": "The hours are reasonable — I'd still have a life outside work",
+          "dimensionType": "value",
+          "dimensionId": "value_work_life_balance_wellbeing"
+        },
+        "c": {
+          "label": "The team feels like my kind of people",
+          "dimensionType": "value",
+          "dimensionId": "value_belonging_community"
+        }
+      },
+      "tension_note": "Classic life trade-off between money, time, and community fit. The highest-paying roles rarely have the best hours or strongest culture fit; the best communities rarely pay the most. These genuinely compete in the real job market."
+    },
+    {
+      "id": "triangle_03",
+      "title": "Ideal working conditions",
+      "prompt": "Picture the work environment where you'd do your best work. Drag the ball toward what describes it most.",
+      "framing": "gain",
+      "vertices": {
+        "a": {
+          "label": "Nobody tells me how to do it — I own the process completely",
+          "dimensionType": "value",
+          "dimensionId": "value_autonomy_independence"
+        },
+        "b": {
+          "label": "The path ahead is clear and I know what to expect",
+          "dimensionType": "value",
+          "dimensionId": "value_security_stability"
+        },
+        "c": {
+          "label": "What I produce has my fingerprints on it — it feels genuinely mine",
+          "dimensionType": "value",
+          "dimensionId": "value_creativity_self_expression"
+        }
+      },
+      "tension_note": "Three environmental needs that pull in different directions. High autonomy often means high uncertainty, which conflicts with security. High security often means prescribed output, which conflicts with creativity. Creativity without autonomy is constrained expression."
+    },
+    {
+      "id": "triangle_04",
+      "title": "When things get hard",
+      "prompt": "Work gets difficult. Drag the ball toward what describes how you naturally respond.",
+      "framing": "gain",
+      "vertices": {
+        "a": {
+          "label": "The harder it gets, the more locked in I become — I want the win",
+          "dimensionType": "value",
+          "dimensionId": "value_challenge_achievement"
+        },
+        "b": {
+          "label": "I stay calm and keep moving even when I can't see the full path",
+          "dimensionType": "trait",
+          "dimensionId": "trait_ambiguity_resilience"
+        },
+        "c": {
+          "label": "I figure out what I need to learn and pick it up fast",
+          "dimensionType": "trait",
+          "dimensionId": "trait_adaptability_learning"
+        }
+      },
+      "tension_note": "Three distinct responses to difficulty. The achiever is energised by the obstacle and wants the conquest. The resilient person stays psychologically stable in fog. The adapter focuses on acquiring new capability. These feel distinct internally and predict different career resilience profiles."
+    },
+    {
+      "id": "triangle_05",
+      "title": "What drains you",
+      "prompt": "Think about work situations that leave you feeling flat or frustrated. Drag the ball toward what drains you most.",
+      "framing": "loss",
+      "vertices": {
+        "a": {
+          "label": "Being told exactly what to do and how to do it",
+          "dimensionType": "value",
+          "dimensionId": "value_autonomy_independence"
+        },
+        "b": {
+          "label": "Putting in real effort that nobody notices or connects to me",
+          "dimensionType": "value",
+          "dimensionId": "value_recognition_visibility"
+        },
+        "c": {
+          "label": "Working in a place where I don't feel like I fit or belong",
+          "dimensionType": "value",
+          "dimensionId": "value_belonging_community"
+        }
+      },
+      "tension_note": "Second measurement for autonomy, recognition, and belonging using loss framing. People who are highly driven by a value often find its absence more salient than its presence — loss framing surfaces different and often stronger signal than gain framing for the same dimensions.",
+      "second_measurement_for": ["value_autonomy_independence", "value_recognition_visibility", "value_belonging_community"]
+    },
+    {
+      "id": "triangle_06",
+      "title": "How you naturally operate",
+      "prompt": "When you're working with or around other people, drag the ball toward what describes where your energy naturally goes.",
+      "framing": "gain",
+      "vertices": {
+        "a": {
+          "label": "Reading what people actually need and adjusting how I engage with them",
+          "dimensionType": "trait",
+          "dimensionId": "trait_social_collaboration"
+        },
+        "b": {
+          "label": "Starting things before everything is figured out and pulling others along",
+          "dimensionType": "trait",
+          "dimensionId": "trait_experimentation_risk_tolerance"
+        },
+        "c": {
+          "label": "Taking ownership of the outcome whether I did every part myself or not",
+          "dimensionType": "trait",
+          "dimensionId": "trait_comfort_ambiguous_ownership"
+        }
+      },
+      "tension_note": "Three distinct orientations toward working with others. The collaborator reads the room and invests relationally. The initiator starts things and generates momentum. The owner takes accountability for results regardless of who executed. These represent genuinely different behavioral profiles."
+    },
+    {
+      "id": "triangle_07",
+      "title": "Turning down a great opportunity",
+      "prompt": "A great opportunity lands in your lap. What would make you turn it down? Drag the ball toward what would most likely be the dealbreaker.",
+      "framing": "loss",
+      "vertices": {
+        "a": {
+          "label": "It would cost me the community and relationships I've built",
+          "dimensionType": "value",
+          "dimensionId": "value_belonging_community"
+        },
+        "b": {
+          "label": "It would leave no real time or energy for life outside work",
+          "dimensionType": "value",
+          "dimensionId": "value_work_life_balance_wellbeing"
+        },
+        "c": {
+          "label": "The role is so defined there's no room to make it my own",
+          "dimensionType": "value",
+          "dimensionId": "value_creativity_self_expression"
+        }
+      },
+      "tension_note": "Second measurement for belonging, work-life balance, and creativity using loss framing. The dealbreaker framing is particularly powerful — it reveals which value is non-negotiable rather than merely preferred.",
+      "second_measurement_for": ["value_belonging_community", "value_work_life_balance_wellbeing", "value_creativity_self_expression"]
+    },
+    {
+      "id": "triangle_08",
+      "title": "Your best future self at work",
+      "prompt": "Picture yourself ten years from now, doing your best work. Drag the ball toward what that looks like.",
+      "framing": "gain",
+      "vertices": {
+        "a": {
+          "label": "Known and respected as the person who gets hard things done",
+          "dimensionType": "value",
+          "dimensionId": "value_recognition_visibility",
+          "secondary_dimensionId": "value_challenge_achievement",
+          "note": "This vertex intentionally blends recognition and achievement — the combination surfaces whether external reputation or internal conquest is the primary driver when both are present"
+        },
+        "b": {
+          "label": "Quietly excellent at something very few people can do as well",
+          "dimensionType": "value",
+          "dimensionId": "value_mastery_growth"
+        },
+        "c": {
+          "label": "The person others trust and most want to work alongside",
+          "dimensionType": "trait",
+          "dimensionId": "trait_social_collaboration"
+        }
+      },
+      "tension_note": "Second measurement for recognition, mastery, and social collaboration in an aspirational frame. The contrast between vertex A (external reputation) and vertex B (internal depth) is particularly revealing — both are forms of excellence but one faces outward and one faces inward. Vertex C adds the relational archetype as a genuine third pull."
+    }
+  ]
+}

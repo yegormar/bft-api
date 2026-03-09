@@ -1,5 +1,8 @@
 'use strict';
 
+// Scenario mode: set before any app module loads so getAssessmentMode() returns 'scenarios'.
+process.env.BFT_ASSESSMENT_MODE = 'scenarios';
+
 // Use a dedicated test port so tests do not conflict with a running dev server (e.g. PORT=3000).
 process.env.PORT = process.env.PORT || '39391';
 // Set env before any app module is loaded so config and background pregen behave correctly.

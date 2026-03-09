@@ -11,14 +11,31 @@ function exit(message) {
   process.exit(1);
 }
 
+const ALLOWED_ASSESSMENT_MODES = ['scenarios', 'triangles'];
+
+function getAssessmentMode() {
+  const raw = process.env.BFT_ASSESSMENT_MODE;
+  if (raw === undefined || raw === '') {
+    exit('BFT_ASSESSMENT_MODE is required. Set it in .env (see env.example). Example: triangles');
+  }
+  const mode = raw.trim().toLowerCase();
+  if (!ALLOWED_ASSESSMENT_MODES.includes(mode)) {
+    exit(`BFT_ASSESSMENT_MODE must be one of: ${ALLOWED_ASSESSMENT_MODES.join(', ')}. Got: ${raw}`);
+  }
+  return mode;
+}
+
 function getPregenConfig() {
+  if (getAssessmentMode() === 'triangles') {
+    return { queueCap: 0, refillThreshold: 0 };
+  }
   const capRaw = process.env.BFT_PREGEN_QUEUE_CAP;
   if (capRaw === undefined || capRaw === '') {
-    exit('BFT_PREGEN_QUEUE_CAP is required. Set it in .env (see env_dev). Example: 5');
+    exit('BFT_PREGEN_QUEUE_CAP is required when BFT_ASSESSMENT_MODE=scenarios. Set it in .env (see env_dev). Example: 5');
   }
   const refillRaw = process.env.BFT_PREGEN_REFILL_THRESHOLD;
   if (refillRaw === undefined || refillRaw === '') {
-    exit('BFT_PREGEN_REFILL_THRESHOLD is required. Set it in .env (see env_dev). Example: 1');
+    exit('BFT_PREGEN_REFILL_THRESHOLD is required when BFT_ASSESSMENT_MODE=scenarios. Set it in .env (see env_dev). Example: 1');
   }
   const queueCap = parseInt(capRaw, 10);
   const refill = parseInt(refillRaw, 10);
@@ -33,9 +50,12 @@ function getPregenConfig() {
 }
 
 function getInterviewConfig() {
+  if (getAssessmentMode() === 'triangles') {
+    return { minSignalPerDimension: 1, maxQuestions: undefined };
+  }
   const minRaw = process.env.MIN_SIGNAL_PER_DIMENSION;
   if (minRaw === undefined || minRaw === '') {
-    exit('MIN_SIGNAL_PER_DIMENSION is required. Set it in .env (see env_dev). Example: 1');
+    exit('MIN_SIGNAL_PER_DIMENSION is required when BFT_ASSESSMENT_MODE=scenarios. Set it in .env (see env_dev). Example: 1');
   }
   const minSignal = parseInt(minRaw, 10);
   if (Number.isNaN(minSignal) || minSignal < 1) {
@@ -65,6 +85,7 @@ function getInterviewConfig() {
 }
 
 function validateOnLoad() {
+  getAssessmentMode();
   getPregenConfig();
   getInterviewConfig();
 }
@@ -72,6 +93,7 @@ function validateOnLoad() {
 validateOnLoad();
 
 module.exports = {
+  getAssessmentMode,
   getPregenConfig,
   getInterviewConfig,
 };

@@ -3,7 +3,10 @@ const assessmentConfig = require('../../config/assessment');
 const sessionService = require('./sessionService');
 const assessmentModel = require('../data/assessmentModel');
 const questionStore = require('./questionStore');
-const questionGenerator = require('./questionGeneration');
+/** Lazy load so scenario/LLM deps are not required when BFT_ASSESSMENT_MODE=triangles. */
+function getQuestionGenerator() {
+  return require('./questionGeneration');
+}
 
 const answersBySession = new Map();
 /** Accumulated assessment summaries from Ollama per session (for report). */
@@ -39,6 +42,117 @@ if (storeDir) {
 
 /** Map dimensionType (singular) to coverage object key (plural) so we read/write the same keys. */
 const COVERAGE_KEY_BY_TYPE = { aptitude: 'aptitudes', trait: 'traits', value: 'values', skill: 'skills' };
+
+/** Triangle assessment: score = (barycentric * 4) + 1, mapping [0,1] to [1,5]. */
+const TRIANGLE_SCORE_SCALE = { mult: 4, add: 1 };
+
+let trianglesData = null;
+
+function loadTriangles() {
+  if (trianglesData) return trianglesData;
+  const path = require('path');
+  const fs = require('fs');
+  const filePath = path.join(__dirname, '..', 'data', 'dimension_triangles.json');
+  const raw = fs.readFileSync(filePath, 'utf8');
+  trianglesData = JSON.parse(raw);
+  return trianglesData;
+}
+
+/** Infer dimension type from dimensionId (e.g. value_helping_others_impact -> value). */
+function dimensionTypeFromId(dimensionId) {
+  if (typeof dimensionId !== 'string') return 'value';
+  if (dimensionId.startsWith('value_')) return 'value';
+  if (dimensionId.startsWith('trait_')) return 'trait';
+  return 'value';
+}
+
+/** Build dimensionSet for a triangle from vertices a, b, c (order preserved). */
+function triangleToDimensionSet(triangle) {
+  const v = triangle.vertices || {};
+  return ['a', 'b', 'c'].map((key) => {
+    const vert = v[key];
+    if (!vert || !vert.dimensionId) return null;
+    return {
+      dimensionType: dimensionTypeFromId(vert.dimensionId),
+      dimensionId: vert.dimensionId,
+      id: vert.dimensionId,
+    };
+  }).filter(Boolean);
+}
+
+/** Progress for triangle mode: questionsAsked / total triangles, percentComplete. */
+function getTriangleProgress(state, totalTriangles) {
+  const questionsAsked = state.questionIndex;
+  const percentComplete = totalTriangles > 0 ? Math.round((questionsAsked / totalTriangles) * 100) : 0;
+  const model = assessmentModel.load();
+  const allDimensions = assessmentModel.getAllDimensions();
+  return {
+    questionsAsked,
+    coveredDimensions: questionsAsked,
+    totalDimensions: totalTriangles,
+    percentComplete: Math.min(100, percentComplete),
+  };
+}
+
+/**
+ * Get next triangle question when BFT_ASSESSMENT_MODE=triangles.
+ * Serves triangles in order; completion when all triangles have been served.
+ */
+function getNextTriangleQuestion(sessionId) {
+  const state = getOrInitInterviewState(sessionId);
+  const data = loadTriangles();
+  const triangles = data.triangles || [];
+  const total = triangles.length;
+
+  if (state.questionIndex >= total) {
+    const progress = getTriangleProgress(state, total);
+    return {
+      completed: true,
+      nextQuestion: null,
+      assessmentSummary: null,
+      progress: { ...progress, percentComplete: 100 },
+    };
+  }
+
+  const triangle = triangles[state.questionIndex];
+  const dimensionSet = triangleToDimensionSet(triangle);
+  const question = {
+    type: 'triangle',
+    id: `triangle_${state.questionIndex}`,
+    title: triangle.title,
+    prompt: triangle.prompt,
+    framing: triangle.framing,
+    vertices: {
+      a: { label: triangle.vertices?.a?.label, dimensionId: triangle.vertices?.a?.dimensionId },
+      b: { label: triangle.vertices?.b?.label, dimensionId: triangle.vertices?.b?.dimensionId },
+      c: { label: triangle.vertices?.c?.label, dimensionId: triangle.vertices?.c?.dimensionId },
+    },
+  };
+  const assignedId = `scenario_${state.questionIndex}`;
+  state.questionIndex += 1;
+  state.askedQuestionIds.add(assignedId);
+  state.askedQuestionTitles.push(question.title || '');
+  state.questionToDimension[assignedId] = dimensionSet;
+  state.servedQuestions[assignedId] = { ...question, id: assignedId };
+
+  for (const d of dimensionSet) {
+    const key = COVERAGE_KEY_BY_TYPE[d.dimensionType];
+    if (!key) continue;
+    const id = d.id;
+    if (!state.coverage[key]) state.coverage[key] = {};
+    if (!state.coverage[key][id]) state.coverage[key][id] = { questionCount: 0, lastQuestionId: null };
+    state.coverage[key][id].questionCount += 1;
+    state.coverage[key][id].lastQuestionId = assignedId;
+  }
+
+  const progress = getTriangleProgress(state, total);
+  return {
+    completed: false,
+    nextQuestion: { ...question, id: assignedId },
+    assessmentSummary: null,
+    progress,
+  };
+}
 
 let devMaxQuestionsLogged = false;
 
@@ -330,10 +444,34 @@ function applyOneAnswerToState(state, answer, sessionId) {
   }
 
   const served = servedQuestions[qid];
+  const qType = served?.type || 'single_choice';
+  const rawValue = answer.value ?? answer.selected ?? answer.answer ?? answer.text;
+
+  if (qType === 'triangle' && served && dims.length >= 3) {
+    const coords = rawValue && typeof rawValue === 'object' ? rawValue : { a: 1 / 3, b: 1 / 3, c: 1 / 3 };
+    const num = (v) => (typeof v === 'number' && !Number.isNaN(v) ? v : 1 / 3);
+    const a = Math.max(0, Math.min(1, num(coords.a)));
+    const b = Math.max(0, Math.min(1, num(coords.b)));
+    const c = Math.max(0, Math.min(1, num(coords.c)));
+    const sum = a + b + c;
+    const na = sum > 0 ? a / sum : 1 / 3;
+    const nb = sum > 0 ? b / sum : 1 / 3;
+    const nc = sum > 0 ? c / sum : 1 / 3;
+    const scoreA = na * TRIANGLE_SCORE_SCALE.mult + TRIANGLE_SCORE_SCALE.add;
+    const scoreB = nb * TRIANGLE_SCORE_SCALE.mult + TRIANGLE_SCORE_SCALE.add;
+    const scoreC = nc * TRIANGLE_SCORE_SCALE.mult + TRIANGLE_SCORE_SCALE.add;
+    const scoresByDimensionId = {
+      [dims[0].id]: Math.round(scoreA * 100) / 100,
+      [dims[1].id]: Math.round(scoreB * 100) / 100,
+      [dims[2].id]: Math.round(scoreC * 100) / 100,
+    };
+    console.log('[bft] answer sessionId=%s questionId=%s type=triangle barycentric=%s scoresApplied=%s', sessionId, qid, JSON.stringify({ a: na, b: nb, c: nc }), JSON.stringify(scoresByDimensionId));
+    addDimensionScoresToAggregate(dimensionScoresAggregate, dims, scoresByDimensionId);
+    return;
+  }
+
   if (!served || !Array.isArray(served.options)) return;
   const options = served.options;
-  const qType = served.type || 'single_choice';
-  const rawValue = answer.value ?? answer.selected ?? answer.answer ?? answer.text;
 
   if (qType === 'single_choice' && typeof rawValue === 'string') {
     const option = options.find((o) => o && o.value === rawValue);
@@ -560,7 +698,7 @@ function getAssessment(sessionId) {
       const served = state.servedQuestions[questionId];
       const userAnswer = answers[i] ? (answers[i].value ?? answers[i].selected ?? answers[i].answer ?? answers[i].text) : undefined;
       if (served) {
-        askedQuestionsWithAnswers.push({
+        const entry = {
           questionId,
           title: served.title,
           description: served.description,
@@ -571,7 +709,12 @@ function getAssessment(sessionId) {
             dimensionScores: o.dimensionScores,
           })),
           userAnswer,
-        });
+        };
+        if (served.type === 'triangle' && served.vertices) {
+          entry.vertices = served.vertices;
+          entry.prompt = served.prompt;
+        }
+        askedQuestionsWithAnswers.push(entry);
       } else {
         askedQuestionsWithAnswers.push({ questionId, userAnswer });
       }
@@ -653,7 +796,7 @@ function runBackgroundPregeneration(sessionId, lastQuestion, lastDimensionSet, b
         const dimensionSet = selectOneDimensionRandom(currentCoverage, model);
         if (dimensionSet.length === 0) break;
 
-        const result = await questionGenerator.requestQuestion({
+        const result = await getQuestionGenerator().requestQuestion({
           sessionId,
           bftUserId: bftUserId || '',
           preSurveyProfile,
@@ -723,6 +866,11 @@ async function waitForQueueOrTimeout(sessionId, timeoutMs) {
  * @param {string} bftUserId - from cookie (req.bftUserId)
  */
 async function getNextQuestion(sessionId, bftUserId) {
+  if (assessmentConfig.getAssessmentMode() === 'triangles') {
+    return getNextTriangleQuestion(sessionId);
+  }
+
+  const questionGenerator = getQuestionGenerator();
   const answers = answersBySession.get(sessionId) || [];
   const model = assessmentModel.load();
   const interviewConfig = getInterviewConfig();
@@ -809,7 +957,7 @@ async function getNextQuestion(sessionId, bftUserId) {
     };
   }
 
-  const result = await questionGenerator.requestQuestion({
+  const result = await getQuestionGenerator().requestQuestion({
     sessionId,
     bftUserId,
     preSurveyProfile,

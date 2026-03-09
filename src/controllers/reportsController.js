@@ -10,6 +10,7 @@ async function getReport(req, res, next) {
     }
     const includeLlm = req.query.include === 'full';
     const report = await reportService.getReport(sessionId, { includeLlm });
+    res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
     res.json(report);
   } catch (err) {
     next(err);
