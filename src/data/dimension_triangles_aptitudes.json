@@ -1,0 +1,183 @@
+{
+  "version": "2.1",
+  "description": "Aptitude Inclination Indicator (Aii). 8 scenarios covering 6 aptitude dimensions. Same triangle mechanics and scoring as dimension_triangles.json; vertices use dimensionId and dimensions_measured for alignment with the rest of the system.",
+  "scoring_note": "Same as dimension_triangles.json: score = (barycentric_coordinate x 4) + 1, mapping [0,1] to [1,5]. Aggregate by simple average per dimension.",
+  "triangles": [
+    {
+      "id": "apt_01",
+      "title": "The Broken Process",
+      "prompt": "Your team has been using the same workflow for months. Recently things keep going wrong — deadlines missed, outputs inconsistent — but nobody can agree on why. You have been asked to figure it out. What is your first move?",
+      "framing": "gain",
+      "vertices": {
+        "a": {
+          "label": "I'd map the process step by step and look for where the logic breaks down — where an input doesn't reliably produce the expected output.",
+          "dimensionId": "aptitude_logical_analytical_reasoning"
+        },
+        "b": {
+          "label": "I'd look at the tools and systems being used — something in how they're configured or interacting is probably causing the inconsistency.",
+          "dimensionId": "aptitude_technical_hands_on"
+        },
+        "c": {
+          "label": "I'd look across the recent failures for what they have in common — there's probably a recurring pattern that points to the real cause.",
+          "dimensionId": "aptitude_pattern_recognition"
+        }
+      },
+      "tension_note": "All three are legitimate diagnostic approaches. The signal is whether someone decomposes logic step by step (G), investigates the system internals and tooling (T), or hunts for structural similarity across failure instances (P).",
+      "dimensions_measured": ["aptitude_logical_analytical_reasoning", "aptitude_technical_hands_on", "aptitude_pattern_recognition"]
+    },
+    {
+      "id": "apt_02",
+      "title": "The Vague Brief",
+      "prompt": "A client sends you a one-paragraph brief for a project. It is short, enthusiastic, and completely unclear about what they actually want. You have one reply before a meeting tomorrow. What do you do?",
+      "framing": "gain",
+      "vertices": {
+        "a": {
+          "label": "I'd read it very carefully to identify exactly which words are doing too much work — where the ambiguity lives — and ask precisely targeted questions.",
+          "dimensionId": "aptitude_verbal_linguistic"
+        },
+        "b": {
+          "label": "I'd make my best imaginative guess at what they probably mean, sketch two or three possible directions, and present those as options to react to.",
+          "dimensionId": "aptitude_creative_open_ended"
+        },
+        "c": {
+          "label": "I'd identify what decisions have to be made before work can start and structure my reply around getting those specific answers.",
+          "dimensionId": "aptitude_logical_analytical_reasoning"
+        }
+      },
+      "tension_note": "Best separator for V vs C in the battery. The verbal choice requires noticing linguistic ambiguity specifically; the creative choice involves generating options under uncertainty; the logical choice involves decomposing the decision dependencies.",
+      "dimensions_measured": ["aptitude_verbal_linguistic", "aptitude_creative_open_ended", "aptitude_logical_analytical_reasoning"]
+    },
+    {
+      "id": "apt_04",
+      "title": "The New Tool",
+      "prompt": "Your company has just adopted a new project management platform. Everyone has been given access. How do you approach learning it?",
+      "framing": "gain",
+      "vertices": {
+        "a": {
+          "label": "I'd go straight into the settings, permissions, and integrations — I want to understand what the system is actually made of and how the parts connect before I use it for anything real.",
+          "dimensionId": "aptitude_technical_hands_on"
+        },
+        "b": {
+          "label": "I'd find the official guide or help articles and read through them carefully — I want to understand what the tool is designed to do before I start making decisions about how to use it.",
+          "dimensionId": "aptitude_verbal_linguistic"
+        },
+        "c": {
+          "label": "I'd pick a real piece of work and just start — the fastest way for me to learn what a tool can do is to try to actually do something with it, not study it first.",
+          "dimensionId": "aptitude_creative_open_ended"
+        }
+      },
+      "tension_note": "Technical emphasizes understanding internal structure before use; Creative emphasizes using the tool for real output immediately; Verbal remains extracting meaning from documentation before acting.",
+      "dimensions_measured": ["aptitude_technical_hands_on", "aptitude_verbal_linguistic", "aptitude_creative_open_ended"]
+    },
+    {
+      "id": "apt_05",
+      "title": "The Argument",
+      "prompt": "Two colleagues are in disagreement about which approach to take on a project. Both make reasonable-sounding cases. You are asked to weigh in. What do you naturally do?",
+      "framing": "gain",
+      "vertices": {
+        "a": {
+          "label": "I'd ask each of them to state their assumptions explicitly — usually the disagreement comes down to a hidden difference in premises, not the argument itself.",
+          "dimensionId": "aptitude_logical_analytical_reasoning"
+        },
+        "b": {
+          "label": "I'd listen for whether they're actually using key terms differently — often people think they disagree when they're just describing the same thing in different language.",
+          "dimensionId": "aptitude_verbal_linguistic"
+        },
+        "c": {
+          "label": "I'd ask what we could actually measure or compare — if there's data that could settle or at least inform the question, that's where I'd start.",
+          "dimensionId": "aptitude_quantitative_numerical"
+        }
+      },
+      "tension_note": "The strongest G vs V separator. Logical targets hidden premises; Verbal targets terminological slippage; Quantitative looks for empirical resolution.",
+      "dimensions_measured": ["aptitude_logical_analytical_reasoning", "aptitude_verbal_linguistic", "aptitude_quantitative_numerical"]
+    },
+    {
+      "id": "apt_06",
+      "title": "The Unexpected Result",
+      "prompt": "You followed a process carefully — a recipe, an experiment, a plan — and got a result you did not expect. Not a disaster, just not what you predicted. What do you do first?",
+      "framing": "gain",
+      "vertices": {
+        "a": {
+          "label": "I'd change one thing and try again — the fastest way to understand what happened is to run a variation and see if the result shifts.",
+          "dimensionId": "aptitude_creative_open_ended"
+        },
+        "b": {
+          "label": "I'd think about whether I've seen this kind of unexpected result before — in a different context or a different domain — because the explanation is probably something familiar in disguise.",
+          "dimensionId": "aptitude_pattern_recognition"
+        },
+        "c": {
+          "label": "I'd go back through exactly what I did, step by step, and find the point where the process diverged from what I expected — the answer is somewhere in the sequence.",
+          "dimensionId": "aptitude_technical_hands_on"
+        }
+      },
+      "tension_note": "Universally relatable; none of the three responses is primed by the prompt. C, P, and T appear together.",
+      "dimensions_measured": ["aptitude_creative_open_ended", "aptitude_pattern_recognition", "aptitude_technical_hands_on"]
+    },
+    {
+      "id": "apt_07",
+      "title": "The Uncertain Choice",
+      "prompt": "You need to make an important decision — it could be a career move, a big purchase, or a personal commitment. You have some information but not enough, and the signals are mixed. How do you think it through?",
+      "framing": "gain",
+      "vertices": {
+        "a": {
+          "label": "I'd lay out the key variables — cost, probability, timeframe — and try to quantify the options as best I can, even roughly, so I can compare them on the same terms.",
+          "dimensionId": "aptitude_quantitative_numerical"
+        },
+        "b": {
+          "label": "I'd work out what would have to be true for each option to be the right call — and then ask myself honestly whether those conditions are actually met.",
+          "dimensionId": "aptitude_logical_analytical_reasoning"
+        },
+        "c": {
+          "label": "I'd picture each option as a concrete future — what does my life actually look like if I go this way versus that way — and see which story feels more real and right.",
+          "dimensionId": "aptitude_creative_open_ended"
+        }
+      },
+      "tension_note": "Personal high-stakes decision. The only triangle pairing N directly against C.",
+      "dimensions_measured": ["aptitude_quantitative_numerical", "aptitude_logical_analytical_reasoning", "aptitude_creative_open_ended"]
+    },
+    {
+      "id": "apt_08",
+      "title": "The Miscommunication",
+      "prompt": "A project has gone sideways because two teams had different understandings of the same goal. You are brought in after the fact to work out what happened. What do you look for first?",
+      "framing": "gain",
+      "vertices": {
+        "a": {
+          "label": "I'd go back to the original brief or communication and look at the actual words used — I'd expect to find a phrase that each team reasonably read differently.",
+          "dimensionId": "aptitude_verbal_linguistic"
+        },
+        "b": {
+          "label": "I'd ask each team to describe in their own words what they thought the project was supposed to produce — I'd expect to see two completely different pictures, and that gap is the same gap I've seen cause failures before.",
+          "dimensionId": "aptitude_pattern_recognition"
+        },
+        "c": {
+          "label": "I'd map out what each team's workflow actually looked like and find the point where they were supposed to hand off or coordinate — that's usually where the disconnect lives.",
+          "dimensionId": "aptitude_technical_hands_on"
+        }
+      },
+      "tension_note": "Verbal looks at language itself; Pattern looks for misaligned mental models; Technical maps the process handoff as the breakdown point.",
+      "dimensions_measured": ["aptitude_verbal_linguistic", "aptitude_pattern_recognition", "aptitude_technical_hands_on"]
+    },
+    {
+      "id": "apt_10",
+      "title": "The Unfamiliar Territory",
+      "prompt": "You are getting into something completely new — a different field, industry, or domain you have never worked in before. It could be a new job, a course, a side project, or just deep personal curiosity. What is your natural way in?",
+      "framing": "gain",
+      "vertices": {
+        "a": {
+          "label": "I'd look for the underlying structure — most fields have the same basic dynamics underneath, just dressed differently. I'd find what this reminds me of and work from there.",
+          "dimensionId": "aptitude_pattern_recognition"
+        },
+        "b": {
+          "label": "I'd find out what numbers actually matter here — what gets measured, what gets optimized, what counts as success — and use that as my entry point into how the field actually thinks.",
+          "dimensionId": "aptitude_quantitative_numerical"
+        },
+        "c": {
+          "label": "I'd want to understand how the core tools and processes actually work — not just what people do, but how the machinery underneath it all fits together.",
+          "dimensionId": "aptitude_technical_hands_on"
+        }
+      },
+      "tension_note": "The only triangle pairing N and T directly. Relatable to students, career changers, and specialists.",
+      "dimensions_measured": ["aptitude_pattern_recognition", "aptitude_quantitative_numerical", "aptitude_technical_hands_on"]
+    }
+  ]
+}

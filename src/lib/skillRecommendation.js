@@ -88,26 +88,31 @@ function getRelevanceScoreForDimension(rankingData, dimensionId) {
 }
 
 /**
- * Compute applicability score per skill from dimension scores (traits/values).
- * Returns array of { id, name, description, ai_trend, structural_scores, applicability }
- * ordered by applicability descending. Skills with no link get applicability 0.
+ * Compute applicability score per skill from dimension scores (traits/values/aptitudes).
+ * Uses average contribution per skill (sum of contributions / number of contributing dimensions)
+ * so that skills linked from many dimensions do not dominate. Returns array of
+ * { id, name, description, ai_trend, structural_scores, applicability } ordered by
+ * applicability descending. Skills with no link get applicability 0.
  *
- * @param {object} dimensionScores - { traits: [{ id, name, mean, band, count }], values: [...] }
+ * @param {object} dimensionScores - { traits: [{ id, name, mean, band, count }], values: [...], aptitudes: [...] }
  * @returns {Array<object>}
  */
 function getSkillsWithApplicability(dimensionScores) {
   const model = assessmentModel.load();
   const rankingData = loadAiRelevanceRanking();
-  const applicabilityBySkill = new Map();
+  const sumBySkill = new Map();
+  const countBySkill = new Map();
 
   for (const skill of model.skills) {
-    applicabilityBySkill.set(skill.id, 0);
+    sumBySkill.set(skill.id, 0);
+    countBySkill.set(skill.id, 0);
   }
 
   const traits = (dimensionScores && dimensionScores.traits) || [];
   const values = (dimensionScores && dimensionScores.values) || [];
+  const aptitudes = (dimensionScores && dimensionScores.aptitudes) || [];
 
-  for (const list of [traits, values]) {
+  for (const list of [traits, values, aptitudes]) {
     for (const d of list) {
       if (!d || !d.id) continue;
       const def = model.dimensionsById.get(d.id);
@@ -120,26 +125,32 @@ function getSkillsWithApplicability(dimensionScores) {
       const contribution = mean * band * relevance;
 
       for (const skillId of clusters) {
-        if (!applicabilityBySkill.has(skillId)) continue;
-        applicabilityBySkill.set(skillId, (applicabilityBySkill.get(skillId) || 0) + contribution);
+        if (!sumBySkill.has(skillId)) continue;
+        sumBySkill.set(skillId, (sumBySkill.get(skillId) || 0) + contribution);
+        countBySkill.set(skillId, (countBySkill.get(skillId) || 0) + 1);
       }
     }
   }
 
-  const result = model.skills.map((s) => ({
-    id: s.id,
-    name: s.name,
-    short_label: s.short_label || null,
-    description: s.description || '',
-    ai_trend: s.ai_trend || null,
-    ai_category: s.ai_category || null,
-    ai_future_rationale: s.ai_future_rationale || null,
-    how_measured_or_observed: s.how_measured_or_observed || null,
-    question_hints: Array.isArray(s.question_hints) ? s.question_hints : null,
-    structural_scores: s.structural_scores || null,
-    applicability: applicabilityBySkill.get(s.id) ?? 0,
-    ai_future_score: computeAiFutureScore(s),
-  }));
+  const result = model.skills.map((s) => {
+    const sum = sumBySkill.get(s.id) ?? 0;
+    const count = countBySkill.get(s.id) ?? 0;
+    const applicability = count > 0 ? sum / count : 0;
+    return {
+      id: s.id,
+      name: s.name,
+      short_label: s.short_label || null,
+      description: s.description || '',
+      ai_trend: s.ai_trend || null,
+      ai_category: s.ai_category || null,
+      ai_future_rationale: s.ai_future_rationale || null,
+      how_measured_or_observed: s.how_measured_or_observed || null,
+      question_hints: Array.isArray(s.question_hints) ? s.question_hints : null,
+      structural_scores: s.structural_scores || null,
+      applicability,
+      ai_future_score: computeAiFutureScore(s),
+    };
+  });
 
   result.sort((a, b) => (b.applicability || 0) - (a.applicability || 0));
   return result;

@@ -43,8 +43,27 @@ function update(id, updates) {
   return session;
 }
 
+/**
+ * Restore a session entity from an exported blob (dev/debug). Overwrites if id exists.
+ * @param {object} session - { id, status?, createdAt?, updatedAt?, preSurveyProfile? }
+ * @returns {object} The restored session
+ */
+function restore(session) {
+  if (!session || typeof session.id !== 'string') return null;
+  const restored = {
+    id: session.id,
+    status: STATUSES.includes(session.status) ? session.status : 'draft',
+    createdAt: session.createdAt || new Date().toISOString(),
+    updatedAt: session.updatedAt || new Date().toISOString(),
+    preSurveyProfile: session.preSurveyProfile ?? undefined,
+  };
+  sessions.set(session.id, restored);
+  return restored;
+}
+
 module.exports = {
   create,
   getById,
   update,
+  restore,
 };

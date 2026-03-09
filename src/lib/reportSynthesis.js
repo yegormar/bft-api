@@ -119,22 +119,17 @@ function getExploredDimensionsFromCoverage(coverage, model) {
 }
 
 /**
- * LLM-only synthesis: full insights → one narrative profile summary.
+ * Single profile summary from session payload JSON. Input is the full session payload
+ * (questions_and_answers, dimensions, skills, personality_cluster). One LLM call; one summary string.
  * Returns string or null if LLM disabled/fails.
  */
-async function generateProfileSummaryLLM(insights, preSurveyProfile = null) {
+async function generateProfileSummaryFromPayload(payload) {
+  if (!payload || typeof payload !== 'object') return null;
   if (!ollamaClient.config.enabled) return null;
   const systemPrompt = llmConfig.getReportProfileSystemPrompt && llmConfig.getReportProfileSystemPrompt();
   if (!systemPrompt || !systemPrompt.trim()) return null;
 
-  const model = assessmentModel.load();
-  const dimensionNames = {
-    aptitudes: model.aptitudes.map((a) => a.name),
-    traits: model.traits.map((t) => t.name),
-    values: model.values.map((v) => v.name),
-  };
-
-  const userContent = buildProfileLLMUserPrompt(insights, dimensionNames);
+  const userContent = JSON.stringify(payload, null, 2);
   const messages = [
     { role: 'system', content: systemPrompt.trim() },
     { role: 'user', content: userContent },
@@ -145,7 +140,7 @@ async function generateProfileSummaryLLM(insights, preSurveyProfile = null) {
     const text = (res.content || '').trim();
     return text || null;
   } catch (err) {
-    console.warn('[reportSynthesis] LLM profile summary error:', err.message);
+    console.warn('[reportSynthesis] LLM profile summary from payload error:', err.message);
     return null;
   }
 }
@@ -291,7 +286,7 @@ async function generateProfessionRecommendations(profileSummary, profileByDimens
 
 module.exports = {
   getExploredDimensionsFromCoverage,
-  generateProfileSummaryLLM,
+  generateProfileSummaryFromPayload,
   generateProfileSummaryHybrid,
   loadAiRelevanceRanking,
   getRankingEntriesForExploredDimensions,

@@ -3,6 +3,7 @@ const assessmentConfig = require('../../config/assessment');
 const sessionService = require('./sessionService');
 const assessmentModel = require('../data/assessmentModel');
 const questionStore = require('./questionStore');
+const bayesianTriangleScorer = require('../lib/bayesianTriangleScorer');
 /** Lazy load so scenario/LLM deps are not required when BFT_ASSESSMENT_MODE=triangles. */
 function getQuestionGenerator() {
   return require('./questionGeneration');
@@ -48,21 +49,33 @@ const TRIANGLE_SCORE_SCALE = { mult: 4, add: 1 };
 
 let trianglesData = null;
 
+/** Shuffle array in place (Fisher-Yates). Returns the same array. */
+function shuffleArray(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
 function loadTriangles() {
   if (trianglesData) return trianglesData;
   const path = require('path');
   const fs = require('fs');
-  const filePath = path.join(__dirname, '..', 'data', 'dimension_triangles.json');
-  const raw = fs.readFileSync(filePath, 'utf8');
-  trianglesData = JSON.parse(raw);
+  const basePath = path.join(__dirname, '..', 'data');
+  const data1 = JSON.parse(fs.readFileSync(path.join(basePath, 'dimension_triangles.json'), 'utf8'));
+  const data2 = JSON.parse(fs.readFileSync(path.join(basePath, 'dimension_triangles_aptitudes.json'), 'utf8'));
+  const triangles = [...(data1.triangles || []), ...(data2.triangles || [])];
+  trianglesData = { triangles };
   return trianglesData;
 }
 
-/** Infer dimension type from dimensionId (e.g. value_helping_others_impact -> value). */
+/** Infer dimension type from dimensionId (e.g. value_helping_others_impact -> value, aptitude_* -> aptitude). */
 function dimensionTypeFromId(dimensionId) {
   if (typeof dimensionId !== 'string') return 'value';
   if (dimensionId.startsWith('value_')) return 'value';
   if (dimensionId.startsWith('trait_')) return 'trait';
+  if (dimensionId.startsWith('aptitude_')) return 'aptitude';
   return 'value';
 }
 
@@ -96,14 +109,20 @@ function getTriangleProgress(state, totalTriangles) {
 
 /**
  * Get next triangle question when BFT_ASSESSMENT_MODE=triangles.
- * Serves triangles in order; completion when all triangles have been served.
+ * Uses combined triangles from dimension_triangles.json and dimension_triangles_aptitudes.json.
+ * Order is randomized once per session at first use (skipped when NODE_ENV=test for deterministic tests).
  */
 function getNextTriangleQuestion(sessionId) {
   const state = getOrInitInterviewState(sessionId);
   const data = loadTriangles();
   const triangles = data.triangles || [];
-  const total = triangles.length;
 
+  if (!state.triangleOrder) {
+    const order = triangles.slice();
+    state.triangleOrder = process.env.NODE_ENV === 'test' ? order : shuffleArray(order);
+  }
+
+  const total = state.triangleOrder.length;
   if (state.questionIndex >= total) {
     const progress = getTriangleProgress(state, total);
     return {
@@ -114,7 +133,7 @@ function getNextTriangleQuestion(sessionId) {
     };
   }
 
-  const triangle = triangles[state.questionIndex];
+  const triangle = state.triangleOrder[state.questionIndex];
   const dimensionSet = triangleToDimensionSet(triangle);
   const question = {
     type: 'triangle',
@@ -188,13 +207,13 @@ function getOrInitInterviewState(sessionId) {
         skills: {},
       },
       servedQuestions: {},
-      dimensionScoresAggregate: { traits: {}, values: {} },
+      dimensionScoresAggregate: { traits: {}, values: {}, aptitudes: {} },
     };
     interviewStateBySession.set(sessionId, state);
   }
   if (state.servedQuestions == null) state.servedQuestions = {};
   if (state.dimensionScoresAggregate == null) {
-    state.dimensionScoresAggregate = { traits: {}, values: {} };
+    state.dimensionScoresAggregate = { traits: {}, values: {}, aptitudes: {} };
   }
   return state;
 }
@@ -410,11 +429,11 @@ function getOrInitPreGeneratedQueue(sessionId) {
 function addDimensionScoresToAggregate(aggregate, dims, scoresByDimensionId) {
   if (!aggregate || !dims || !scoresByDimensionId) return;
   for (const dim of dims) {
-    if (dim.dimensionType !== 'trait' && dim.dimensionType !== 'value') continue;
+    const bucketKey = COVERAGE_KEY_BY_TYPE[dim.dimensionType];
+    if (bucketKey !== 'traits' && bucketKey !== 'values' && bucketKey !== 'aptitudes') continue;
     const id = dim.id;
     const score = scoresByDimensionId[id];
     if (score == null || typeof score !== 'number') continue;
-    const bucketKey = COVERAGE_KEY_BY_TYPE[dim.dimensionType];
     const bucket = bucketKey ? aggregate[bucketKey] : undefined;
     if (!bucket || typeof bucket !== 'object') continue;
     if (!bucket[id]) bucket[id] = { sum: 0, count: 0 };
@@ -574,7 +593,7 @@ function replaceAnswers(sessionId, payload) {
     values: {},
     skills: {},
   };
-  state.dimensionScoresAggregate = { traits: {}, values: {} };
+  state.dimensionScoresAggregate = { traits: {}, values: {}, aptitudes: {} };
 
   for (const a of answers) {
     applyOneAnswerToState(state, a, sessionId);
@@ -639,13 +658,17 @@ function enrichAggregateWithSyntheticUnmeasured(aggregate, state, model, intervi
 }
 
 function buildDimensionScoresOutput(aggregate, model) {
-  if (!aggregate) return { traits: [], values: [] };
+  if (!aggregate) return { traits: [], values: [], aptitudes: [] };
   const m = model || assessmentModel.load();
-  const out = { traits: [], values: [] };
-  for (const type of ['traits', 'values']) {
-    const bucket = aggregate[type];
+  const out = { traits: [], values: [], aptitudes: [] };
+  const types = [
+    { key: 'traits', list: m.traits },
+    { key: 'values', list: m.values },
+    { key: 'aptitudes', list: m.aptitudes },
+  ];
+  for (const { key, list } of types) {
+    const bucket = aggregate[key];
     if (!bucket || typeof bucket !== 'object') continue;
-    const list = type === 'traits' ? m.traits : m.values;
     const dimensionsById = m.dimensionsById;
     for (const id of Object.keys(bucket)) {
       const entry = bucket[id];
@@ -653,7 +676,7 @@ function buildDimensionScoresOutput(aggregate, model) {
       const mean = entry.sum / entry.count;
       const band = mean <= 2 ? 'low' : mean >= 4 ? 'high' : 'medium';
       const dim = dimensionsById.get(id);
-      out[type].push({
+      out[key].push({
         id,
         name: (dim && dim.name) || id,
         mean: Math.round(mean * 100) / 100,
@@ -663,6 +686,97 @@ function buildDimensionScoresOutput(aggregate, model) {
     }
   }
   return out;
+}
+
+/**
+ * Collect raw triangle responses from state and answers for the Bayesian scorer.
+ * Returns [{ dims: [dimIdA, dimIdB, dimIdC], weights: [a, b, c] }, ...].
+ */
+function collectTriangleRawResponses(state, answers) {
+  if (!state || !state.servedQuestions || !Array.isArray(answers)) return [];
+  const raw = [];
+  for (const answer of answers) {
+    const questionId = answer.questionId || answer.question_id;
+    if (!questionId) continue;
+    const served = state.servedQuestions[questionId];
+    if (!served || served.type !== 'triangle' || !served.vertices) continue;
+    const vert = served.vertices;
+    const dims = [vert.a?.dimensionId, vert.b?.dimensionId, vert.c?.dimensionId].filter(Boolean);
+    if (dims.length !== 3) continue;
+    const val = answer.value ?? answer.selected ?? answer.answer ?? answer.text;
+    const coords = val && typeof val === 'object' ? val : { a: 1 / 3, b: 1 / 3, c: 1 / 3 };
+    const num = (x) => (typeof x === 'number' && !Number.isNaN(x) ? x : 1 / 3);
+    let a = Math.max(0, Math.min(1, num(coords.a)));
+    let b = Math.max(0, Math.min(1, num(coords.b)));
+    let c = Math.max(0, Math.min(1, num(coords.c)));
+    const sum = a + b + c;
+    if (sum <= 0) a = b = c = 1 / 3;
+    else {
+      a /= sum;
+      b /= sum;
+      c /= sum;
+    }
+    raw.push({ dims, weights: [a, b, c] });
+  }
+  return raw;
+}
+
+/**
+ * Convert Bayesian scorer profile to dimensionScores shape { traits, values, aptitudes }.
+ */
+function buildDimensionScoresOutputFromBayesian(profile, model) {
+  const m = model || assessmentModel.load();
+  const out = { traits: [], values: [], aptitudes: [] };
+  const keyByType = { trait: 'traits', value: 'values', aptitude: 'aptitudes' };
+  for (const p of profile) {
+    const id = p.dimension_id;
+    const dim = m.dimensionsById.get(id);
+    const type = (dim && dim._type) || (id.startsWith('trait_') ? 'trait' : id.startsWith('value_') ? 'value' : 'aptitude');
+    const key = keyByType[type] || 'traits';
+    const mean = p.score_1_to_5;
+    const band = mean <= 2 ? 'low' : mean >= 4 ? 'high' : 'medium';
+    out[key].push({
+      id,
+      name: (dim && dim.name) || id,
+      mean,
+      band,
+      count: p.n_triangles || 0,
+    });
+  }
+  return out;
+}
+
+/**
+ * When in triangle mode with triangle answers, use Bayesian scorer for dimension scores.
+ * Otherwise use aggregate (simple average) path.
+ */
+function buildDimensionScoresForAssessment(state, answers, model, interviewConfig) {
+  const useBayesian =
+    assessmentConfig.getAssessmentMode() === 'triangles' &&
+    state &&
+    Array.isArray(answers) &&
+    answers.length > 0;
+  if (!useBayesian) {
+    const effectiveAggregate = state && state.dimensionScoresAggregate
+      ? enrichAggregateWithSyntheticUnmeasured(state.dimensionScoresAggregate, state, model, interviewConfig)
+      : null;
+    return buildDimensionScoresOutput(effectiveAggregate || {}, model);
+  }
+  const rawResponses = collectTriangleRawResponses(state, answers);
+  if (rawResponses.length === 0) {
+    const effectiveAggregate = state.dimensionScoresAggregate
+      ? enrichAggregateWithSyntheticUnmeasured(state.dimensionScoresAggregate, state, model, interviewConfig)
+      : null;
+    return buildDimensionScoresOutput(effectiveAggregate || {}, model);
+  }
+  const result = bayesianTriangleScorer.scoreTriangleResponses(rawResponses);
+  if (!result.profile || result.profile.length === 0) {
+    const effectiveAggregate = state.dimensionScoresAggregate
+      ? enrichAggregateWithSyntheticUnmeasured(state.dimensionScoresAggregate, state, model, interviewConfig)
+      : null;
+    return buildDimensionScoresOutput(effectiveAggregate || {}, model);
+  }
+  return buildDimensionScoresOutputFromBayesian(result.profile, model);
 }
 
 function getAssessment(sessionId) {
@@ -683,12 +797,7 @@ function getAssessment(sessionId) {
 
   const interviewConfig = getInterviewConfig();
   const model = assessmentModel.load();
-  const effectiveAggregate = state && state.dimensionScoresAggregate
-    ? enrichAggregateWithSyntheticUnmeasured(state.dimensionScoresAggregate, state, model, interviewConfig)
-    : null;
-  const dimensionScores = effectiveAggregate
-    ? buildDimensionScoresOutput(effectiveAggregate, model)
-    : { traits: [], values: [] };
+  const dimensionScores = buildDimensionScoresForAssessment(state, answers, model, interviewConfig);
 
   let askedQuestionsWithAnswers = undefined;
   if (state && state.servedQuestions && typeof state.questionIndex === 'number') {
@@ -1047,13 +1156,7 @@ function getSessionHealth(sessionId) {
     coverage[key] = state.coverage[key] || {};
   }
 
-  const effectiveAggregate = enrichAggregateWithSyntheticUnmeasured(
-    state.dimensionScoresAggregate,
-    state,
-    model,
-    interviewConfig
-  );
-  const dimensionScores = buildDimensionScoresOutput(effectiveAggregate, model);
+  const dimensionScores = buildDimensionScoresForAssessment(state, answers, model, interviewConfig);
 
   return {
     sessionId,
@@ -1073,6 +1176,103 @@ function getSessionHealth(sessionId) {
   };
 }
 
+const EXPORT_VERSION = 1;
+
+/**
+ * Export full session state for dev/debug (questions, answers, interview state, pregen queue).
+ * Not part of the UI. Returns null if session not found.
+ * @param {string} sessionId
+ * @returns {object | null} { version, session, answers, assessmentSummaries, interviewState, preGeneratedQueue }
+ */
+function exportSessionData(sessionId) {
+  const session = sessionService.getById(sessionId);
+  if (!session) return null;
+
+  const answers = answersBySession.get(sessionId) || [];
+  const assessmentSummaries = assessmentSummariesBySession.get(sessionId) || [];
+  const state = interviewStateBySession.get(sessionId);
+  const preGeneratedQueue = preGeneratedQueueBySession.get(sessionId) || [];
+
+  const interviewState = state
+    ? {
+        askedQuestionIds: Array.from(state.askedQuestionIds || []),
+        askedQuestionTitles: state.askedQuestionTitles || [],
+        questionToDimension: state.questionToDimension || {},
+        questionIndex: typeof state.questionIndex === 'number' ? state.questionIndex : 0,
+        coverage: state.coverage || { aptitudes: {}, traits: {}, values: {}, skills: {} },
+        servedQuestions: state.servedQuestions || {},
+        dimensionScoresAggregate: state.dimensionScoresAggregate || { traits: {}, values: {}, aptitudes: {} },
+      }
+    : null;
+
+  return {
+    version: EXPORT_VERSION,
+    session: { ...session },
+    answers: [...answers],
+    assessmentSummaries: [...assessmentSummaries],
+    interviewState,
+    preGeneratedQueue: [...preGeneratedQueue],
+  };
+}
+
+/**
+ * Restore session state from an exported blob (dev/debug). Use targetSessionId to restore
+ * into a new session id; otherwise payload.session.id is used.
+ * Caller should call reportService.invalidateReportCache(sessionId) after restore.
+ * @param {object} payload - Result of exportSessionData()
+ * @param {string} [targetSessionId] - If set, restore under this id instead of payload.session.id
+ * @returns {{ sessionId: string, session: object }}
+ */
+function restoreSessionData(payload, targetSessionId) {
+  if (!payload || typeof payload !== 'object') {
+    const err = new Error('restoreSessionData requires a payload object');
+    err.status = 400;
+    throw err;
+  }
+  const sessionId = targetSessionId && typeof targetSessionId === 'string'
+    ? targetSessionId
+    : (payload.session && payload.session.id);
+  if (!sessionId) {
+    const err = new Error('restoreSessionData requires payload.session.id or targetSessionId');
+    err.status = 400;
+    throw err;
+  }
+
+  const session = sessionService.restore({
+    ...payload.session,
+    id: sessionId,
+  });
+  if (!session) {
+    const err = new Error('restoreSessionData: session restore failed');
+    err.status = 400;
+    throw err;
+  }
+
+  answersBySession.set(sessionId, Array.isArray(payload.answers) ? [...payload.answers] : []);
+  assessmentSummariesBySession.set(sessionId, Array.isArray(payload.assessmentSummaries) ? [...payload.assessmentSummaries] : []);
+
+  if (payload.interviewState && typeof payload.interviewState === 'object') {
+    const s = payload.interviewState;
+    const state = {
+      askedQuestionIds: new Set(Array.isArray(s.askedQuestionIds) ? s.askedQuestionIds : []),
+      askedQuestionTitles: Array.isArray(s.askedQuestionTitles) ? [...s.askedQuestionTitles] : [],
+      questionToDimension: s.questionToDimension && typeof s.questionToDimension === 'object' ? { ...s.questionToDimension } : {},
+      questionIndex: typeof s.questionIndex === 'number' ? s.questionIndex : 0,
+      coverage: s.coverage && typeof s.coverage === 'object' ? { ...s.coverage } : { aptitudes: {}, traits: {}, values: {}, skills: {} },
+      servedQuestions: s.servedQuestions && typeof s.servedQuestions === 'object' ? { ...s.servedQuestions } : {},
+      dimensionScoresAggregate: s.dimensionScoresAggregate && typeof s.dimensionScoresAggregate === 'object' ? { ...s.dimensionScoresAggregate } : { traits: {}, values: {}, aptitudes: {} },
+    };
+    interviewStateBySession.set(sessionId, state);
+  } else {
+    interviewStateBySession.delete(sessionId);
+  }
+
+  preGeneratedQueueBySession.set(sessionId, Array.isArray(payload.preGeneratedQueue) ? [...payload.preGeneratedQueue] : []);
+  generatorBusyBySession.set(sessionId, false);
+
+  return { sessionId, session };
+}
+
 module.exports = {
   submitAnswers,
   replaceAnswers,
@@ -1083,4 +1283,6 @@ module.exports = {
   isInterviewComplete,
   selectNextDimensionSet,
   getOrInitInterviewState,
+  exportSessionData,
+  restoreSessionData,
 };

@@ -116,9 +116,8 @@ function buildReportFromCache(sessionId, session, assessment, cached) {
   if (assessment.insights) report.insights = assessment.insights;
   report.dimensionScores = ensureDevDimensionScores(assessment.dimensionScores || { traits: [], values: [] });
   report.dimensionMeta = buildDimensionMeta(report.dimensionScores);
-  report.strengthProfileSummaryLLM = cached.strengthProfileSummaryLLM ?? null;
+  report.profileSummary = cached.profileSummary ?? null;
   report.profileByDimensions = ensureDevAptitudesInProfile(cached.profileByDimensions ?? {});
-  report.strengthProfileSummaryHybrid = cached.strengthProfileSummaryHybrid ?? null;
   report.careerClusterAlignment = null;
   report.skillDevelopmentRoadmap = cached.skillDevelopmentRoadmap ?? null;
   report.structuralDimensionMeta = skillRecommendation.getStructuralDimensionMeta();
@@ -148,8 +147,7 @@ function buildCoreReport(sessionId, session, assessment) {
   const profileByDimensions = reportSynthesis.getExploredDimensionsFromCoverage(coverage);
   report.profileByDimensions = ensureDevAptitudesInProfile(profileByDimensions ?? {});
 
-  report.strengthProfileSummaryLLM = null;
-  report.strengthProfileSummaryHybrid = null;
+  report.profileSummary = null;
   report.careerClusterAlignment = null;
   return report;
 }
@@ -177,13 +175,12 @@ async function getReport(sessionId, options = {}) {
 
   const report = buildCoreReport(sessionId, session, assessment);
 
-  const [strengthProfileSummaryLLM, hybridResult] = await Promise.all([
-    reportSynthesis.generateProfileSummaryLLM(assessment.insights, session.preSurveyProfile),
-    reportSynthesis.generateProfileSummaryHybrid(assessment.coverageSummary?.coverage ?? null),
-  ]);
-  report.strengthProfileSummaryLLM = strengthProfileSummaryLLM ?? null;
-  report.profileByDimensions = ensureDevAptitudesInProfile(hybridResult.profileByDimensions ?? {});
-  report.strengthProfileSummaryHybrid = hybridResult.strengthProfileSummaryHybrid ?? null;
+  const payload = getSessionPayloadForLlm(sessionId);
+  const profileSummary = payload
+    ? await reportSynthesis.generateProfileSummaryFromPayload(payload)
+    : null;
+  report.profileSummary = profileSummary ?? null;
+  report.profileByDimensions = report.profileByDimensions;
 
   report.careerClusterAlignment = null;
   report.skillDevelopmentRoadmap = skillRecommendation.getSkillsWithApplicability(assessment.dimensionScores || {});
@@ -191,8 +188,7 @@ async function getReport(sessionId, options = {}) {
   reportCacheBySession.set(sessionId, {
     answerCount,
     generatedAt: report._meta.generatedAt,
-    strengthProfileSummaryLLM: report.strengthProfileSummaryLLM,
-    strengthProfileSummaryHybrid: report.strengthProfileSummaryHybrid,
+    profileSummary: report.profileSummary,
     profileByDimensions: report.profileByDimensions,
     skillDevelopmentRoadmap: report.skillDevelopmentRoadmap,
   });
@@ -204,7 +200,90 @@ function invalidateReportCache(sessionId) {
   if (sessionId) reportCacheBySession.delete(sessionId);
 }
 
+/** Keys to include for each dimension in the LLM payload (metadata + score). */
+const DIMENSION_PAYLOAD_KEYS = [
+  'id',
+  'name',
+  'description',
+  'how_measured_or_observed',
+  'related_skill_clusters',
+  'score_scale',
+];
+
+/**
+ * Build a single JSON payload representing the session for LLM consumption (assessment summary,
+ * profession recommendations). Includes questions/answers, dimension measurements with full metadata,
+ * skills with calculated applicability, and personality cluster (pre-survey profile + Q&A).
+ *
+ * @param {string} sessionId
+ * @returns {object | null} Payload object or null if session not found
+ */
+function getSessionPayloadForLlm(sessionId) {
+  const session = sessionService.getById(sessionId);
+  if (!session) return null;
+
+  const assessment = assessmentService.getAssessment(sessionId);
+  const model = assessmentModel.load();
+  const dimensionScores = ensureDevDimensionScores(assessment.dimensionScores || { traits: [], values: [], aptitudes: [] });
+
+  const questions_and_answers = (assessment.askedQuestionsWithAnswers || []).map((q) => ({
+    questionId: q.questionId,
+    title: q.title,
+    description: q.description,
+    type: q.type,
+    ...(q.prompt != null && { prompt: q.prompt }),
+    ...(q.vertices != null && { vertices: q.vertices }),
+    ...(q.options != null && { options: q.options }),
+    userAnswer: q.userAnswer,
+  }));
+
+  const dimensions = { aptitudes: [], traits: [], values: [] };
+  for (const type of ['aptitudes', 'traits', 'values']) {
+    const list = dimensionScores[type];
+    if (!Array.isArray(list)) continue;
+    for (const scoreItem of list) {
+      const full = model.dimensionsById.get(scoreItem.id);
+      const meta = {};
+      for (const key of DIMENSION_PAYLOAD_KEYS) {
+        if (full && Object.prototype.hasOwnProperty.call(full, key)) {
+          meta[key] = full[key];
+        }
+      }
+      dimensions[type].push({
+        ...meta,
+        id: scoreItem.id,
+        name: scoreItem.name ?? full?.name ?? scoreItem.id,
+        mean: scoreItem.mean,
+        band: scoreItem.band,
+        count: scoreItem.count,
+      });
+    }
+  }
+
+  const skillsWithApplicability = skillRecommendation.getSkillsWithApplicability(dimensionScores);
+  const skills = skillsWithApplicability.map((s) => ({
+    id: s.id,
+    name: s.name,
+    description: s.description ?? '',
+    applicability: s.applicability ?? 0,
+  }));
+
+  const personality_cluster = {
+    pre_survey_profile: session.preSurveyProfile ?? null,
+    questions_and_answers_for_profile: questions_and_answers,
+  };
+
+  return {
+    session_id: sessionId,
+    questions_and_answers,
+    dimensions,
+    skills,
+    personality_cluster,
+  };
+}
+
 module.exports = {
   getReport,
   invalidateReportCache,
+  getSessionPayloadForLlm,
 };
