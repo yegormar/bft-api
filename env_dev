@@ -1,30 +1,40 @@
-# Copy to .env for local dev. Same layout as env.example; swap Cloud/Local block as needed.
+# Copy to .env and set values. All listed below are required unless marked optional.
 
 # Server
 PORT=3000
 NODE_ENV=development
+BFT_DEV_MAX_QUESTIONS=1
 CORS_ORIGIN=http://localhost:5173
-
-# Question store and pregen
-BFT_QUESTIONS_STORE_DIR=./data/questions-store
+BFT_ADMIN_ENABLED=1
 BFT_FEEDBACK_FILE=./data/feedback.jsonl
-BFT_SCENARIO_STORE_FIRST=false
-BFT_PREGEN_QUEUE_CAP=3
-BFT_PREGEN_REFILL_THRESHOLD=1
-BFT_QUESTION_LLM_TIMEOUT_MS=10000
+BFT_ASSESSMENT_MODE=triangles
+
+# Question generation optimizations
+BFT_QUESTIONS_STORE_DIR=./data/questions-store
+BFT_SCENARIO_STORE_FIRST=true
+BFT_PREGEN_QUEUE_CAP=0
+BFT_PREGEN_REFILL_THRESHOLD=0
+BFT_QUESTION_LLM_TIMEOUT_MS=60000
+
+# Assessment (required). Mode: scenarios (LLM) or triangles (fixed triangle set).
+BFT_ASSESSMENT_MODE=triangles
+MIN_SIGNAL_PER_DIMENSION=1
+MAX_INTERVIEW_QUESTIONS=20
 
 # LLM configuration - Ollama Cloud
 LLM_PROVIDER=ollama_cloud
 LLM_BASE_URL=https://ollama.com
 LLM_API_KEY=
-LLM_MODEL=gpt-oss:20b-cloud
-LLM_THINK=false
+LLM_MODEL=kimi-k2:1t
+LLM_THINK=false 
+# GPT-OSS: use LLM_THINK_LEVEL=low|medium|high.
+LLM_THINK_LEVEL=low
 
 # LLM configuration - Ollama local
 # LLM_PROVIDER=ollama
 # LLM_BASE_URL=http://ubuntu-llm:11434
-# LLM_MODEL=gemma3:12b
-# LLM_THINK=false
+# LLM_MODEL=llama3:latest
+# LLM_THINK=false 
 
 LLM_WEB_SEARCH=true
 LLM_TEMPERATURE=0.5
@@ -33,16 +43,9 @@ LLM_NUM_CTX=32768
 LLM_TOP_P=0.9
 LLM_CHECKUP_INTERVAL_SEC=180
 
-# Prompts
+# Prompts – paths relative to project root (conf/). Add more as needed.
 LLM_REPORT_PROFILE_SYSTEM_PROMPT_FILE=conf/report_profile_system_prompt.txt
 LLM_REPORT_HYBRID_SYSTEM_PROMPT_FILE=conf/report_hybrid_system_prompt.txt
 LLM_REPORT_RECOMMENDATIONS_SYSTEM_PROMPT_FILE=conf/report_recommendations_system_prompt.txt
 BFT_SCENARIO_STEP1_INSTRUCTIONS_FILE=conf/scenario_step1.txt
 BFT_SCENARIO_STEP3_INSTRUCTIONS_FILE=conf/scenario_step3.txt
-
-# Assessment (required)
-MIN_SIGNAL_PER_DIMENSION=1
-MAX_INTERVIEW_QUESTIONS=
-
-# Dev: limit questions per session (optional, development only)
-BFT_DEV_MAX_QUESTIONS=5
