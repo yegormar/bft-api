@@ -3,7 +3,6 @@
  * Aligns with PROJECT_DESCRIPTION.md (Strength Profile, Career Clusters, etc.).
  */
 const REPORT_SECTIONS = [
-  'strengthProfileSummary',
   'coreAdvantageAreas',
   'careerClusterAlignment',
   'aiResilienceAnalysis',

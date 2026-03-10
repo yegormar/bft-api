@@ -146,6 +146,7 @@ function getNextTriangleQuestion(sessionId) {
       b: { label: triangle.vertices?.b?.label, dimensionId: triangle.vertices?.b?.dimensionId },
       c: { label: triangle.vertices?.c?.label, dimensionId: triangle.vertices?.c?.dimensionId },
     },
+    triangleId: triangle.id,
   };
   const assignedId = `scenario_${state.questionIndex}`;
   state.questionIndex += 1;
@@ -822,6 +823,7 @@ function getAssessment(sessionId) {
         if (served.type === 'triangle' && served.vertices) {
           entry.vertices = served.vertices;
           entry.prompt = served.prompt;
+          if (served.triangleId != null) entry.triangleId = served.triangleId;
         }
         askedQuestionsWithAnswers.push(entry);
       } else {

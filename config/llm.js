@@ -118,27 +118,11 @@ if (!fs.existsSync(reportProfilePath)) {
   exit(`LLM_REPORT_PROFILE_SYSTEM_PROMPT_FILE does not exist: ${reportProfilePath}`);
 }
 
-const reportHybridSystemPromptFile = (process.env.LLM_REPORT_HYBRID_SYSTEM_PROMPT_FILE || '').trim();
-if (!reportHybridSystemPromptFile) {
-  exit('LLM_REPORT_HYBRID_SYSTEM_PROMPT_FILE is required. Set it in .env (e.g. conf/report_hybrid_system_prompt.txt).');
+// Required. Path to AI-era context file appended to report profile prompt. Set to empty to disable. Must be present in .env (see .env.example).
+if (process.env.LLM_REPORT_AI_CONTEXT_FILE === undefined) {
+  exit('LLM_REPORT_AI_CONTEXT_FILE must be set in .env. Use empty value to disable, or path (e.g. conf/report_ai_context.txt). See .env.example.');
 }
-const reportHybridPath = path.isAbsolute(reportHybridSystemPromptFile)
-  ? reportHybridSystemPromptFile
-  : path.join(PROJECT_ROOT, reportHybridSystemPromptFile);
-if (!fs.existsSync(reportHybridPath)) {
-  exit(`LLM_REPORT_HYBRID_SYSTEM_PROMPT_FILE does not exist: ${reportHybridPath}`);
-}
-
-const reportRecommendationsSystemPromptFile = (process.env.LLM_REPORT_RECOMMENDATIONS_SYSTEM_PROMPT_FILE || '').trim();
-if (!reportRecommendationsSystemPromptFile) {
-  exit('LLM_REPORT_RECOMMENDATIONS_SYSTEM_PROMPT_FILE is required. Set it in .env (e.g. conf/report_recommendations_system_prompt.txt).');
-}
-const reportRecPath = path.isAbsolute(reportRecommendationsSystemPromptFile)
-  ? reportRecommendationsSystemPromptFile
-  : path.join(PROJECT_ROOT, reportRecommendationsSystemPromptFile);
-if (!fs.existsSync(reportRecPath)) {
-  exit(`LLM_REPORT_RECOMMENDATIONS_SYSTEM_PROMPT_FILE does not exist: ${reportRecPath}`);
-}
+const reportAiContextFile = (process.env.LLM_REPORT_AI_CONTEXT_FILE || '').trim();
 
 // Required. For GPT-OSS: use "low"|"medium"|"high". For other thinking models: true/false (or 0, 1, no, off).
 const thinkRaw = (process.env.LLM_THINK || process.env.OLLAMA_THINK || '').trim().toLowerCase();
@@ -197,8 +181,7 @@ const llm = {
   systemPromptFile: systemPromptFile || null,
   handoffSystemPromptFile: handoffSystemPromptFile || null,
   reportProfileSystemPromptFile,
-  reportHybridSystemPromptFile,
-  reportRecommendationsSystemPromptFile,
+  reportAiContextFile,
   /** Seconds between periodic LLM checkups (keep-alive). From LLM_CHECKUP_INTERVAL_SEC. */
   checkupIntervalSec,
 
@@ -220,12 +203,9 @@ const llm = {
     return reportProfileSystemPromptFile ? loadPromptFile(reportProfileSystemPromptFile) : null;
   },
 
-  getReportHybridSystemPrompt() {
-    return reportHybridSystemPromptFile ? loadPromptFile(reportHybridSystemPromptFile) : null;
-  },
-
-  getReportRecommendationsSystemPrompt() {
-    return reportRecommendationsSystemPromptFile ? loadPromptFile(reportRecommendationsSystemPromptFile) : null;
+  /** Resolved path to AI-era context file (appended to report profile prompt when path non-empty). Returns null when LLM_REPORT_AI_CONTEXT_FILE is empty (disabled). */
+  getReportAiContextPath() {
+    return reportAiContextFile ? resolveProjectPath(reportAiContextFile) : null;
   },
 
   resolveProjectPath,

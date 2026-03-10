@@ -243,7 +243,13 @@
         }
       },
       "tension_note": "Loss framing surfaces background needs: autonomy, individual visibility, and financial predictability.",
-      "dimensions_measured": ["value_autonomy_independence", "trait_comfort_ambiguous_ownership", "value_financial_success"]
+      "dimensions_measured": ["value_autonomy_independence", "trait_comfort_ambiguous_ownership", "value_financial_success"],
+      "answer_interpretations": {
+        "balanced": "All three feel somewhat relevant; no strong pull in any direction. Your profile combines all triangles; this question is one input.",
+        "dominant_a": "Strong pull toward autonomy: lacking say or control would eventually break you.",
+        "dominant_b": "Strong pull toward visibility: invisible effort or credit going to the group would eventually break you.",
+        "dominant_c": "Strong pull toward predictability: unpredictable rewards would eventually break you."
+      }
     }
   ],
   "coverage_map": {

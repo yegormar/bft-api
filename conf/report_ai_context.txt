@@ -1,0 +1,44 @@
+# AI-era context for recommendations (synthesized from labor and skills analysis)
+
+Use this when suggesting study paths and careers so advice aligns with a gradual 10-15 year AI transition. Cognitive processing becomes cheap; coordination, accountability, system design, and trust become scarce and valuable.
+
+## What tends to shrink in value
+- Pure information processing: routine coding, template-based analysis, document review, bookkeeping, standard compliance, tier-1 support, generic content production, meeting summarization.
+- Roles where the main human value-add is time, diligence, and access to information (AI does these at lower cost).
+- Middle-layer roles that process and analyze without owning decisions (most exposed to compression).
+
+## What tends to persist or grow
+- Accountability and decision ownership: final judgment in high-stakes decisions, risk ownership, signing authority, ethical judgment in ambiguous situations. AI can advise; it cannot sign the document or be held liable.
+- Trust-based relationship work: enterprise sales where the relationship is the product, high-stakes negotiation, capital raising, board-level advisory. Value from who is doing it, not just what is done.
+- Organizational and political intelligence: navigating institutional dynamics, stakeholder relationships, change management, cross-functional conflict resolution.
+- Physical and technical execution: skilled trades, hands-on care, equipment maintenance, emergency response requiring real-time physical judgment. Infrastructure coupling slows displacement.
+- Creative judgment: strategic direction for creative work, taste-based curation, brand stewardship, original conceptual work.
+
+## Skills and roles that grow with AI
+- AI governance and oversight: model auditing, bias assessment, AI risk and policy, regulatory compliance for AI-driven decisions, interpretability.
+- System design and orchestration: human-AI workflow boundaries, AI infrastructure, multi-agent design, failure mode analysis. Complexity grows as capability grows.
+- High-order questioning and direction: formulating the right problems for AI to solve, evaluating AI outputs with domain expertise, knowing when not to trust AI conclusions.
+- Human-centric services (scarcity premium): coaching, mentorship, trust navigation, AI literacy advisory, high-touch education.
+- Infrastructure for the AI economy: energy systems for compute, data center and semiconductor, cybersecurity, robotics deployment and maintenance.
+
+## Durable capability stack (for any path)
+- Systems thinking: how components interact, feedback loops, failure propagation.
+- Technical literacy: how AI systems work, their limits and failure modes (not necessarily coding).
+- Statistical reasoning: uncertainty, base rates, what data can and cannot support.
+- Structured communication: translating complexity between technical and non-technical audiences.
+- Risk understanding: liability, what can go wrong, owning consequences.
+- Adaptability: meta-skill in a fast-moving environment.
+
+## Career path angles (align to the person's profile)
+- Technically inclined: AI infrastructure and systems engineering; design, secure, and maintain distributed intelligent systems.
+- Analytically inclined with policy interest: AI governance, risk, and compliance; regulation and audit layers grow.
+- Business-oriented: Human-AI workflow design and enterprise transformation; where AI acts autonomously vs where humans approve.
+- Healthcare-oriented: Biotech, AI-assisted diagnostics, personalized medicine; hybrid technical-clinical roles expand.
+- Strong interpersonal skills: Enterprise relationship roles (sales, partnerships, capital raising, deal structuring); accountability and trust remain human-dominant.
+
+## Strategic rule for advice
+Favor directions that emphasize: system builders, liability owners, infrastructure operators, human-complexity managers. Do not steer toward building identity around "I process information well." Steer toward "I design, operate, govern, or humanize intelligent systems" or "I own decisions and their consequences." Problem framing and direction-setting (defining the right problem) become the core premium as execution automates.
+
+## Risk framing (for "directions to avoid" or caution)
+- High exposure: fully digital, rules-based, analysis-heavy roles with low personal accountability (junior dev, routine QA, bookkeepers, paralegals, tier-1 support, generic content).
+- Structurally advantaged: liability ownership or infrastructure coupling high; strong AI complementarity; automation susceptibility low.

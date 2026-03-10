@@ -1,9 +1,66 @@
+const path = require('path');
+const fs = require('fs');
 const assessmentModel = require('../data/assessmentModel');
 const { getReportTemplate } = require('../lib/reportStructure');
 const assessmentService = require('./assessmentService');
 const sessionService = require('./sessionService');
 const reportSynthesis = require('../lib/reportSynthesis');
 const skillRecommendation = require('../lib/skillRecommendation');
+
+/** Lazy-loaded map: triangleId -> { answer_interpretations: { balanced?, dominant_a?, ... } } */
+let triangleInterpretationsById = null;
+function getTriangleInterpretationsById() {
+  if (triangleInterpretationsById) return triangleInterpretationsById;
+  const basePath = path.join(__dirname, '..', 'data');
+  const files = ['dimension_triangles.json', 'dimension_triangles_aptitudes.json'];
+  triangleInterpretationsById = {};
+  for (const file of files) {
+    const filePath = path.join(basePath, file);
+    if (!fs.existsSync(filePath)) continue;
+    const data = JSON.parse(fs.readFileSync(filePath, 'utf8'));
+    const triangles = data.triangles || [];
+    for (const t of triangles) {
+      if (t.id && t.answer_interpretations && typeof t.answer_interpretations === 'object') {
+        triangleInterpretationsById[t.id] = t.answer_interpretations;
+      }
+    }
+  }
+  return triangleInterpretationsById;
+}
+
+/**
+ * Infer pattern from barycentric userAnswer: "balanced" if no strong pull, else "dominant_a" etc.
+ * @param {{ a?: number, b?: number, c?: number }} userAnswer
+ * @returns {'balanced'|'dominant_a'|'dominant_b'|'dominant_c'}
+ */
+function getTriangleAnswerPattern(userAnswer) {
+  if (!userAnswer || typeof userAnswer !== 'object') return 'balanced';
+  const a = Number(userAnswer.a);
+  const b = Number(userAnswer.b);
+  const c = Number(userAnswer.c);
+  if (Number.isNaN(a) || Number.isNaN(b) || Number.isNaN(c)) return 'balanced';
+  const max = Math.max(a, b, c);
+  const min = Math.min(a, b, c);
+  if (max - min <= 0.25 || max <= 0.45) return 'balanced';
+  if (a === max) return 'dominant_a';
+  if (b === max) return 'dominant_b';
+  return 'dominant_c';
+}
+
+/**
+ * Get interpretation text for a triangle answer. Uses answer_interpretations from data when
+ * present; otherwise returns a short fallback based on pattern and vertices.
+ */
+function getInterpretationForTriangleAnswer(triangleId, userAnswer, vertices, interpretationsById) {
+  const pattern = getTriangleAnswerPattern(userAnswer);
+  const interpretations = interpretationsById && triangleId ? interpretationsById[triangleId] : null;
+  const text = interpretations && interpretations[pattern];
+  if (text && typeof text === 'string') return text;
+  if (pattern === 'balanced') return 'All three options feel somewhat relevant; no strong pull in any direction. This question is one input to your profile.';
+  const key = pattern === 'dominant_a' ? 'a' : pattern === 'dominant_b' ? 'b' : 'c';
+  const label = vertices && vertices[key] && vertices[key].label ? vertices[key].label : key;
+  return `Strongest pull toward: ${label}.`;
+}
 
 /** Cached synthesized report per session (LLM outputs). Invalidated when answer count changes. */
 const reportCacheBySession = new Map();
@@ -226,16 +283,35 @@ function getSessionPayloadForLlm(sessionId) {
   const model = assessmentModel.load();
   const dimensionScores = ensureDevDimensionScores(assessment.dimensionScores || { traits: [], values: [], aptitudes: [] });
 
-  const questions_and_answers = (assessment.askedQuestionsWithAnswers || []).map((q) => ({
-    questionId: q.questionId,
-    title: q.title,
-    description: q.description,
-    type: q.type,
-    ...(q.prompt != null && { prompt: q.prompt }),
-    ...(q.vertices != null && { vertices: q.vertices }),
-    ...(q.options != null && { options: q.options }),
-    userAnswer: q.userAnswer,
-  }));
+  const questions_and_answers = (assessment.askedQuestionsWithAnswers || []).map((q) => {
+    const base = {
+      title: q.title,
+      type: q.type,
+      ...(q.prompt != null && { prompt: q.prompt }),
+      ...(q.vertices != null && { vertices: q.vertices }),
+    };
+    if (q.type === 'triangle' && q.userAnswer != null && typeof q.userAnswer === 'object') {
+      const ua = q.userAnswer;
+      const pa = Math.round((Number(ua.a) || 0) * 100);
+      const pb = Math.round((Number(ua.b) || 0) * 100);
+      const pc = Math.round((Number(ua.c) || 0) * 100);
+      const nameFor = (key) => {
+        const v = q.vertices && q.vertices[key];
+        const id = v && v.dimensionId;
+        const dim = id ? model.dimensionsById.get(id) : null;
+        return (dim && dim.name) || id || key;
+      };
+      base.choiceSummary = `Position: ${nameFor('a')} ${pa}%, ${nameFor('b')} ${pb}%, ${nameFor('c')} ${pc}%`;
+      const pattern = getTriangleAnswerPattern(q.userAnswer);
+      const dominantKey = pattern === 'dominant_a' ? 'a' : pattern === 'dominant_b' ? 'b' : pattern === 'dominant_c' ? 'c' : null;
+      if (dominantKey && q.vertices && q.vertices[dominantKey] && typeof q.vertices[dominantKey].label === 'string') {
+        base.chosenOptionLabel = q.vertices[dominantKey].label;
+      }
+    } else if (q.userAnswer !== undefined) {
+      base.userAnswer = q.userAnswer;
+    }
+    return base;
+  });
 
   const dimensions = { aptitudes: [], traits: [], values: [] };
   for (const type of ['aptitudes', 'traits', 'values']) {
@@ -249,28 +325,39 @@ function getSessionPayloadForLlm(sessionId) {
           meta[key] = full[key];
         }
       }
+      const band = scoreItem.band;
+      const scale = full && full.score_scale && full.score_scale.interpretation;
+      const band_interpretation =
+        band && scale && typeof scale[band] === 'string' ? scale[band] : undefined;
       dimensions[type].push({
         ...meta,
         id: scoreItem.id,
         name: scoreItem.name ?? full?.name ?? scoreItem.id,
         mean: scoreItem.mean,
-        band: scoreItem.band,
+        band,
         count: scoreItem.count,
+        ...(band_interpretation != null && { band_interpretation }),
       });
     }
   }
 
   const skillsWithApplicability = skillRecommendation.getSkillsWithApplicability(dimensionScores);
-  const skills = skillsWithApplicability.map((s) => ({
-    id: s.id,
-    name: s.name,
-    description: s.description ?? '',
-    applicability: s.applicability ?? 0,
-  }));
+  const skills = skillsWithApplicability.map((s) => {
+    const full = model.skillsById.get(s.id);
+    const out = {
+      id: s.id,
+      name: s.name,
+      description: s.description ?? '',
+      applicability: s.applicability ?? 0,
+    };
+    if (full && typeof full.ai_trend === 'string' && full.ai_trend.length > 0) {
+      out.ai_trend = full.ai_trend;
+    }
+    return out;
+  });
 
   const personality_cluster = {
     pre_survey_profile: session.preSurveyProfile ?? null,
-    questions_and_answers_for_profile: questions_and_answers,
   };
 
   return {

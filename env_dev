@@ -47,7 +47,6 @@ LLM_CHECKUP_INTERVAL_SEC=180
 
 # Prompts – paths relative to project root (conf/). Add more as needed.
 LLM_REPORT_PROFILE_SYSTEM_PROMPT_FILE=conf/report_profile_system_prompt.txt
-LLM_REPORT_HYBRID_SYSTEM_PROMPT_FILE=conf/report_hybrid_system_prompt.txt
-LLM_REPORT_RECOMMENDATIONS_SYSTEM_PROMPT_FILE=conf/report_recommendations_system_prompt.txt
+LLM_REPORT_AI_CONTEXT_FILE=conf/report_ai_context.txt
 BFT_SCENARIO_STEP1_INSTRUCTIONS_FILE=conf/scenario_step1.txt
 BFT_SCENARIO_STEP3_INSTRUCTIONS_FILE=conf/scenario_step3.txt
