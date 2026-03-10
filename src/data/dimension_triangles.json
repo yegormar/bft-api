@@ -1,248 +1,248 @@
 {
-  "version": "1.3",
-  "description": "Triangle Assessment Set. All 15 dimensions covered with a minimum of 2 measurements each across Gain and Loss frames. Fixes applied: T05 prompt clarified, T07 vertex B remapped to correctly measure experimentation_risk_tolerance, T01 restored for helping_others_impact gain frame, T13 added for autonomy loss frame and comfort_ambiguous_ownership second measurement.",
-  "scoring_note": "All triangles use standard drag-toward mechanics. For gain-framed triangles, proximity to a vertex indicates affinity with that dimension. For loss-framed triangles, proximity to a vertex indicates that the absence of that dimension is most painful — which maps to a high score on that dimension. Formula: score = (barycentric_coordinate × 4) + 1, mapping [0,1] to [1,5]. Aggregate multiple measurements per dimension by simple average.",
+  "version": "1.5",
+  "description": "Triangle Assessment Set. v1.5: prompts and vertex labels shortened for cognitive load reduction. Prompt carries full scenario; each vertex is one short idea under 10 words. Measured dimensions, dimensionIds, framing, and coverage map unchanged from v1.3.",
+  "scoring_note": "All triangles use standard drag-toward mechanics. For gain-framed triangles, proximity to a vertex indicates affinity with that dimension. For loss-framed triangles, proximity to a vertex indicates that the absence of that dimension is most painful - which maps to a high score on that dimension. Formula: score = (barycentric_coordinate × 4) + 1, mapping [0,1] to [1,5]. Aggregate multiple measurements per dimension by simple average.",
   "triangles": [
     {
       "id": "triangle_01",
       "title": "The Meaning of a Win",
-      "prompt": "You just hit a major milestone. Which flavor of satisfaction do you feel most strongly?",
+      "prompt": "You just nailed something - an exam, a competition, a personal goal. Which feeling hits hardest?",
       "framing": "gain",
       "vertices": {
         "a": {
-          "label": "The tangible, positive change in the lives of the people you served",
+          "label": "You actually helped someone",
           "dimensionId": "value_helping_others_impact"
         },
         "b": {
-          "label": "The quiet pride of doing something technically difficult that few others could replicate",
+          "label": "You did something most people couldn't",
           "dimensionId": "value_mastery_growth"
         },
         "c": {
-          "label": "The energy of being recognized as the person who made it happen",
+          "label": "People saw you do it",
           "dimensionId": "value_recognition_visibility"
         }
       },
-      "tension_note": "Three distinct sources of post-achievement satisfaction: impact on others, internal depth, and external recognition. Mutually exclusive at extremes. Provides gain-frame measurement for helping_others_impact, which otherwise only appears in loss frame.",
+      "tension_note": "Three distinct sources of post-achievement satisfaction: impact on others, internal depth, and external recognition.",
       "dimensions_measured": ["value_helping_others_impact", "value_mastery_growth", "value_recognition_visibility"]
     },
     {
       "id": "triangle_02",
-      "title": "The Ideal Offer",
-      "prompt": "You have three job offers, each perfect in only one way. Which compromise would you actually make?",
+      "title": "Pick Your Path",
+      "prompt": "Three opportunities - each great in only one way, each with a real cost. Which do you actually choose?",
       "framing": "gain",
       "vertices": {
         "a": {
-          "label": "Top-tier salary, but the work is stressful and constant",
+          "label": "Great money, but stressful and relentless",
           "dimensionId": "value_financial_success"
         },
         "b": {
-          "label": "Complete flexibility and peace of mind, but the pay is just okay",
+          "label": "Total flexibility, but average pay",
           "dimensionId": "value_work_life_balance_wellbeing"
         },
         "c": {
-          "label": "A deep sense of community and shared values, but the hours are long",
+          "label": "People you love, but long hours",
           "dimensionId": "value_belonging_community"
         }
       },
-      "tension_note": "Classic life trade-off between money, time, and community fit. Each vertex imposes a real cost, ensuring the placement reveals genuine priority rather than wishful thinking.",
+      "tension_note": "Classic trade-off between money, time, and community. Each option has a real cost, ensuring the placement reveals genuine priority.",
       "dimensions_measured": ["value_financial_success", "value_work_life_balance_wellbeing", "value_belonging_community"]
     },
     {
       "id": "triangle_03",
-      "title": "The Nature of the Work",
-      "prompt": "If you could design your daily workflow from scratch, which pull is strongest?",
+      "title": "Your Ideal Day",
+      "prompt": "If you could design how you spend your time every day, which matters most?",
       "framing": "gain",
       "vertices": {
         "a": {
-          "label": "Total independence: you decide the what and the how",
+          "label": "Full control - you decide everything",
           "dimensionId": "value_autonomy_independence"
         },
         "b": {
-          "label": "Absolute stability: you know exactly what is expected and your future is secure",
+          "label": "Total clarity - you always know what's coming",
           "dimensionId": "value_security_stability"
         },
         "c": {
-          "label": "Pure creativity: the chance to build something original and expressive",
+          "label": "Pure creativity - you build something original",
           "dimensionId": "value_creativity_self_expression"
         }
       },
-      "tension_note": "Three environmental needs that genuinely compete. High autonomy often means high uncertainty, conflicting with security. High security often means prescribed output, conflicting with creativity. Creativity without autonomy is constrained expression.",
+      "tension_note": "Three environmental needs that genuinely compete: autonomy, security, and creativity.",
       "dimensions_measured": ["value_autonomy_independence", "value_security_stability", "value_creativity_self_expression"]
     },
     {
       "id": "triangle_04",
-      "title": "When the Fog Rolls In",
-      "prompt": "You are leading a project where the tools and goals change every week. What keeps you moving?",
+      "title": "When Everything Keeps Changing",
+      "prompt": "You're working toward something important but the rules and goals keep shifting. What actually keeps you going?",
       "framing": "gain",
       "vertices": {
         "a": {
-          "label": "The high of conquering a problem that seems impossible to others",
+          "label": "Cracking the problem that stops everyone else",
           "dimensionId": "value_challenge_achievement"
         },
         "b": {
-          "label": "The ability to stay calm and effective even when you don't have all the facts",
+          "label": "Staying calm when you don't have all the answers",
           "dimensionId": "trait_ambiguity_resilience"
         },
         "c": {
-          "label": "The speed at which you can learn new systems and pivot your approach",
+          "label": "Picking up new skills faster than the situation changes",
           "dimensionId": "trait_adaptability_learning"
         }
       },
-      "tension_note": "Three distinct responses to sustained difficulty. The achiever is energised by the obstacle. The resilient person maintains psychological stability in fog. The adapter focuses on acquiring new capability. Mixing value and traits is intentional — the three archetypes are genuinely distinct regardless of category.",
+      "tension_note": "Three distinct responses to sustained difficulty: the achiever, the stabiliser, and the fast adapter.",
       "dimensions_measured": ["value_challenge_achievement", "trait_ambiguity_resilience", "trait_adaptability_learning"]
     },
     {
       "id": "triangle_05",
       "title": "The Energy Drain",
-      "prompt": "Which of these work environments would burn you out the fastest? Which is your biggest dealbreaker?",
+      "prompt": "Which of these would burn you out the fastest?",
       "framing": "loss",
       "vertices": {
         "a": {
-          "label": "Total isolation — no human connection of any kind",
+          "label": "Complete isolation - no one around",
           "dimensionId": "value_belonging_community"
         },
         "b": {
-          "label": "Zero real-world impact — your work changes nothing for anyone",
+          "label": "Zero impact - your work changes nothing",
           "dimensionId": "value_helping_others_impact"
         },
         "c": {
-          "label": "A completely rigid system — zero creative input ever allowed",
+          "label": "No creative input - ever",
           "dimensionId": "value_creativity_self_expression"
         }
       },
-      "tension_note": "Loss-framed measurement for belonging, helping impact, and creativity. Proximity to a vertex means that absence is the most painful — mapping correctly to a high score on that dimension. Prompt fixed to use standard drag-toward mechanics with no contradictory instructions.",
+      "tension_note": "Loss-framed. Proximity to a vertex means that absence is the most painful.",
       "dimensions_measured": ["value_belonging_community", "value_helping_others_impact", "value_creativity_self_expression"]
     },
     {
       "id": "triangle_07",
       "title": "The Dealbreaker",
-      "prompt": "A company is recruiting you hard. Which single missing element kills the deal?",
+      "prompt": "You have a great opportunity in front of you. One thing is missing. Which missing thing makes you walk away?",
       "framing": "loss",
       "vertices": {
         "a": {
-          "label": "No room for growth — you'll be doing the same thing in five years",
+          "label": "No growth - same thing forever",
           "dimensionId": "value_mastery_growth"
         },
         "b": {
-          "label": "No freedom to try things — every decision needs approval before you act",
+          "label": "No freedom - every idea needs approval",
           "dimensionId": "trait_experimentation_risk_tolerance"
         },
         "c": {
-          "label": "No real collaboration — it is every person for themselves",
+          "label": "No teamwork - everyone for themselves",
           "dimensionId": "trait_social_collaboration"
         }
       },
-      "tension_note": "Vertex B fixed: original label ('no skin in the game') measured financial motivation, not experimentation tolerance. New label correctly maps to someone high on experimentation who would find required approval for every action genuinely draining.",
+      "tension_note": "Loss-framed. Three dealbreakers: growth, freedom to experiment, and collaboration.",
       "dimensions_measured": ["value_mastery_growth", "trait_experimentation_risk_tolerance", "trait_social_collaboration"]
     },
     {
       "id": "triangle_08",
       "title": "The Future Self",
-      "prompt": "Ten years from now, you are successful. What is the core of that success?",
+      "prompt": "Ten years from now, you made it. What is the core of that success?",
       "framing": "gain",
       "vertices": {
         "a": {
-          "label": "You are the recognized authority that everyone in the field knows by name",
+          "label": "Everyone in your field knows your name",
           "dimensionId": "value_recognition_visibility"
         },
         "b": {
-          "label": "You have mastered a craft to a depth that very few humans reach",
+          "label": "You went deeper into your craft than almost anyone",
           "dimensionId": "value_mastery_growth"
         },
         "c": {
-          "label": "You are the glue — the person who builds the teams that change the world",
+          "label": "You built the team everyone else credits",
           "dimensionId": "trait_social_collaboration"
         }
       },
-      "tension_note": "Purified version: recognition and achievement cleanly separated. Recognition faces outward (reputation), mastery faces inward (depth), social glue faces relational (team impact). Three genuinely distinct archetypes of success.",
+      "tension_note": "Three archetypes of success: reputation, depth, and team impact.",
       "dimensions_measured": ["value_recognition_visibility", "value_mastery_growth", "trait_social_collaboration"]
     },
     {
       "id": "triangle_10",
-      "title": "Conquest vs. Status",
-      "prompt": "In a high-stakes project, you can only protect one thing. Which is it?",
+      "title": "What You Protect",
+      "prompt": "High-stakes moment - a competition, a performance, something that really matters. You can only walk away with one thing. Which is it?",
       "framing": "loss",
       "vertices": {
         "a": {
-          "label": "The internal win: knowing you conquered a challenge at the edge of your ability",
+          "label": "Knowing you hit the edge of your ability",
           "dimensionId": "value_challenge_achievement"
         },
         "b": {
-          "label": "The external win: being seen as the definitive expert and leader in the room",
+          "label": "Being seen as the best in the room",
           "dimensionId": "value_recognition_visibility"
         },
         "c": {
-          "label": "The steady win: knowing your work provides a predictable foundation for your future",
+          "label": "Building something that keeps paying off",
           "dimensionId": "value_security_stability"
         }
       },
-      "tension_note": "Best triangle in the set. Cleanly separates internal achievement (Conqueror), external reputation (Authority), and predictability (Strategist). Loss framing — protect one — forces honest prioritisation.",
+      "tension_note": "Loss framing forces honest choice between internal achievement, external reputation, and stability.",
       "dimensions_measured": ["value_challenge_achievement", "value_recognition_visibility", "value_security_stability"]
     },
     {
       "id": "triangle_11",
-      "title": "The Orchestrator vs. The Maker",
-      "prompt": "A new tool lets you produce ten times more work, but the nature of work changes. Where do you find your flow?",
+      "title": "How You Work Best",
+      "prompt": "Big creative project, powerful tools available to help. Where do you find your flow?",
       "framing": "gain",
       "vertices": {
         "a": {
-          "label": "Directing a system of agents and tools to achieve a massive scaled result",
+          "label": "Running the whole system toward a big goal",
           "dimensionId": "trait_comfort_ambiguous_ownership"
         },
         "b": {
-          "label": "Doing the core creative work yourself because you love the process",
+          "label": "Making the thing yourself - hands on",
           "dimensionId": "value_creativity_self_expression"
         },
         "c": {
-          "label": "Rapid iteration — trying fifty small experiments to find what works",
+          "label": "Running fast experiments to find what works",
           "dimensionId": "trait_experimentation_risk_tolerance"
         }
       },
-      "tension_note": "AI-era behavioral triangle. Orchestration vs personal creation vs rapid iteration maps onto three genuinely different ways people will relate to AI-augmented work. The prompt grounds the tension in a concrete and relevant scenario.",
+      "tension_note": "Three modes: orchestration, personal creation, and rapid iteration.",
       "dimensions_measured": ["trait_comfort_ambiguous_ownership", "value_creativity_self_expression", "trait_experimentation_risk_tolerance"]
     },
     {
       "id": "triangle_12",
       "title": "When the Plan Falls Apart",
-      "prompt": "A project you have worked on for months is suddenly cancelled. What is your immediate, natural response?",
+      "prompt": "Something you worked on for months suddenly falls through. What do you do first?",
       "framing": "loss",
       "vertices": {
         "a": {
-          "label": "You immediately start scanning for the next wave to ride, unbothered by the loss",
+          "label": "Already looking for the next thing",
           "dimensionId": "trait_adaptability_learning"
         },
         "b": {
-          "label": "You stay calm and start methodically organizing the chaos into a new structure",
+          "label": "Turning the mess into a new plan",
           "dimensionId": "trait_ambiguity_resilience"
         },
         "c": {
-          "label": "You focus on the team, making sure everyone feels supported through the transition",
+          "label": "Checking that the people around you are okay",
           "dimensionId": "trait_social_collaboration"
         }
       },
-      "tension_note": "Loss-framed trait triangle. Three distinct responses to disruption: the Agile Adapter (moves on fast), the Stabilizer (creates order in chaos), and the Social Glue (holds the people together). Provides second loss-frame measurement for adaptability, resilience, and collaboration.",
+      "tension_note": "Loss-framed. Three responses to disruption: the adapter, the stabiliser, and the social glue.",
       "dimensions_measured": ["trait_adaptability_learning", "trait_ambiguity_resilience", "trait_social_collaboration"]
     },
     {
       "id": "triangle_13",
-      "title": "The Invisible Constraints",
-      "prompt": "You land a role with great pay and interesting work. Which hidden constraint would quietly erode your motivation over time?",
+      "title": "The Hidden Catch",
+      "prompt": "You got it - great opportunity, interesting work, real rewards. But one thing is secretly wrong. Which would eventually break you?",
       "framing": "loss",
       "vertices": {
         "a": {
-          "label": "Every process is set — you execute what others designed, with no say in how it works",
+          "label": "No say - you just run someone else's system",
           "dimensionId": "value_autonomy_independence"
         },
         "b": {
-          "label": "The output is always a group product — your individual contribution is never visible or credited",
+          "label": "Your effort is invisible - credit always goes to the group",
           "dimensionId": "trait_comfort_ambiguous_ownership"
         },
         "c": {
-          "label": "The income is unpredictable — some months are great, others leave you anxious",
+          "label": "Unpredictable rewards - great sometimes, anxious others",
           "dimensionId": "value_financial_success"
         }
       },
-      "tension_note": "New triangle added to provide: (1) loss-frame second measurement for autonomy_independence, which previously had only one gain-frame reading; (2) second measurement for comfort_ambiguous_ownership, which previously appeared only in T11; (3) loss-frame second measurement for financial_success, which previously had only one gain-frame reading. The slow-erosion framing surfaces values that operate as background needs rather than conscious priorities.",
+      "tension_note": "Loss framing surfaces background needs: autonomy, individual visibility, and financial predictability.",
       "dimensions_measured": ["value_autonomy_independence", "trait_comfort_ambiguous_ownership", "value_financial_success"]
     }
   ],
