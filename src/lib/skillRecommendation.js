@@ -176,4 +176,5 @@ function getStructuralDimensionMeta() {
 module.exports = {
   getSkillsWithApplicability,
   getStructuralDimensionMeta,
+  computeAiFutureScore,
 };

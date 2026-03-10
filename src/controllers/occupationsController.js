@@ -26,6 +26,27 @@ function listBySkills(req, res, next) {
 }
 
 /**
+ * POST /api/occupations/match
+ * Body: { skills: [{ id, bucket, applicability }], dimensionScores: { traits: [{ id, mean, band }], values: [...] }, groupBy?: 'category' }.
+ * Returns { groups } when groupBy=category, else flat list. Each occupation has matchScore and aiRelevanceFromSkills.
+ */
+function matchBySkillsAndDimensions(req, res, next) {
+  try {
+    const body = req.body || {};
+    const skills = Array.isArray(body.skills) ? body.skills : [];
+    const dimensionScores = body.dimensionScores && typeof body.dimensionScores === 'object' ? body.dimensionScores : {};
+    const grouped = body.groupBy === 'category';
+    const result = occupationService.scoreBySkillsAndDimensions(
+      { skills, dimensionScores },
+      { grouped }
+    );
+    res.json(result);
+  } catch (err) {
+    next(err);
+  }
+}
+
+/**
  * GET /api/occupations/:nocCode
  * Returns full occupation object or 404.
  */
@@ -45,5 +66,6 @@ function getByNocCode(req, res, next) {
 
 module.exports = {
   listBySkills,
+  matchBySkillsAndDimensions,
   getByNocCode,
 };

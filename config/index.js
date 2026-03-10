@@ -5,6 +5,7 @@
  */
 
 const path = require('path');
+const fs = require('fs');
 require('dotenv').config({ path: path.join(__dirname, '..', '.env') });
 
 function exit(message) {
@@ -53,10 +54,40 @@ if (feedbackFile === '') {
   exit('BFT_FEEDBACK_FILE must be non-empty. Set it in .env (e.g. ./data/feedback.jsonl).');
 }
 
+const careerPathsStep1Raw = process.env.CAREERS_LLM_STEP1_PROMPT_FILE;
+if (careerPathsStep1Raw === undefined || String(careerPathsStep1Raw).trim() === '') {
+  exit('CAREERS_LLM_STEP1_PROMPT_FILE is required. Set it in .env (e.g. conf/career_paths_step1.txt). See env.example.');
+}
+const careerPathsStep1Path = path.isAbsolute(careerPathsStep1Raw) ? careerPathsStep1Raw : path.join(__dirname, '..', careerPathsStep1Raw.trim());
+if (!fs.existsSync(careerPathsStep1Path) || !fs.statSync(careerPathsStep1Path).isFile()) {
+  exit(`CAREERS_LLM_STEP1_PROMPT_FILE must point to an existing file. Got: ${careerPathsStep1Raw}. Resolved: ${careerPathsStep1Path}. Set it in .env (e.g. conf/career_paths_step1.txt).`);
+}
+
+const careerPathsStep2Raw = process.env.CAREERS_LLM_STEP2_PROMPT_FILE;
+if (careerPathsStep2Raw === undefined || String(careerPathsStep2Raw).trim() === '') {
+  exit('CAREERS_LLM_STEP2_PROMPT_FILE is required. Set it in .env (e.g. conf/career_paths_step2.txt). See env.example.');
+}
+const careerPathsStep2Path = path.isAbsolute(careerPathsStep2Raw) ? careerPathsStep2Raw : path.join(__dirname, '..', careerPathsStep2Raw.trim());
+if (!fs.existsSync(careerPathsStep2Path) || !fs.statSync(careerPathsStep2Path).isFile()) {
+  exit(`CAREERS_LLM_STEP2_PROMPT_FILE must point to an existing file. Got: ${careerPathsStep2Raw}. Resolved: ${careerPathsStep2Path}. Set it in .env (e.g. conf/career_paths_step2.txt).`);
+}
+
+const careerPathsAiContextRaw = process.env.CAREERS_LLM_AI_CONTEXT_FILE;
+if (careerPathsAiContextRaw === undefined || String(careerPathsAiContextRaw).trim() === '') {
+  exit('CAREERS_LLM_AI_CONTEXT_FILE is required. Set it in .env (e.g. conf/report_ai_context.txt). See env.example.');
+}
+const careerPathsAiContextPath = path.isAbsolute(careerPathsAiContextRaw) ? careerPathsAiContextRaw : path.join(__dirname, '..', careerPathsAiContextRaw.trim());
+if (!fs.existsSync(careerPathsAiContextPath) || !fs.statSync(careerPathsAiContextPath).isFile()) {
+  exit(`CAREERS_LLM_AI_CONTEXT_FILE must point to an existing file. Got: ${careerPathsAiContextRaw}. Resolved: ${careerPathsAiContextPath}. Set it in .env (e.g. conf/report_ai_context.txt).`);
+}
+
 module.exports = {
   port,
   nodeEnv,
   corsOrigin,
   questionsStoreDir,
   feedbackFile,
+  getCareerPathsStep1PromptPath: () => careerPathsStep1Path,
+  getCareerPathsStep2PromptPath: () => careerPathsStep2Path,
+  getCareerPathsAiContextPath: () => careerPathsAiContextPath,
 };

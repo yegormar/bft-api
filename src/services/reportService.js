@@ -273,9 +273,10 @@ const DIMENSION_PAYLOAD_KEYS = [
  * skills with calculated applicability, and personality cluster (pre-survey profile + Q&A).
  *
  * @param {string} sessionId
+ * @param {{ includeQuestionsAndAnswers?: boolean }} [options] - If includeQuestionsAndAnswers is false, omit questions_and_answers (e.g. for career paths so the model uses only dimensions + skills).
  * @returns {object | null} Payload object or null if session not found
  */
-function getSessionPayloadForLlm(sessionId) {
+function getSessionPayloadForLlm(sessionId, options = {}) {
   const session = sessionService.getById(sessionId);
   if (!session) return null;
 
@@ -283,7 +284,9 @@ function getSessionPayloadForLlm(sessionId) {
   const model = assessmentModel.load();
   const dimensionScores = ensureDevDimensionScores(assessment.dimensionScores || { traits: [], values: [], aptitudes: [] });
 
-  const questions_and_answers = (assessment.askedQuestionsWithAnswers || []).map((q) => {
+  const includeQa = options.includeQuestionsAndAnswers !== false;
+  const questions_and_answers = includeQa
+    ? (assessment.askedQuestionsWithAnswers || []).map((q) => {
     const base = {
       title: q.title,
       type: q.type,
@@ -311,7 +314,8 @@ function getSessionPayloadForLlm(sessionId) {
       base.userAnswer = q.userAnswer;
     }
     return base;
-  });
+  })
+    : undefined;
 
   const dimensions = { aptitudes: [], traits: [], values: [] };
   for (const type of ['aptitudes', 'traits', 'values']) {
@@ -360,13 +364,16 @@ function getSessionPayloadForLlm(sessionId) {
     pre_survey_profile: session.preSurveyProfile ?? null,
   };
 
-  return {
+  const payload = {
     session_id: sessionId,
-    questions_and_answers,
     dimensions,
     skills,
     personality_cluster,
   };
+  if (questions_and_answers !== undefined) {
+    payload.questions_and_answers = questions_and_answers;
+  }
+  return payload;
 }
 
 module.exports = {

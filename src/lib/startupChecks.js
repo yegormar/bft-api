@@ -115,6 +115,27 @@ function runFileAndDirChecks(config) {
   }
   requireFile(step1Path, 'Scenario step 1 instructions');
   requireFile(step3Path, 'Scenario step 3 instructions');
+
+  const skillWeightRaw = (process.env.OCCUPATION_SKILL_WEIGHT || '').trim();
+  const dimensionWeightRaw = (process.env.OCCUPATION_DIMENSION_WEIGHT || '').trim();
+  if (skillWeightRaw === '') {
+    exit('OCCUPATION_SKILL_WEIGHT is required. Set it in .env (e.g. 0.6). See env.example.');
+  }
+  if (dimensionWeightRaw === '') {
+    exit('OCCUPATION_DIMENSION_WEIGHT is required. Set it in .env (e.g. 0.4). See env.example.');
+  }
+  const skillWeight = parseFloat(skillWeightRaw, 10);
+  const dimensionWeight = parseFloat(dimensionWeightRaw, 10);
+  if (Number.isNaN(skillWeight) || skillWeight < 0 || skillWeight > 1) {
+    exit(`OCCUPATION_SKILL_WEIGHT must be a number between 0 and 1. Got: ${skillWeightRaw}`);
+  }
+  if (Number.isNaN(dimensionWeight) || dimensionWeight < 0 || dimensionWeight > 1) {
+    exit(`OCCUPATION_DIMENSION_WEIGHT must be a number between 0 and 1. Got: ${dimensionWeightRaw}`);
+  }
+  const sum = skillWeight + dimensionWeight;
+  if (Math.abs(sum - 1) > 1e-6) {
+    exit(`OCCUPATION_SKILL_WEIGHT and OCCUPATION_DIMENSION_WEIGHT must sum to 1. Got: ${skillWeight} + ${dimensionWeight} = ${sum}. Set both in .env (e.g. 0.6 and 0.4). See env.example.`);
+  }
 }
 
 /** Default timeout (ms) for startup LLM check when BFT_STARTUP_LLM_CHECK_TIMEOUT_MS is unset. Documented in env.example. */

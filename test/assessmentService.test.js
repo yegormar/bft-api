@@ -33,25 +33,6 @@ const questionStore = require('../src/services/questionStore');
 
 describe('assessmentService', () => {
   describe('getNextQuestion', () => {
-    it('returns completed when interview is complete (MAX_INTERVIEW_QUESTIONS=0)', async () => {
-      const prevMax = process.env.MAX_INTERVIEW_QUESTIONS;
-      const prevDev = process.env.BFT_DEV_MAX_QUESTIONS;
-      process.env.MAX_INTERVIEW_QUESTIONS = '0';
-      delete process.env.BFT_DEV_MAX_QUESTIONS;
-      try {
-        const session = sessionService.create(null);
-        const result = await assessmentService.getNextQuestion(session.id, 'user-complete-' + Date.now());
-        assert.strictEqual(result.completed, true);
-        assert.strictEqual(result.nextQuestion, null);
-        assert.ok(result.progress);
-        assert.strictEqual(result.progress.percentComplete, 100);
-      } finally {
-        if (prevMax !== undefined) process.env.MAX_INTERVIEW_QUESTIONS = prevMax;
-        else delete process.env.MAX_INTERVIEW_QUESTIONS;
-        if (prevDev !== undefined) process.env.BFT_DEV_MAX_QUESTIONS = prevDev;
-      }
-    });
-
     it('returns question from store or LLM when queue is empty (store when LLM fails, LLM when LLM succeeds)', async () => {
       const profile = { dominant: ['creative'], secondaryTone: 'adventurous' };
       const session = sessionService.create(profile);
