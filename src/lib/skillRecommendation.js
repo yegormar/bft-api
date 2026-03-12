@@ -1,12 +1,27 @@
 /**
- * Skill applicability from traits/values dimension scores.
- * Uses related_skill_clusters in dimension_traits.json and dimension_values.json plus AI relevance ranking.
- * AI future relevance uses ai_skills_ranking_model.json (see bft-doc/AI_SKILLS_DECISION_MATRIX.md).
+ * Skill applicability from traits/values/aptitudes dimension scores.
+ * Uses dimension_skill_mapping.json for compatibility weights; applicability is a weighted average
+ * of dimension scores (1-5 scale), output 1 (low) to 5 (high). No link yields 0.
+ * AI future relevance (separate) uses ai_skills_ranking_model.json (see bft-doc/AI_SKILLS_DECISION_MATRIX.md).
  */
 
 const path = require('path');
 const fs = require('fs');
 const assessmentModel = require('../data/assessmentModel');
+
+const DIMENSION_SKILL_MAPPING_PATH = path.join(__dirname, '../data/dimension_skill_mapping.json');
+let dimensionSkillMappingCache = null;
+
+function loadDimensionSkillMapping() {
+  if (dimensionSkillMappingCache) return dimensionSkillMappingCache;
+  const raw = fs.readFileSync(DIMENSION_SKILL_MAPPING_PATH, 'utf8');
+  const data = JSON.parse(raw);
+  const weights = data.dimension_skill_weights && typeof data.dimension_skill_weights === 'object'
+    ? data.dimension_skill_weights
+    : {};
+  dimensionSkillMappingCache = weights;
+  return dimensionSkillMappingCache;
+}
 
 const AI_FUTURE_MODEL_PATH = path.join(__dirname, '../data/ai_skills_ranking_model.json');
 let aiFutureModelCache = null;
@@ -63,8 +78,6 @@ function computeAiFutureScore(skill) {
 const AI_RANKING_PATH = path.join(__dirname, '../data/ai_relevance_ranking.json');
 let aiRankingCache = null;
 
-const BAND_WEIGHT = { high: 1, medium: 0.6, low: 0.3 };
-
 function loadAiRelevanceRanking() {
   if (aiRankingCache) return aiRankingCache;
   try {
@@ -89,23 +102,24 @@ function getRelevanceScoreForDimension(rankingData, dimensionId) {
 
 /**
  * Compute applicability score per skill from dimension scores (traits/values/aptitudes).
- * Uses average contribution per skill (sum of contributions / number of contributing dimensions)
- * so that skills linked from many dimensions do not dominate. Returns array of
- * { id, name, description, ai_trend, structural_scores, applicability } ordered by
- * applicability descending. Skills with no link get applicability 0.
+ * Uses only dimension_skill_mapping.json: for each skill, applicability = weighted average
+ * of dimension means (1-5) by the mapping weights (0-1). Band is for display/labels only
+ * and is not used in this calculation.
+ * Output: applicability in range 1 (low) to 5 (high); 0 when no dimension links to the skill.
+ * AI relevance is not included; it is shown separately (ai_trend, ai_future_score).
  *
  * @param {object} dimensionScores - { traits: [{ id, name, mean, band, count }], values: [...], aptitudes: [...] }
- * @returns {Array<object>}
+ * @returns {Array<object>} skills with applicability 1-5 (or 0), ordered by applicability descending
  */
 function getSkillsWithApplicability(dimensionScores) {
   const model = assessmentModel.load();
-  const rankingData = loadAiRelevanceRanking();
-  const sumBySkill = new Map();
-  const countBySkill = new Map();
+  const mapping = loadDimensionSkillMapping();
 
+  const weightedSumBySkill = new Map();
+  const weightSumBySkill = new Map();
   for (const skill of model.skills) {
-    sumBySkill.set(skill.id, 0);
-    countBySkill.set(skill.id, 0);
+    weightedSumBySkill.set(skill.id, 0);
+    weightSumBySkill.set(skill.id, 0);
   }
 
   const traits = (dimensionScores && dimensionScores.traits) || [];
@@ -115,27 +129,26 @@ function getSkillsWithApplicability(dimensionScores) {
   for (const list of [traits, values, aptitudes]) {
     for (const d of list) {
       if (!d || !d.id) continue;
-      const def = model.dimensionsById.get(d.id);
-      const clusters = (def && def.related_skill_clusters) || [];
-      if (clusters.length === 0) continue;
+      const skillWeights = mapping[d.id];
+      if (!skillWeights || typeof skillWeights !== 'object') continue;
 
       const mean = typeof d.mean === 'number' ? d.mean : 0;
-      const band = (d.band && BAND_WEIGHT[d.band]) != null ? BAND_WEIGHT[d.band] : 0.6;
-      const relevance = getRelevanceScoreForDimension(rankingData, d.id);
-      const contribution = mean * band * relevance;
 
-      for (const skillId of clusters) {
-        if (!sumBySkill.has(skillId)) continue;
-        sumBySkill.set(skillId, (sumBySkill.get(skillId) || 0) + contribution);
-        countBySkill.set(skillId, (countBySkill.get(skillId) || 0) + 1);
+      for (const [skillId, w] of Object.entries(skillWeights)) {
+        const weight = typeof w === 'number' ? w : 0;
+        if (weight <= 0 || !weightedSumBySkill.has(skillId)) continue;
+        weightedSumBySkill.set(skillId, (weightedSumBySkill.get(skillId) || 0) + mean * weight);
+        weightSumBySkill.set(skillId, (weightSumBySkill.get(skillId) || 0) + weight);
       }
     }
   }
 
   const result = model.skills.map((s) => {
-    const sum = sumBySkill.get(s.id) ?? 0;
-    const count = countBySkill.get(s.id) ?? 0;
-    const applicability = count > 0 ? sum / count : 0;
+    const wSum = weightedSumBySkill.get(s.id) ?? 0;
+    const totalWeight = weightSumBySkill.get(s.id) ?? 0;
+    const applicability = totalWeight > 0
+      ? Math.max(1, Math.min(5, wSum / totalWeight))
+      : 0;
     return {
       id: s.id,
       name: s.name,

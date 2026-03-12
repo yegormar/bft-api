@@ -1,0 +1,9 @@
+{
+  "description": "Band ranges for the 1-5 scale. Applied to skills (applicability), dimensions (values, traits, aptitudes), and match display. Used by API and UI for band label and tile color. Set via BFT_BANDS_RANGES_FILE.",
+  "bands": [
+    { "id": "low", "label": "Low", "min": 1, "max": 2, "maxInclusive": false },
+    { "id": "medium", "label": "Medium", "min": 2, "max": 3.5, "maxInclusive": false },
+    { "id": "high", "label": "High", "min": 3.5, "max": 4.5, "maxInclusive": false },
+    { "id": "very_high", "label": "Very High", "min": 4.5, "max": 5, "maxInclusive": true }
+  ]
+}

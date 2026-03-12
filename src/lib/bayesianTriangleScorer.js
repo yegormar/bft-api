@@ -199,7 +199,16 @@ function seededRng(seed) {
 }
 
 /**
+ * Minimum range of posterior theta means for which we treat the group as differentiated.
+ * Below this, data did not meaningfully distinguish dimensions; we return neutral (3) for all
+ * instead of forcing min/max to 1 and 5 (which would produce arbitrary extremes).
+ */
+const THETA_SPREAD_NEUTRAL_THRESHOLD = 0.5;
+
+/**
  * Map posterior mean theta to [1, 5] preserving rank order.
+ * If the range of theta means is below THETA_SPREAD_NEUTRAL_THRESHOLD, returns 3 for all
+ * (no differentiation signal) instead of rescaling.
  */
 function thetaToScore15(samples) {
   const means = samples[0].map((_, d) => samples.reduce((s, row) => s + row[d], 0) / samples.length);
@@ -210,7 +219,7 @@ function thetaToScore15(samples) {
   });
   const lo = Math.min(...means);
   const hi = Math.max(...means);
-  if (hi - lo < 1e-6) return { scores: means.map(() => 3), stds };
+  if (hi - lo < THETA_SPREAD_NEUTRAL_THRESHOLD) return { scores: means.map(() => 3), stds };
   const scores = means.map((m) => 1 + (4 * (m - lo)) / (hi - lo));
   return { scores, stds };
 }

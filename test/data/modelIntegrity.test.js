@@ -3,7 +3,7 @@
 /**
  * Model integrity tests: validate dimension/skill data and all ID references.
  * Ensures no missing IDs, no duplicate IDs across files, and consistent references
- * in scenarioBatches, ai_relevance_ranking, noc-2021-enriched, and related_skill_clusters.
+ * in scenarioBatches, ai_relevance_ranking, noc-2021-enriched, and dimension_skill_mapping.
  */
 
 const path = require('path');
@@ -108,38 +108,6 @@ describe('data/modelIntegrity', () => {
     });
   });
 
-  describe('related_skill_clusters', () => {
-    it('related_skill_clusters in aptitudes reference existing skill ids', () => {
-      const missing = [];
-      model.aptitudes.forEach((a) => {
-        (a.related_skill_clusters || []).forEach((sid) => {
-          if (!validSkillIds.has(sid)) missing.push({ dimension: a.id, skillId: sid });
-        });
-      });
-      assert.strictEqual(missing.length, 0, `Aptitudes reference missing skills: ${JSON.stringify(missing)}`);
-    });
-
-    it('related_skill_clusters in traits reference existing skill ids', () => {
-      const missing = [];
-      model.traits.forEach((t) => {
-        (t.related_skill_clusters || []).forEach((sid) => {
-          if (!validSkillIds.has(sid)) missing.push({ dimension: t.id, skillId: sid });
-        });
-      });
-      assert.strictEqual(missing.length, 0, `Traits reference missing skills: ${JSON.stringify(missing)}`);
-    });
-
-    it('related_skill_clusters in values reference existing skill ids', () => {
-      const missing = [];
-      model.values.forEach((v) => {
-        (v.related_skill_clusters || []).forEach((sid) => {
-          if (!validSkillIds.has(sid)) missing.push({ dimension: v.id, skillId: sid });
-        });
-      });
-      assert.strictEqual(missing.length, 0, `Values reference missing skills: ${JSON.stringify(missing)}`);
-    });
-  });
-
   describe('scenarioBatches.json', () => {
     it('every batch dimension dimensionId exists in model and dimensionType matches', () => {
       const batches = loadJson('scenarioBatches.json');
@@ -158,6 +126,32 @@ describe('data/modelIntegrity', () => {
         });
       });
       assert.strictEqual(errors.length, 0, `scenarioBatches errors: ${JSON.stringify(errors)}`);
+    });
+  });
+
+  describe('dimension_skill_mapping.json', () => {
+    it('every dimension id in dimension_skill_weights exists in model (aptitudes, traits, values)', () => {
+      const mapping = loadJson('dimension_skill_mapping.json');
+      const weights = mapping.dimension_skill_weights || {};
+      const aptTraitValueIds = new Set([...model.aptitudes.map((a) => a.id), ...model.traits.map((t) => t.id), ...model.values.map((v) => v.id)]);
+      const missing = [];
+      Object.keys(weights).forEach((dimId) => {
+        if (!aptTraitValueIds.has(dimId)) missing.push(dimId);
+      });
+      assert.strictEqual(missing.length, 0, `dimension_skill_mapping dimension ids missing in model: ${missing.join(', ')}`);
+    });
+
+    it('every skill id in dimension_skill_weights exists in model.skills', () => {
+      const mapping = loadJson('dimension_skill_mapping.json');
+      const weights = mapping.dimension_skill_weights || {};
+      const missing = [];
+      Object.values(weights).forEach((skillWeights) => {
+        if (typeof skillWeights !== 'object') return;
+        Object.keys(skillWeights).forEach((skillId) => {
+          if (!validSkillIds.has(skillId)) missing.push(skillId);
+        });
+      });
+      assert.strictEqual(missing.length, 0, `dimension_skill_mapping skill ids missing in model: ${[...new Set(missing)].join(', ')}`);
     });
   });
 

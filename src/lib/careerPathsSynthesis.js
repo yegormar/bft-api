@@ -44,7 +44,7 @@ const VALID_BUCKETS = new Set(['high', 'medium', 'low']);
 const DIMENSION_SLIM_KEYS = ['id', 'name', 'description', 'mean', 'band', 'band_interpretation'];
 
 /**
- * Build a slim payload for the career LLM: dimensions without related_skill_clusters/score_scale,
+ * Build a slim payload for the career LLM: dimensions without score_scale (slim set),
  * skills without applicability/description, personality with only dominant/secondary/avoid/demographics.
  */
 function buildSlimCareerPayload(fullPayload, selected_skills_with_investment) {

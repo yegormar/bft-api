@@ -18,13 +18,6 @@
         "Do you prefer to start something even when the outcome is uncertain, or wait until you have a clearer picture?",
         "When given a new challenge, do you feel energized by the risk or more comfortable once the path is predictable?"
       ],
-      "related_skill_clusters": [
-        "human_ai_coordination",
-        "delegation_oversight",
-        "feedback_refinement",
-        "workflow_orchestration",
-        "instruction_clarity"
-      ],
       "score_scale": {
         "min": 1,
         "max": 5,
@@ -46,14 +39,6 @@
       "question_hints": [
         "When your job or tools changed, how quickly did you adapt and feel effective again?",
         "Do you seek out new challenges to learn from, or prefer to deepen existing skills before branching out?"
-      ],
-      "related_skill_clusters": [
-        "ai_literacy",
-        "systems_thinking",
-        "human_ai_coordination",
-        "context_memory_management",
-        "cross_domain_synthesis",
-        "research_analysis"
       ],
       "score_scale": {
         "min": 1,
@@ -77,12 +62,6 @@
         "Do you prefer working with others to solve problems or working independently?",
         "When you work in a team, do you focus more on the relationship and trust or on dividing tasks efficiently?"
       ],
-      "related_skill_clusters": [
-        "delegation_oversight",
-        "feedback_refinement",
-        "workflow_orchestration",
-        "ethical_reputational_risk_sensing"
-      ],
       "score_scale": {
         "min": 1,
         "max": 5,
@@ -105,13 +84,6 @@
         "When a project succeeds because of a team (or tools), how do you feel about claiming credit or responsibility?",
         "Would you be comfortable submitting work that you heavily edited but didn't write from scratch?"
       ],
-      "related_skill_clusters": [
-        "human_ai_coordination",
-        "delegation_oversight",
-        "workflow_orchestration",
-        "verification_epistemic_hygiene",
-        "instruction_clarity"
-      ],
       "score_scale": {
         "min": 1,
         "max": 5,
@@ -133,13 +105,6 @@
       "question_hints": [
         "How do you stay motivated when priorities or tools seem to change constantly?",
         "Tell me about a time you had to work toward a goal when the path was very unclear."
-      ],
-      "related_skill_clusters": [
-        "systems_thinking",
-        "problem_formulation",
-        "strategic_planning",
-        "cross_domain_synthesis",
-        "structured_problem_solving"
       ],
       "score_scale": {
         "min": 1,

@@ -81,6 +81,32 @@ if (!fs.existsSync(careerPathsAiContextPath) || !fs.statSync(careerPathsAiContex
   exit(`CAREERS_LLM_AI_CONTEXT_FILE must point to an existing file. Got: ${careerPathsAiContextRaw}. Resolved: ${careerPathsAiContextPath}. Set it in .env (e.g. conf/report_ai_context.txt).`);
 }
 
+const bandsRangesFileRaw = process.env.BFT_BANDS_RANGES_FILE;
+if (bandsRangesFileRaw === undefined || String(bandsRangesFileRaw).trim() === '') {
+  exit('BFT_BANDS_RANGES_FILE is required. Set it in .env (e.g. conf/bands_ranges.json). See env.example.');
+}
+const bandsRangesFilePath = path.isAbsolute(bandsRangesFileRaw) ? bandsRangesFileRaw : path.join(__dirname, '..', bandsRangesFileRaw.trim());
+if (!fs.existsSync(bandsRangesFilePath) || !fs.statSync(bandsRangesFilePath).isFile()) {
+  exit(`BFT_BANDS_RANGES_FILE must point to an existing file. Got: ${bandsRangesFileRaw}. Resolved: ${bandsRangesFilePath}. Set it in .env (e.g. conf/bands_ranges.json).`);
+}
+let bandsRangesCache = null;
+function getBandsRanges() {
+  if (bandsRangesCache) return bandsRangesCache;
+  const raw = fs.readFileSync(bandsRangesFilePath, 'utf8');
+  const data = JSON.parse(raw);
+  const bands = Array.isArray(data.bands) ? data.bands : [];
+  if (bands.length === 0) {
+    exit('BFT_BANDS_RANGES_FILE must define a non-empty "bands" array. See conf/bands_ranges.json.');
+  }
+  bands.forEach((b, i) => {
+    if (!b || typeof b.id !== 'string' || typeof b.label !== 'string' || typeof b.min !== 'number' || typeof b.max !== 'number' || typeof b.maxInclusive !== 'boolean') {
+      exit(`BFT_BANDS_RANGES_FILE bands[${i}] must have id (string), label (string), min (number), max (number), maxInclusive (boolean).`);
+    }
+  });
+  bandsRangesCache = bands;
+  return bandsRangesCache;
+}
+
 module.exports = {
   port,
   nodeEnv,
@@ -90,4 +116,5 @@ module.exports = {
   getCareerPathsStep1PromptPath: () => careerPathsStep1Path,
   getCareerPathsStep2PromptPath: () => careerPathsStep2Path,
   getCareerPathsAiContextPath: () => careerPathsAiContextPath,
+  getBandsRanges,
 };

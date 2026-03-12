@@ -1,181 +1,142 @@
-  {
-    "version": "1.3",
-    "sources": [
-      "Citrini Research (2028 GIC thought exercise)",
-      "Microsoft New Future of Work Report 2025"
-    ],
-    "description": "Aptitudes: natural affinity and raw potential (capacity). Largely stable; dictate ceiling and speed of learning in a field. Distinct from traits (how you behave), values (what you want), and skills (what you have learned). Used with traits and values to match users to skill stacks and paths where their capacity is an asset. Note on measurement: aptitudes are assessed here through self-report and behavioral proxies, not direct performance tasks. Scores reflect expressed affinity and comfort rather than demonstrated capacity. Treat aptitude scores as directional indicators, not ceilings.",
-    "aptitudes": [
-      {
-        "id": "aptitude_logical_analytical_reasoning",
-        "name": "Logical and analytical reasoning",
-        "short_label": "Logical reasoning",
-        "description": "Capacity to follow and construct logical arguments, identify cause and effect, and reason systematically from premises to conclusions. Determines how quickly someone can learn formal systems, rules, and structured domains (e.g. law, logic, systems design).",
-        "ai_future_rationale": "Stable. Routine logical execution is automated; high-level reasoning, design of systems, and oversight of AI output still require human logical capacity. Aptitude underpins skills like problem_formulation and systems_thinking.",
-        "how_measured_or_observed": "Ability to spot flaws in arguments or processes; comfort with 'if-then' and rule-based reasoning; performance on tasks that require following or designing a clear logical structure. Probe with scenarios that have a right answer derivable from rules.",
-        "scenario_constraint": "Because scenario questions cannot test whether someone derives a correct answer, this aptitude must be measured as a proxy: present a situation where the person must decide how to approach a rule-based or structured problem, and observe whether they naturally reach for logical decomposition. The signal is whether they break the problem into steps, check for flaws, or apply if-then reasoning - not whether they get it right. A scenario that asks whether they enjoy logic or prefer structured work measures stated preference, not this aptitude.",
-        "question_hints": [
-          "When someone gives a reason for something, do you often find yourself checking whether the logic holds?",
-          "Do you find it easy or hard to break a complex rule or process into clear steps?"
-        ],
-        "related_skill_clusters": [
-          "structured_problem_solving",
-          "strategic_planning",
-          "problem_formulation",
-          "systems_thinking",
-          "verification_epistemic_hygiene",
-          "epistemic_calibration"
-        ],
-        "score_scale": {
-          "min": 1,
-          "max": 5,
-          "interpretation": {
-            "low": "Domains that rely heavily on formal logic or stepwise reasoning may feel slower to master; strengths may lie more in other capacities (e.g. verbal, pattern, creative). Fit for paths where structure is one of several demands, not the main one.",
-            "medium": "Can follow and use logical structure with practice; suitable for roles that combine reasoning with other skills. Able to develop problem_formulation and systems_thinking with support.",
-            "high": "Strong fit for roles that require structure and reasoning; higher ceiling and faster learning in logic-heavy domains. Good foundation for problem_formulation, systems_thinking, and oversight of AI output."
-          }
-        }
-      },
-      {
-        "id": "aptitude_quantitative_numerical",
-        "name": "Quantitative and numerical facility",
-        "short_label": "Quantitative",
-        "description": "Capacity to work comfortably with numbers, quantities, proportions, and data. Determines ceiling and learning speed in math-heavy fields, data analysis, finance, and technical domains that rely on numerical reasoning.",
-        "ai_future_rationale": "Mixed. Routine computation and data crunching are highly automated; interpretation, judgment on metrics, and strategic use of quantitative insight remain human. Ceiling in data-heavy fields still depends on this aptitude.",
-        "how_measured_or_observed": "Comfort with numbers in everyday decisions (budgets, estimates, comparisons); ability to interpret charts or simple statistics; self-report and scenario questions about handling numerical or data-heavy tasks.",
-        "scenario_constraint": "Because scenario questions cannot test numerical performance directly, this aptitude must be measured as a proxy: present a situation that contains numbers, quantities, or data as part of the context, and observe whether the person naturally engages with that numerical information to make their decision. The signal is whether they use the numbers rather than ignore them. Do not include numbers in every option equally - one option should require engaging with the quantitative detail, another should allow bypassing it. A scenario that asks whether they like math or prefer data-driven roles measures stated preference, not this aptitude.",
-        "question_hints": [
-          "When you see numbers or data, do you feel at ease making sense of them or do you prefer to avoid them?",
-          "How do you approach a problem that involves comparing options using quantities or metrics?"
-        ],
-        "related_skill_clusters": [
-          "research_analysis",
-          "epistemic_calibration",
-          "verification_epistemic_hygiene",
-          "structured_problem_solving"
-        ],
-        "score_scale": {
-          "min": 1,
-          "max": 5,
-          "interpretation": {
-            "low": "Data-heavy or number-centric domains may require more effort; recommendations should steer toward roles where quantitative work is one input among others, not the core. Other aptitudes may be stronger levers.",
-            "medium": "Can work with data and numbers when needed; suitable for roles that use quantitative insight alongside judgment and communication. Able to develop research_analysis and epistemic_calibration with practice.",
-            "high": "Strong foundation for roles that use quantitative judgment and oversight (not routine number-crunching). Pair with epistemic_calibration and steer toward interpretation and decision-making over pure computation."
-          }
-        }
-      },
-      {
-        "id": "aptitude_verbal_linguistic",
-        "name": "Verbal and linguistic facility",
-        "short_label": "Verbal & linguistic",
-        "description": "Capacity to understand and use language with precision and nuance: reading, writing, and grasping subtle meaning. Determines ceiling in communication-heavy roles, persuasion, editing, and domains where wording and interpretation matter.",
-        "ai_future_rationale": "Grows. Nuance, persuasion, and precise communication remain human-centric. Agents take instructions literally; human verbal facility is needed to frame, edit, and judge output.",
-        "how_measured_or_observed": "Ease with reading dense text or legal/technical language; ability to rephrase and clarify; sensitivity to tone and ambiguity in wording. Probe with scenarios about interpreting or drafting text.",
-        "scenario_constraint": "Because scenario questions cannot directly test reading or writing quality, this aptitude must be measured as a proxy: present a situation where the precise meaning of words matters - a miscommunication to resolve, a message to reframe, or two people using the same word differently. The signal is whether the person notices the linguistic nuance and treats it as the crux of the decision, rather than treating all options as equivalent. A scenario about preferring writing tasks or enjoying communication measures interest, not this aptitude.",
-        "question_hints": [
-          "Do you find it easy to notice when two people mean different things by the same words?",
-          "When you have to explain something in writing, do you enjoy getting the wording right or find it tedious?"
-        ],
-        "related_skill_clusters": [
-          "instruction_clarity",
-          "feedback_refinement",
-          "ethical_reputational_risk_sensing"
-        ],
-        "score_scale": {
-          "min": 1,
-          "max": 5,
-          "interpretation": {
-            "low": "Roles that depend heavily on precise wording or dense text may feel more demanding; fit for paths where communication is supported by tools or where other strengths (e.g. technical, pattern) lead.",
-            "medium": "Can communicate clearly with attention; suitable for roles that combine verbal clarity with other skills. Able to develop instruction_clarity and feedback_refinement with practice.",
-            "high": "Strong fit for roles involving framing, editing, and judging output; critical for briefing agents and improving human or AI-generated content. Prioritize in recommendations for AI-augmented work."
-          }
-        }
-      },
-      {
-        "id": "aptitude_pattern_recognition",
-        "name": "Pattern recognition and abstraction",
-        "short_label": "Pattern recognition",
-        "description": "Capacity to spot similarities, analogies, and recurring structures across different contexts. Supports learning by transfer and cross-domain thinking; determines how quickly someone can see 'this is like that' and apply prior knowledge in new settings.",
-        "ai_future_rationale": "Grows. Cross-domain synthesis and 'seeing connections' favor humans; AI is strong within a domain. This aptitude supports learning by transfer and durable differentiation.",
-        "how_measured_or_observed": "Tendency to draw analogies; ability to identify what two different problems have in common; performance on tasks that require seeing a general rule or pattern behind varied examples.",
-        "scenario_constraint": "Because scenario questions cannot directly test analogical reasoning, this aptitude must be measured as a proxy: present a situation that contains an embedded structural similarity to something from a different domain, and include one option that only makes sense if the person has noticed the pattern. The signal is whether they choose the option that applies the transferred insight. If both options are equally reasonable without recognising the pattern, the scenario does not measure this aptitude. A scenario that asks whether they enjoy finding connections or thinking abstractly measures stated preference, not demonstrated aptitude.",
-        "question_hints": [
-          "When you learn something new, do you often connect it to something you already knew from a different area?",
-          "If two problems look different on the surface, how easily can you tell whether they're really the same type of problem?"
-        ],
-        "related_skill_clusters": [
-          "cross_domain_synthesis",
-          "systems_thinking",
-          "aesthetic_taste",
-          "problem_formulation",
-          "research_analysis"
-        ],
-        "score_scale": {
-          "min": 1,
-          "max": 5,
-          "interpretation": {
-            "low": "Cross-domain or analogy-heavy work may take more effort; fit for roles that stay within a clearer domain or where structure is provided. Other aptitudes may drive skill development more.",
-            "medium": "Can spot connections with some practice; suitable for roles that benefit from linking ideas across areas. Able to develop cross_domain_synthesis and systems_thinking over time.",
-            "high": "Strong fit for roles that benefit from analogies and cross-domain thinking; good foundation for cross_domain_synthesis and high-level problem_formulation. Align with skill development in these areas."
-          }
-        }
-      },
-      {
-        "id": "aptitude_technical_hands_on",
-        "name": "Technical / hands-on orientation",
-        "short_label": "Technical / hands-on",
-        "description": "Natural inclination to understand how tools, machines, or software systems function internally by reasoning about their components and cause-and-effect relationships.",
-        "ai_future_rationale": "Mixed. Routine coding, configuration, and implementation are increasingly automated. However, the ability to understand system behavior, diagnose problems, and design or supervise technical systems remains valuable. In an AI-rich environment, this aptitude is best positioned toward system design, architecture thinking, and supervising AI agents rather than routine execution.",
-        "how_measured_or_observed": "Tendency to investigate how a system works when encountering unfamiliar tools or software; comfort thinking about mechanisms, components, and process flows; inclination to trace cause-and-effect relationships within systems; noticing when a tool behaves incorrectly and forming hypotheses about why.",
-        "scenario_constraint": "Scenario questions cannot directly test technical skill or knowledge. Instead, they must measure orientation toward engaging with the system itself. Present a situation involving a tool, device, or software system where one option involves investigating how the system works and another option bypasses that layer (for example delegating, using a workaround, or treating the system as a black box). Both options must be equally reasonable and lead to acceptable outcomes so the choice reflects the respondent's natural inclination rather than strategic optimization. Avoid scenarios that simply ask whether the respondent enjoys technical work, as that measures interest rather than this aptitude.",
-        "question_hints": [
-          "When a tool or system behaves unexpectedly, do you usually try to understand why it is happening or simply work around the issue to continue the task?",
-          "When encountering unfamiliar software, devices, or workflows, do you tend to explore how the underlying components interact or focus only on using the surface features needed for the task?"
-        ],
-        "related_skill_clusters": [
-          "ai_literacy",
-          "human_ai_coordination",
-          "workflow_orchestration",
-          "context_memory_management",
-          "delegation_oversight"
-        ],
-        "score_scale": {
-          "min": 1,
-          "max": 5,
-          "interpretation": {
-            "low": "Prefers to use tools without engaging deeply with how they function internally. Often effective in roles where technology supports the work but does not require diagnosing or designing systems.",
-            "medium": "Comfortable engaging with technical systems when necessary and capable of reasoning about system behavior with some effort. Well suited to roles that combine technology use with coordination, communication, or management responsibilities.",
-            "high": "Strong inclination to analyze and understand system behavior. Well suited to designing, troubleshooting, and supervising complex technical systems, including AI-driven workflows and agent orchestration."
-          }
-        }
-      },
-      {
-        "id": "aptitude_creative_open_ended",
-        "name": "Creative and open-ended thinking",
-        "short_label": "Creative thinking",
-        "description": "Capacity for imagination, divergent thinking, and generating options when there is no single right answer. Valued where human taste, novelty, and judgment matter. Supports learning in arts, design, and strategy.",
-        "ai_future_rationale": "Grows. Judgment, novelty, and open-ended creation are harder to automate. Humans 'directing for taste' remain in the loop; higher-value tasks favor creativity.",
-        "how_measured_or_observed": "Interest in arts, design, storytelling; preference for 'freedom to explore and experiment'; responses to open-ended scenarios; ability to generate multiple plausible approaches to a vague brief.",
-        "scenario_constraint": "Because scenario questions cannot directly observe the range or originality of ideas generated, this aptitude must be measured as a proxy: present an open-ended situation with no defined correct answer and observe whether the person chooses the option that requires generating something new versus the option that applies an existing template or known approach. The signal is whether they are drawn toward the open-ended, generative path when a structured alternative exists. Do not make the creative option obviously riskier or the structured option obviously safer - the choice should reveal aptitude affinity, not risk tolerance. A scenario that asks whether they prefer open-ended or structured tasks measures stated preference rather than this aptitude.",
-        "question_hints": [
-          "Do you prefer clear instructions or freedom to explore?",
-          "Do you enjoy imaginative or storytelling-style tasks?"
-        ],
-        "related_skill_clusters": [
-          "problem_formulation",
-          "aesthetic_taste",
-          "cross_domain_synthesis",
-          "feedback_refinement"
-        ],
-        "score_scale": {
-          "min": 1,
-          "max": 5,
-          "interpretation": {
-            "low": "Roles that demand constant novelty or open-ended judgment may feel less natural; fit for paths with more structure or where other aptitudes (e.g. logical, quantitative) are the main lever. No negative framing.",
-            "medium": "Can contribute ideas and iterate when given some scope; suitable for roles that mix creative input with structure. Able to develop problem_formulation and aesthetic_taste with practice.",
-            "high": "Strong fit for roles that emphasize ideation, design, and human taste over routine production. Good foundation for problem_formulation, aesthetic_taste, and cross-domain synthesis. Align with AI-era paths where directing and curating matter."
-          }
+{
+  "version": "1.3",
+  "sources": [
+    "Citrini Research (2028 GIC thought exercise)",
+    "Microsoft New Future of Work Report 2025"
+  ],
+  "description": "Aptitudes: natural affinity and raw potential (capacity). Largely stable; dictate ceiling and speed of learning in a field. Distinct from traits (how you behave), values (what you want), and skills (what you have learned). Used with traits and values to match users to skill stacks and paths where their capacity is an asset. Note on measurement: aptitudes are assessed here through self-report and behavioral proxies, not direct performance tasks. Scores reflect expressed affinity and comfort rather than demonstrated capacity. Treat aptitude scores as directional indicators, not ceilings.",
+  "aptitudes": [
+    {
+      "id": "aptitude_logical_analytical_reasoning",
+      "name": "Logical and analytical reasoning",
+      "short_label": "Logical reasoning",
+      "description": "Capacity to follow and construct logical arguments, identify cause and effect, and reason systematically from premises to conclusions. Determines how quickly someone can learn formal systems, rules, and structured domains (e.g. law, logic, systems design).",
+      "ai_future_rationale": "Stable. Routine logical execution is automated; high-level reasoning, design of systems, and oversight of AI output still require human logical capacity. Aptitude underpins skills like problem_formulation and systems_thinking.",
+      "how_measured_or_observed": "Ability to spot flaws in arguments or processes; comfort with 'if-then' and rule-based reasoning; performance on tasks that require following or designing a clear logical structure. Probe with scenarios that have a right answer derivable from rules.",
+      "scenario_constraint": "Because scenario questions cannot test whether someone derives a correct answer, this aptitude must be measured as a proxy: present a situation where the person must decide how to approach a rule-based or structured problem, and observe whether they naturally reach for logical decomposition. The signal is whether they break the problem into steps, check for flaws, or apply if-then reasoning - not whether they get it right. A scenario that asks whether they enjoy logic or prefer structured work measures stated preference, not this aptitude.",
+      "question_hints": [
+        "When someone gives a reason for something, do you often find yourself checking whether the logic holds?",
+        "Do you find it easy or hard to break a complex rule or process into clear steps?"
+      ],
+      "score_scale": {
+        "min": 1,
+        "max": 5,
+        "interpretation": {
+          "low": "Domains that rely heavily on formal logic or stepwise reasoning may feel slower to master; strengths may lie more in other capacities (e.g. verbal, pattern, creative). Fit for paths where structure is one of several demands, not the main one.",
+          "medium": "Can follow and use logical structure with practice; suitable for roles that combine reasoning with other skills. Able to develop problem_formulation and systems_thinking with support.",
+          "high": "Strong fit for roles that require structure and reasoning; higher ceiling and faster learning in logic-heavy domains. Good foundation for problem_formulation, systems_thinking, and oversight of AI output."
         }
       }
-    ]
-  }
+    },
+    {
+      "id": "aptitude_quantitative_numerical",
+      "name": "Quantitative and numerical facility",
+      "short_label": "Quantitative",
+      "description": "Capacity to work comfortably with numbers, quantities, proportions, and data. Determines ceiling and learning speed in math-heavy fields, data analysis, finance, and technical domains that rely on numerical reasoning.",
+      "ai_future_rationale": "Mixed. Routine computation and data crunching are highly automated; interpretation, judgment on metrics, and strategic use of quantitative insight remain human. Ceiling in data-heavy fields still depends on this aptitude.",
+      "how_measured_or_observed": "Comfort with numbers in everyday decisions (budgets, estimates, comparisons); ability to interpret charts or simple statistics; self-report and scenario questions about handling numerical or data-heavy tasks.",
+      "scenario_constraint": "Because scenario questions cannot test numerical performance directly, this aptitude must be measured as a proxy: present a situation that contains numbers, quantities, or data as part of the context, and observe whether the person naturally engages with that numerical information to make their decision. The signal is whether they use the numbers rather than ignore them. Do not include numbers in every option equally - one option should require engaging with the quantitative detail, another should allow bypassing it. A scenario that asks whether they like math or prefer data-driven roles measures stated preference, not this aptitude.",
+      "question_hints": [
+        "When you see numbers or data, do you feel at ease making sense of them or do you prefer to avoid them?",
+        "How do you approach a problem that involves comparing options using quantities or metrics?"
+      ],
+      "score_scale": {
+        "min": 1,
+        "max": 5,
+        "interpretation": {
+          "low": "Data-heavy or number-centric domains may require more effort; recommendations should steer toward roles where quantitative work is one input among others, not the core. Other aptitudes may be stronger levers.",
+          "medium": "Can work with data and numbers when needed; suitable for roles that use quantitative insight alongside judgment and communication. Able to develop research_analysis and epistemic_calibration with practice.",
+          "high": "Strong foundation for roles that use quantitative judgment and oversight (not routine number-crunching). Pair with epistemic_calibration and steer toward interpretation and decision-making over pure computation."
+        }
+      }
+    },
+    {
+      "id": "aptitude_verbal_linguistic",
+      "name": "Verbal and linguistic facility",
+      "short_label": "Verbal & linguistic",
+      "description": "Capacity to understand and use language with precision and nuance: reading, writing, and grasping subtle meaning. Determines ceiling in communication-heavy roles, persuasion, editing, and domains where wording and interpretation matter.",
+      "ai_future_rationale": "Grows. Nuance, persuasion, and precise communication remain human-centric. Agents take instructions literally; human verbal facility is needed to frame, edit, and judge output.",
+      "how_measured_or_observed": "Ease with reading dense text or legal/technical language; ability to rephrase and clarify; sensitivity to tone and ambiguity in wording. Probe with scenarios about interpreting or drafting text.",
+      "scenario_constraint": "Because scenario questions cannot directly test reading or writing quality, this aptitude must be measured as a proxy: present a situation where the precise meaning of words matters - a miscommunication to resolve, a message to reframe, or two people using the same word differently. The signal is whether the person notices the linguistic nuance and treats it as the crux of the decision, rather than treating all options as equivalent. A scenario about preferring writing tasks or enjoying communication measures interest, not this aptitude.",
+      "question_hints": [
+        "Do you find it easy to notice when two people mean different things by the same words?",
+        "When you have to explain something in writing, do you enjoy getting the wording right or find it tedious?"
+      ],
+      "score_scale": {
+        "min": 1,
+        "max": 5,
+        "interpretation": {
+          "low": "Roles that depend heavily on precise wording or dense text may feel more demanding; fit for paths where communication is supported by tools or where other strengths (e.g. technical, pattern) lead.",
+          "medium": "Can communicate clearly with attention; suitable for roles that combine verbal clarity with other skills. Able to develop instruction_clarity and feedback_refinement with practice.",
+          "high": "Strong fit for roles involving framing, editing, and judging output; critical for briefing agents and improving human or AI-generated content. Prioritize in recommendations for AI-augmented work."
+        }
+      }
+    },
+    {
+      "id": "aptitude_pattern_recognition",
+      "name": "Pattern recognition and abstraction",
+      "short_label": "Pattern recognition",
+      "description": "Capacity to spot similarities, analogies, and recurring structures across different contexts. Supports learning by transfer and cross-domain thinking; determines how quickly someone can see 'this is like that' and apply prior knowledge in new settings.",
+      "ai_future_rationale": "Grows. Cross-domain synthesis and 'seeing connections' favor humans; AI is strong within a domain. This aptitude supports learning by transfer and durable differentiation.",
+      "how_measured_or_observed": "Tendency to draw analogies; ability to identify what two different problems have in common; performance on tasks that require seeing a general rule or pattern behind varied examples.",
+      "scenario_constraint": "Because scenario questions cannot directly test analogical reasoning, this aptitude must be measured as a proxy: present a situation that contains an embedded structural similarity to something from a different domain, and include one option that only makes sense if the person has noticed the pattern. The signal is whether they choose the option that applies the transferred insight. If both options are equally reasonable without recognising the pattern, the scenario does not measure this aptitude. A scenario that asks whether they enjoy finding connections or thinking abstractly measures stated preference, not demonstrated aptitude.",
+      "question_hints": [
+        "When you learn something new, do you often connect it to something you already knew from a different area?",
+        "If two problems look different on the surface, how easily can you tell whether they're really the same type of problem?"
+      ],
+      "score_scale": {
+        "min": 1,
+        "max": 5,
+        "interpretation": {
+          "low": "Cross-domain or analogy-heavy work may take more effort; fit for roles that stay within a clearer domain or where structure is provided. Other aptitudes may drive skill development more.",
+          "medium": "Can spot connections with some practice; suitable for roles that benefit from linking ideas across areas. Able to develop cross_domain_synthesis and systems_thinking over time.",
+          "high": "Strong fit for roles that benefit from analogies and cross-domain thinking; good foundation for cross_domain_synthesis and high-level problem_formulation. Align with skill development in these areas."
+        }
+      }
+    },
+    {
+      "id": "aptitude_technical_hands_on",
+      "name": "Technical / hands-on orientation",
+      "short_label": "Technical / hands-on",
+      "description": "Natural inclination to understand how tools, machines, or software systems function internally by reasoning about their components and cause-and-effect relationships.",
+      "ai_future_rationale": "Mixed. Routine coding, configuration, and implementation are increasingly automated. However, the ability to understand system behavior, diagnose problems, and design or supervise technical systems remains valuable. In an AI-rich environment, this aptitude is best positioned toward system design, architecture thinking, and supervising AI agents rather than routine execution.",
+      "how_measured_or_observed": "Tendency to investigate how a system works when encountering unfamiliar tools or software; comfort thinking about mechanisms, components, and process flows; inclination to trace cause-and-effect relationships within systems; noticing when a tool behaves incorrectly and forming hypotheses about why.",
+      "scenario_constraint": "Scenario questions cannot directly test technical skill or knowledge. Instead, they must measure orientation toward engaging with the system itself. Present a situation involving a tool, device, or software system where one option involves investigating how the system works and another option bypasses that layer (for example delegating, using a workaround, or treating the system as a black box). Both options must be equally reasonable and lead to acceptable outcomes so the choice reflects the respondent's natural inclination rather than strategic optimization. Avoid scenarios that simply ask whether the respondent enjoys technical work, as that measures interest rather than this aptitude.",
+      "question_hints": [
+        "When a tool or system behaves unexpectedly, do you usually try to understand why it is happening or simply work around the issue to continue the task?",
+        "When encountering unfamiliar software, devices, or workflows, do you tend to explore how the underlying components interact or focus only on using the surface features needed for the task?"
+      ],
+      "score_scale": {
+        "min": 1,
+        "max": 5,
+        "interpretation": {
+          "low": "Prefers to use tools without engaging deeply with how they function internally. Often effective in roles where technology supports the work but does not require diagnosing or designing systems.",
+          "medium": "Comfortable engaging with technical systems when necessary and capable of reasoning about system behavior with some effort. Well suited to roles that combine technology use with coordination, communication, or management responsibilities.",
+          "high": "Strong inclination to analyze and understand system behavior. Well suited to designing, troubleshooting, and supervising complex technical systems, including AI-driven workflows and agent orchestration."
+        }
+      }
+    },
+    {
+      "id": "aptitude_creative_open_ended",
+      "name": "Creative and open-ended thinking",
+      "short_label": "Creative thinking",
+      "description": "Capacity for imagination, divergent thinking, and generating options when there is no single right answer. Valued where human taste, novelty, and judgment matter. Supports learning in arts, design, and strategy.",
+      "ai_future_rationale": "Grows. Judgment, novelty, and open-ended creation are harder to automate. Humans 'directing for taste' remain in the loop; higher-value tasks favor creativity.",
+      "how_measured_or_observed": "Interest in arts, design, storytelling; preference for 'freedom to explore and experiment'; responses to open-ended scenarios; ability to generate multiple plausible approaches to a vague brief.",
+      "scenario_constraint": "Because scenario questions cannot directly observe the range or originality of ideas generated, this aptitude must be measured as a proxy: present an open-ended situation with no defined correct answer and observe whether the person chooses the option that requires generating something new versus the option that applies an existing template or known approach. The signal is whether they are drawn toward the open-ended, generative path when a structured alternative exists. Do not make the creative option obviously riskier or the structured option obviously safer - the choice should reveal aptitude affinity, not risk tolerance. A scenario that asks whether they prefer open-ended or structured tasks measures stated preference rather than this aptitude.",
+      "question_hints": [
+        "Do you prefer clear instructions or freedom to explore?",
+        "Do you enjoy imaginative or storytelling-style tasks?"
+      ],
+      "score_scale": {
+        "min": 1,
+        "max": 5,
+        "interpretation": {
+          "low": "Roles that demand constant novelty or open-ended judgment may feel less natural; fit for paths with more structure or where other aptitudes (e.g. logical, quantitative) are the main lever. No negative framing.",
+          "medium": "Can contribute ideas and iterate when given some scope; suitable for roles that mix creative input with structure. Able to develop problem_formulation and aesthetic_taste with practice.",
+          "high": "Strong fit for roles that emphasize ideation, design, and human taste over routine production. Good foundation for problem_formulation, aesthetic_taste, and cross-domain synthesis. Align with AI-era paths where directing and curating matter."
+        }
+      }
+    }
+  ]
+}

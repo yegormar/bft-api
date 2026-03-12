@@ -263,7 +263,6 @@ const DIMENSION_PAYLOAD_KEYS = [
   'name',
   'description',
   'how_measured_or_observed',
-  'related_skill_clusters',
   'score_scale',
 ];
 

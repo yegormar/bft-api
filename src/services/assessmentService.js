@@ -722,6 +722,72 @@ function collectTriangleRawResponses(state, answers) {
   return raw;
 }
 
+/** Max weight for a response to count as "centre" (no clear choice). */
+const CENTRE_MAX_WEIGHT = 0.4;
+/** If this fraction of responses are centre, treat as low engagement and return neutral scores. */
+const LOW_ENGAGEMENT_THRESHOLD = 0.9;
+/** Minimum number of responses before we consider low engagement (avoid flagging single-triangle or mid-session). */
+const LOW_ENGAGEMENT_MIN_RESPONSES = 10;
+
+function isCentreResponse(r) {
+  const w = r.weights;
+  return w && w.length === 3 && Math.max(...w) <= CENTRE_MAX_WEIGHT;
+}
+
+function centreFraction(rawResponses) {
+  if (!rawResponses || rawResponses.length === 0) return 0;
+  let n = 0;
+  for (const resp of rawResponses) {
+    if (isCentreResponse(resp)) n += 1;
+  }
+  return n / rawResponses.length;
+}
+
+/**
+ * Build neutral dimension scores (mean 3, band medium) for all dimensions present in rawResponses.
+ * Used when engagement is low (user left ball in middle for most questions) so we do not present
+ * an arbitrarily differentiated profile and can signal that choices are needed.
+ */
+function buildNeutralDimensionScores(rawResponses, model) {
+  const m = model || assessmentModel.load();
+  const seen = new Set();
+  for (const r of rawResponses || []) {
+    const dims = r.dims || [];
+    dims.forEach((id) => { if (id) seen.add(id); });
+  }
+  const keyByType = { trait: 'traits', value: 'values', aptitude: 'aptitudes' };
+  const out = { traits: [], values: [], aptitudes: [] };
+  for (const id of [...seen].sort()) {
+    const type = id.startsWith('trait_') ? 'trait' : id.startsWith('value_') ? 'value' : 'aptitude';
+    const key = keyByType[type] || 'traits';
+    const dim = m.dimensionsById.get(id);
+    out[key].push({
+      id,
+      name: (dim && dim.name) || id,
+      mean: 3,
+      band: 'medium',
+      count: 0,
+    });
+  }
+  return out;
+}
+
+/**
+ * Split raw triangle responses into aptitude-only and trait+value.
+ * A response is aptitude-only if all three dims start with 'aptitude_'.
+ */
+function splitRawResponsesByType(rawResponses) {
+  const aptitude = [];
+  const traitValue = [];
+  for (const r of rawResponses) {
+    const dims = r.dims || [];
+    const allAptitude = dims.length === 3 && dims.every((id) => typeof id === 'string' && id.startsWith('aptitude_'));
+    if (allAptitude) aptitude.push(r);
+    else traitValue.push(r);
+  }
+  return { aptitude, traitValue };
+}
+
 /**
  * Convert Bayesian scorer profile to dimensionScores shape { traits, values, aptitudes }.
  */
@@ -748,10 +814,143 @@ function buildDimensionScoresOutputFromBayesian(profile, model) {
 }
 
 /**
- * When in triangle mode with triangle answers, use Bayesian scorer for dimension scores.
- * Otherwise use aggregate (simple average) path.
+ * Zone weights for simple zone-weighted average (decise placements count more).
+ * Used when comparing MCMC to simple path.
  */
-function buildDimensionScoresForAssessment(state, answers, model, interviewConfig) {
+const ZONE_WEIGHT = {
+  corner: 1,
+  near_corner: 0.9,
+  edge: 0.7,
+  near_edge: 0.7,
+  centre: 0.3,
+};
+
+/**
+ * Simple zone-weighted average: for each dimension, mean = weightedSum / weightedCount
+ * with weights from zone. Then rescale to 1-5 within each group (aptitudes; traits+values).
+ * Returns same shape as buildDimensionScoresOutputFromBayesian.
+ */
+function simpleZoneWeightedScores(state, answers, model, rawResponses) {
+  if (!rawResponses || rawResponses.length === 0) return null;
+  const m = model || assessmentModel.load();
+  const keyByType = { trait: 'traits', value: 'values', aptitude: 'aptitudes' };
+  const weightedSum = {};
+  const weightedCount = {};
+  const triangleCount = {};
+
+  for (const r of rawResponses) {
+    const dims = r.dims || [];
+    const weights = r.weights || [];
+    if (dims.length !== 3 || weights.length !== 3) continue;
+    const zone = r.zone || bayesianTriangleScorer.detectZone(weights);
+    const w = ZONE_WEIGHT[zone] ?? ZONE_WEIGHT.centre;
+    const scores = weights.map((coord) => coord * TRIANGLE_SCORE_SCALE.mult + TRIANGLE_SCORE_SCALE.add);
+    for (let i = 0; i < 3; i++) {
+      const id = dims[i];
+      if (!id) continue;
+      if (weightedSum[id] == null) weightedSum[id] = 0;
+      if (weightedCount[id] == null) weightedCount[id] = 0;
+      if (triangleCount[id] == null) triangleCount[id] = 0;
+      weightedSum[id] += w * scores[i];
+      weightedCount[id] += w;
+      triangleCount[id] += 1;
+    }
+  }
+
+  const means = {};
+  for (const id of Object.keys(weightedCount)) {
+    if (weightedCount[id] > 0) means[id] = weightedSum[id] / weightedCount[id];
+  }
+  const dimIds = Object.keys(means);
+  if (dimIds.length === 0) return null;
+
+  const aptitudeIds = dimIds.filter((id) => id.startsWith('aptitude_'));
+  const traitValueIds = dimIds.filter((id) => !id.startsWith('aptitude_'));
+
+  function rescaleGroup(ids) {
+    if (ids.length === 0) return {};
+    const vals = ids.map((id) => means[id]);
+    const lo = Math.min(...vals);
+    const hi = Math.max(...vals);
+    const out = {};
+    if (hi - lo < 1e-6) {
+      ids.forEach((id) => { out[id] = 3; });
+    } else {
+      ids.forEach((id) => { out[id] = 1 + (4 * (means[id] - lo)) / (hi - lo); });
+    }
+    return out;
+  }
+
+  const scoresById = { ...rescaleGroup(aptitudeIds), ...rescaleGroup(traitValueIds) };
+  const out = { traits: [], values: [], aptitudes: [] };
+  for (const id of dimIds) {
+    const type = id.startsWith('trait_') ? 'trait' : id.startsWith('value_') ? 'value' : 'aptitude';
+    const key = keyByType[type] || 'traits';
+    const mean = Math.round(scoresById[id] * 100) / 100;
+    const band = mean <= 2 ? 'low' : mean >= 4 ? 'high' : 'medium';
+    const dim = m.dimensionsById.get(id);
+    out[key].push({
+      id,
+      name: (dim && dim.name) || id,
+      mean,
+      band,
+      count: triangleCount[id] || 0,
+    });
+  }
+  return out;
+}
+
+/**
+ * Log comparison of MCMC vs simple zone-weighted rank order (for future simplify decision).
+ * sessionId can be undefined if not available.
+ */
+function logMcmcVsSimpleComparison(mcmcProfile, simpleScores, sessionId) {
+  if (!mcmcProfile || !simpleScores) return;
+  const mcmcOrder = mcmcProfile.slice().sort((a, b) => b.score_1_to_5 - a.score_1_to_5).map((p) => p.dimension_id);
+  const allSimple = [
+    ...(simpleScores.traits || []),
+    ...(simpleScores.values || []),
+    ...(simpleScores.aptitudes || []),
+  ];
+  const simpleOrder = allSimple.slice().sort((a, b) => b.mean - a.mean).map((d) => d.id);
+  const topMCMC = mcmcOrder[0] || null;
+  const topSimple = simpleOrder[0] || null;
+  const bottomMCMC = mcmcOrder[mcmcOrder.length - 1] || null;
+  const bottomSimple = simpleOrder[simpleOrder.length - 1] || null;
+  const topAgree = topMCMC === topSimple;
+  const bottomAgree = bottomMCMC === bottomSimple;
+  const byIdMcmc = new Map(mcmcProfile.map((p) => [p.dimension_id, p.score_1_to_5]));
+  const byIdSimple = new Map(allSimple.map((d) => [d.id, d.mean]));
+  const commonIds = mcmcOrder.filter((id) => byIdSimple.has(id));
+  let spearman = null;
+  if (commonIds.length >= 2) {
+    const rankM = new Map();
+    const rankS = new Map();
+    mcmcOrder.forEach((id, i) => rankM.set(id, i + 1));
+    simpleOrder.forEach((id, i) => rankS.set(id, i + 1));
+    const n = commonIds.length;
+    const sumSq = commonIds.reduce((acc, id) => acc + (rankM.get(id) - rankS.get(id)) ** 2, 0);
+    spearman = 1 - (6 * sumSq) / (n * (n * n - 1));
+  }
+  console.log(
+    '[bft] mcmc_vs_simple sessionId=%s topAgree=%s bottomAgree=%s spearman=%s topMCMC=%s topSimple=%s bottomMCMC=%s bottomSimple=%s',
+    sessionId ?? 'n/a',
+    topAgree,
+    bottomAgree,
+    spearman != null ? Math.round(spearman * 1000) / 1000 : 'n/a',
+    topMCMC,
+    topSimple,
+    bottomMCMC,
+    bottomSimple
+  );
+}
+
+/**
+ * When in triangle mode with triangle answers, use Bayesian scorer with separate scaling
+ * (aptitudes vs traits+values). Also compute simple zone-weighted path and log comparison.
+ * @param {string} [sessionId] - Optional, for comparison logging.
+ */
+function buildDimensionScoresForAssessment(state, answers, model, interviewConfig, sessionId) {
   const useBayesian =
     assessmentConfig.getAssessmentMode() === 'triangles' &&
     state &&
@@ -761,23 +960,51 @@ function buildDimensionScoresForAssessment(state, answers, model, interviewConfi
     const effectiveAggregate = state && state.dimensionScoresAggregate
       ? enrichAggregateWithSyntheticUnmeasured(state.dimensionScoresAggregate, state, model, interviewConfig)
       : null;
-    return buildDimensionScoresOutput(effectiveAggregate || {}, model);
+    return { dimensionScores: buildDimensionScoresOutput(effectiveAggregate || {}, model), lowEngagement: false };
   }
   const rawResponses = collectTriangleRawResponses(state, answers);
   if (rawResponses.length === 0) {
     const effectiveAggregate = state.dimensionScoresAggregate
       ? enrichAggregateWithSyntheticUnmeasured(state.dimensionScoresAggregate, state, model, interviewConfig)
       : null;
-    return buildDimensionScoresOutput(effectiveAggregate || {}, model);
+    return { dimensionScores: buildDimensionScoresOutput(effectiveAggregate || {}, model), lowEngagement: false };
   }
-  const result = bayesianTriangleScorer.scoreTriangleResponses(rawResponses);
-  if (!result.profile || result.profile.length === 0) {
+
+  if (
+    rawResponses.length >= LOW_ENGAGEMENT_MIN_RESPONSES &&
+    centreFraction(rawResponses) >= LOW_ENGAGEMENT_THRESHOLD
+  ) {
+    return {
+      dimensionScores: buildNeutralDimensionScores(rawResponses, model),
+      lowEngagement: true,
+    };
+  }
+
+  const { aptitude: aptitudeResponses, traitValue: traitValueResponses } = splitRawResponsesByType(rawResponses);
+  const mergedProfile = [];
+  if (aptitudeResponses.length > 0) {
+    const aptResult = bayesianTriangleScorer.scoreTriangleResponses(aptitudeResponses);
+    if (aptResult.profile && aptResult.profile.length > 0) mergedProfile.push(...aptResult.profile);
+  }
+  if (traitValueResponses.length > 0) {
+    const tvResult = bayesianTriangleScorer.scoreTriangleResponses(traitValueResponses);
+    if (tvResult.profile && tvResult.profile.length > 0) mergedProfile.push(...tvResult.profile);
+  }
+
+  if (mergedProfile.length === 0) {
     const effectiveAggregate = state.dimensionScoresAggregate
       ? enrichAggregateWithSyntheticUnmeasured(state.dimensionScoresAggregate, state, model, interviewConfig)
       : null;
-    return buildDimensionScoresOutput(effectiveAggregate || {}, model);
+    return { dimensionScores: buildDimensionScoresOutput(effectiveAggregate || {}, model), lowEngagement: false };
   }
-  return buildDimensionScoresOutputFromBayesian(result.profile, model);
+
+  const simpleScores = simpleZoneWeightedScores(state, answers, model, rawResponses);
+  logMcmcVsSimpleComparison(mergedProfile, simpleScores, sessionId);
+
+  return {
+    dimensionScores: buildDimensionScoresOutputFromBayesian(mergedProfile, model),
+    lowEngagement: false,
+  };
 }
 
 function getAssessment(sessionId) {
@@ -798,7 +1025,9 @@ function getAssessment(sessionId) {
 
   const interviewConfig = getInterviewConfig();
   const model = assessmentModel.load();
-  const dimensionScores = buildDimensionScoresForAssessment(state, answers, model, interviewConfig);
+  const scoreResult = buildDimensionScoresForAssessment(state, answers, model, interviewConfig, sessionId);
+  const dimensionScores = scoreResult && scoreResult.dimensionScores != null ? scoreResult.dimensionScores : scoreResult;
+  const lowEngagement = scoreResult && scoreResult.lowEngagement === true;
 
   let askedQuestionsWithAnswers = undefined;
   if (state && state.servedQuestions && typeof state.questionIndex === 'number') {
@@ -840,6 +1069,7 @@ function getAssessment(sessionId) {
     insights,
     dimensionScores,
     askedQuestionsWithAnswers,
+    lowEngagement: lowEngagement || false,
   };
 }
 
@@ -1158,7 +1388,9 @@ function getSessionHealth(sessionId) {
     coverage[key] = state.coverage[key] || {};
   }
 
-  const dimensionScores = buildDimensionScoresForAssessment(state, answers, model, interviewConfig);
+  const scoreResult = buildDimensionScoresForAssessment(state, answers, model, interviewConfig, sessionId);
+  const dimensionScores = scoreResult && scoreResult.dimensionScores != null ? scoreResult.dimensionScores : scoreResult;
+  const lowEngagement = scoreResult && scoreResult.lowEngagement === true;
 
   return {
     sessionId,
@@ -1173,6 +1405,7 @@ function getSessionHealth(sessionId) {
     },
     coverage,
     dimensionScores,
+    lowEngagement: lowEngagement || false,
     interviewComplete: isInterviewComplete(state.coverage, interviewConfig, model, state.questionIndex),
     backgroundPregenRunning: generatorBusyBySession.get(sessionId) === true,
   };
