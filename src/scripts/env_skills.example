@@ -1,0 +1,15 @@
+# generate-dimension-skill-mapping.js only. Copy to src/scripts/.env_skills.
+
+# Path to the system prompt file (relative to src/scripts).
+GENERATE_DIMENSION_SKILL_MAPPING_PROMPT_FILE=prompts/dimension_skill_mapping_system_prompt.txt
+
+# LLM configuration (default: Ollama Cloud).
+LLM_PROVIDER=ollama_cloud
+LLM_BASE_URL=https://ollama.com
+LLM_API_KEY=
+LLM_MODEL=qwen3.5:397b
+LLM_THINK=false
+LLM_TEMPERATURE=0.5
+LLM_MAX_TOKENS=32768
+LLM_NUM_CTX=32768
+LLM_TOP_P=0.9
