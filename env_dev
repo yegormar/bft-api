@@ -6,8 +6,8 @@ NODE_ENV=development
 BFT_DEV_MAX_QUESTIONS=1
 CORS_ORIGIN=http://localhost:5173
 BFT_ADMIN_ENABLED=1
-# Optional. Set to 1 to enable session export/restore API for development and debugging (not part of UI).
-# BFT_DEV_SESSION_EXPORT=1
+# Session export/restore API (dev only). Default: on. Set to 0 or false to disable.
+BFT_DEV_SESSION_EXPORT=1
 BFT_FEEDBACK_FILE=./data/feedback.jsonl
 BFT_ASSESSMENT_MODE=triangles
 

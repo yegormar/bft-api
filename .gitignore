@@ -32,3 +32,4 @@ yarn-error.log*
 # Optional: uncomment to ignore Cursor rules
 # .cursor/
 /data/questions-store/
+/src/scripts/.env_skills

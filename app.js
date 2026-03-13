@@ -28,7 +28,8 @@ function createApp(config) {
     });
   }
 
-  if (process.env.BFT_DEV_SESSION_EXPORT === '1') {
+  const sessionExportFlag = (process.env.BFT_DEV_SESSION_EXPORT || '1').trim().toLowerCase();
+  if (sessionExportFlag !== '0' && sessionExportFlag !== 'false') {
     app.use('/api/dev/session', require('./src/routes/devSession'));
   }
 
